@@ -1,0 +1,33 @@
+//@version=4
+study(title="cycleOutToCycleInProgression", shorttitle="cocip", overlay=true)
+var cycleOutCrossed = 0
+var cycleInCrossed = 0
+var currentPreInValue = 0
+
+sma200 = security(syminfo.tickerid, '', sma(close, 200))
+sma21  = security(syminfo.tickerid, '', sma(close, 21))
+sma350By2 = security(syminfo.tickerid, '', sma(close, 350)*2)
+sma111 = security(syminfo.tickerid, '', sma(close, 111))
+
+mayersMultiple06 = sma200 * 0.6
+
+if (cycleOutCrossed == 0 and crossunder(sma350By2, sma111))
+    cycleOutCrossed := 1
+    cycleInCrossed := 0
+if (cycleInCrossed == 0 and crossover(mayersMultiple06, sma21))
+    cycleOutCrossed := 0
+    cycleInCrossed := 1
+
+currentPreInValue := round(100 + (mayersMultiple06 - sma21) / sma21 * 100)
+var label lbl = na
+label.delete(lbl)
+percColor = if currentPreInValue > 87
+    color.red
+else if currentPreInValue > 65
+    color.yellow
+else 
+    color.red
+lbl := if barstate.islast and cycleOutCrossed == 1
+    label.new(bar_index[0], close, tostring(currentPreInValue) + "%", yloc = yloc.price, color = percColor, style = label.style_label_upper_right)
+else
+    na
