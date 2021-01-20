@@ -1,0 +1,593 @@
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// WE not ME (Bitcoin Indicator Angels)
+//
+// Telegram: https://t.me/we_not_me
+//
+// David Stevens <mail.davro@gmail.com>
+// 
+// Donations are accepted here
+// Bitcoin: 3Ph9wP4vgASFbFP9DAabZETycXY66ebA8Y
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// @version=4
+study("WE-Angels", "WE-Angels", overlay=true)
+
+// Exponential Moving Averages
+showEMA = input(false, title="EMA")
+
+// Simple Moving Averages
+showSMA                         = input(false, title="SMA")
+showIndicatorAngelSMA           = input(false, title="SMA (Angel Rainbow)")
+showIndicatorAngelSMAYearly     = input(false, title="SMA (Yearly)")
+showIndicatorMayerMultiplier    = input(false, title="Mayer Multiplier")
+showIndicatorDCA                = input(true,  title="DCA")
+showIndicatorDCALambo           = input(true,  title="DCA LAMBo (daily)")
+showIndicatorDCALamboRipper     = input(false, title="DCA LAMBo Ripper (daily beta)")
+showIndicatorAngelManifestation = input(true,  title="Angel Manifestation (111)")
+showIndicatorAngelEnjoy         = input(true,  title="Angel Enjoy (222)")
+showIndicatorAngelBalance       = input(false, title="Angel Balance (333)")
+showIndicatorAngelGuide         = input(false, title="Angel Guide (444)")
+showIndicatorAngelChange        = input(false, title="Angel Change (555)")
+showIndicatorAngelReality       = input(false, title="Angel Reality (666)")
+showIndicatorAngelTrust         = input(true,  title="Angel Trust (777)")
+showIndicatorAngelEnergy        = input(false, title="Angel Energy (888)")
+showIndicatorAngelLevel         = input(false, title="Angel Level (999)")
+
+////////////////////////////////////////////////////////////////////////////////
+// SMA & ANGEL NUMBERS
+////////////////////////////////////////////////////////////////////////////////
+
+// ANGEL 111 - One is a powerful number for manifestation
+// When you see 111, think of the universe as taking a screenshot of your frame of mind
+// Whatever is going on—all your thoughts, visualizations, goals, and dreams— they are going to be replicated.
+// So when you see this sequence, ensuring your thoughts and energy are focused on what you want can help usher that energy into existence
+// according to numerology.
+smaAngel = sma(close, 111)
+
+// ANGEL 222 - In this sometimes-rigidly goal-prioritizing world where we live, 
+// it can be easy to get tripped up on not being at a certain progress point, which can lead you to compare yourself to others. 
+// When you see the number two everywhere, it can be interpreted as an angel-number reminder to be present, enjoy the moment, 
+// and trust that you are exactly where you are supposed to be.
+smaEnjoy = sma(close, 222)
+
+// ANGEL 333 - This sequence is a prompt from the angels to bring more balance into your life.
+// They want you to look at the areas of your life that are not fully rounded out, and self-correct
+// Get some meditation going, embark on that workout routine, and finally start that vision board you’ve been procrastinating on.
+smaBalance = sma(close, 333)
+
+// ANGEL 444 - If you’re navigating a challenge, and have been trying to get guidance from your spirit guide or signs from the universe
+// noticing the number four all around you can serve as evidence that you’re being heard.
+// Your angels are guiding you, surrounding you, and answering your prayers of protection
+// It may be a time of struggle, but you are being led into the light by your guardians.
+smaGuide = sma(close, 444)
+
+// ANGEL 555 When you start spotting 555, that means change is coming. 
+// Before you get worried, know that the change is a good thing, even if it might be uncomfortable.
+// Change can be seen as a negative thing, but with the right mind-set and the right alignment to your goals, 
+// it’s actually your angel’s way of readjusting your life to fit with what you want to happen.
+// Life will look different when you get what you want.
+smaChange = sma(close, 555)
+
+// ANGEL 666 Are 666s showing up seemingly everywhere in your life? 
+// If so, the angels may be trying to give you a bit of a reality check. 
+// This is a strong message from your angel guardians to take personal responsibility in your own life, and ask yourself in all areas
+// ‘what do I need to do differently?’”
+smaReality = sma(close, 666)
+
+// ANGEL 777 -Repeating sevens are basically the universe urging you to relax and let go of your fears for the future. 
+// Give up your control of what’s going to happen next. 
+// And instead, embrace the present and trust that everything is always working out for you.
+smaTrust = sma(close, 777)
+
+// ANGEL 888 - The number eight is about infinity, or the endless loop of energy.
+// Seeing it means that you are effortlessly going with the natural flow and rhythm of what your angels have in store for you.
+// In other words, it’s like a pat on the back and a reminder to be grateful for how far you’ve come.
+smaEnergy = sma(close, 888)
+
+// ANGEL 999 - You’ll likely see repeating nines when you’ve been working on something for a while, and it brings good news in tow.
+// This number means that the cycle of what you have been doing is reaching completion.
+// You are at the finish line of your end goals, and it’s time to start leveling up to visualize some new ones.
+smaLevel = sma(close, 999)
+
+////////////////////////////////////////////////////////////////////////////////
+// SMA Helpers
+////////////////////////////////////////////////////////////////////////////////
+sma3  = sma(close, 3)
+
+sma7 = sma(close, 7)
+sma7Data = if (showSMA)
+    sma7
+
+// SMA
+sma21 = sma(close, 21)
+sma21Data = if (showSMA)
+    sma21
+
+// Number 28 - The Trusting Lamb 
+smaLamb = sma(close, 28)
+smaLambData = if (showSMA)
+    smaLamb
+
+sma50 = sma(close, 50)
+sma50Data = if (showSMA)
+    sma50
+
+sma200 = sma(close, 200)
+sma200Data = if (showSMA)
+    sma200
+
+sma350 = sma(close, 350)
+
+
+sma1Y = sma(close, 365)
+sma1YData = if (showIndicatorAngelSMAYearly)
+    sma1Y
+
+sma2Y  = sma(close, 730)
+sma2YData = if (showIndicatorAngelSMAYearly)
+    sma2Y
+
+sma3Y  = sma(close, 1095)
+sma3YData = if (showIndicatorAngelSMAYearly)
+    sma3Y
+
+sma4Y  = sma(close, 1460)
+sma4YData = if (showIndicatorAngelSMAYearly)
+    sma4Y
+
+sma7Y  = sma(close, 2555)
+sma7YData = if (showIndicatorAngelSMAYearly)
+    sma7Y
+    
+// sma8Y  = sma(close, 2905)
+// sma9Y  = sma(close, 3255)
+// sma10Y  = sma(close, 3605)
+
+////////////////////////////////////////////////////////////////////////////////
+// PLOTS (SMA)
+////////////////////////////////////////////////////////////////////////////////
+plot(sma7Data, color=color.blue, linewidth=1, transp=0, title="SMA 7")
+plot(sma21Data, color=color.orange, linewidth=1, transp=0, title="SMA 21")
+plot(smaLambData, color=color.green, linewidth=1, transp=0, title="SMA LAMB")
+plot(sma50Data, color=color.aqua, linewidth=1, transp=0, title="SMA 50")
+plot(sma200Data, color=color.blue, linewidth=1, transp=0, title="SMA 200")
+plot(sma200 * 2.1, color=color.aqua, linewidth=1, transp=0, title="SMA 200 * 2.1")
+// plot( sma200 * 2.4, color=color.white, linewidth=1, transp=0, title="SMA  sma200 * 2.4")
+
+// SMA ANGELS
+smaAngelData = if (showIndicatorAngelSMA)
+    smaAngel
+plot(smaAngelData, color=color.blue, linewidth=1, transp=0, title="ANGEL")
+
+smaEnjoyData = if (showIndicatorAngelSMA)
+    smaEnjoy
+plot(smaEnjoyData, color=color.gray, linewidth=1, transp=0, title="ENJOY")
+
+smaBalanceData = if (showIndicatorAngelSMA)
+    smaBalance
+plot(smaBalanceData, color=color.gray, linewidth=1, transp=0, title="BALANCE")
+
+smaGuideData = if (showIndicatorAngelSMA)
+    smaGuide
+plot(smaGuideData, color=color.gray, linewidth=1, transp=0, title="GUIDE")
+
+smaChangeData = if (showIndicatorAngelSMA)
+    smaChange
+plot(smaChangeData, color=color.blue, linewidth=1, transp=0, title="CHANGE")
+
+smaRealityData = if (showIndicatorAngelSMA)
+    smaReality
+plot(smaRealityData, color=color.gray, linewidth=1, transp=0, title="REALITY")
+
+smaTrustData = if (showIndicatorAngelSMA)
+    smaTrust
+plot(smaTrustData, color=color.aqua, linewidth=1, transp=0, title="TRUST")
+
+smaEnergyData = if (showIndicatorAngelSMA)
+    smaEnergy
+plot(smaEnergyData, color=color.orange, linewidth=1, transp=0, title="ENERGY")
+
+smaLevelData = if (showIndicatorAngelSMA)
+    smaLevel
+plot(smaLevelData, color=color.red, linewidth=1, transp=0, title="LEVEL")
+
+// GROWTH
+// plot(sma350, color=color.white, linewidth=1, transp=0, title="GROWTH")
+
+// FAIR
+fairValue = sma350 * 2
+plot(fairValue, color=color.white, transp=0, linewidth=1, title="FAIR")
+
+// YEARLY
+plot(sma1YData, color=color.white, linewidth=1, transp=0, title="1Y")
+plot(sma2YData, color=color.gray, linewidth=1, transp=0, title="2Y")
+plot(sma3YData, color=color.blue, linewidth=1, transp=0, title="3Y")
+plot(sma4YData, color=color.orange, linewidth=1, transp=0, title="4Y")
+plot(sma7YData, color=color.gray, linewidth=1, transp=0, title="7Y")
+// plot(sma8Y, color=color.gray, linewidth=1, transp=0, title="8Y")
+// plot(sma9Y, color=color.gray, linewidth=1, transp=0, title="9Y")
+// plot(sma10Y, color=color.gray, linewidth=1, transp=0, title="10Y")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// EMA & ANGEL NUMBERS 
+// TODO STUDY higher SMA/EMA cross over/under in bull bear markets
+////////////////////////////////////////////////////////////////////////////////
+ema3 = ema(close, 3)
+
+ema7 = ema(close, 7)
+ema7Data = if (showEMA)
+    ema7
+
+// Number 28 - The Trusting Lamb 
+emaLamb = ema(close, 28)
+
+ema50 = ema(close, 50)
+ema50Data = if (showEMA)
+    ema50
+
+ema100 = ema(close, 100)
+ema100Data = if (showEMA)
+    ema100
+
+ema150 = ema(close, 150)
+ema150Data = if (showEMA)
+    ema150
+
+// ANGEL Exponential Moving Average
+emaAngel = ema(close, 111)
+emaAngelData = if (showEMA)
+    emaAngel
+
+emaEnjoy = ema(close, 222)
+emaBalance = ema(close, 333)
+
+// PLOTS
+plot(ema7Data, color=color.red, linewidth=1, transp=0, title="EMA 7")
+plot(emaLamb, color=color.red, linewidth=1, transp=0, title="EMA LAMB")
+plot(ema50Data, color=color.olive, linewidth=1, transp=0, title="EMA 50")
+// plot(ema100Data, color=color.red, linewidth=2, transp=0, title="EMA 100")    
+// plot(ema150Data, color=color.blue, linewidth=1, transp=0, title="EMA 150")
+// plot(emaAngelData, color=color.orange, linewidth=2, transp=0, title="ANGEL EMA")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Mayer Multiplier
+//
+// Calculate and plot the MM2.4 MM4 MM5 multipliers
+//
+////////////////////////////////////////////////////////////////////////////////
+
+mm5Data = if (showIndicatorMayerMultiplier)
+    mm5 = sma200 * 5
+mm4Data = if (showIndicatorMayerMultiplier)
+    mm4 = sma200 * 4
+mm24Data = if (showIndicatorMayerMultiplier)
+    mm24 = sma200 * 2.4
+
+plot(mm5Data, color=color.red,  transp=10, linewidth=1, title="MM 5")
+plot(mm4Data, color=color.orange,  transp=20, linewidth=1, title="MM 4")
+plot(mm24Data, color=color.green, transp=30, linewidth=1, title="MM 2.4") 
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SIGNAL - TOP BOTTOM
+//
+// Detect the TOP and BOTTOM in a market, rendered as a RED or GREEN CYCLE 
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// TOP red
+topDetected = crossunder(fairValue, smaAngel)
+plotshape(topDetected, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
+
+// BOTTOM green
+signalBottom = if (timeframe.isdaily)
+    crossunder(sma1Y, (sma2Y))
+plotshape(signalBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
+
+// Original code
+// CYCLE green (offset) (DEFAULT)
+// detectedBottom = crossunder(sma1Y - 1000, (sma2Y))
+// detectedBottomOffset = if (timeframe.isdaily)
+//     crossunder(sma1Y, (sma2Y + 888))
+// plotshape(detectedBottomOffset, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=30, textcolor=color.white, text="CYCLE PRE")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SIGNAL - DCA 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Dollar Cost Average
+// Based on an idea from Thomas for finding a green pre cycle indication.
+// DCA need more studying 
+//
+////////////////////////////////////////////////////////////////////////////////
+
+isDaily = if (timeframe.isdaily)
+    1
+
+detectedPreCycleOut = crossover(sma21, sma200 * 2.4)
+plotshape(isDaily and showIndicatorDCA and detectedPreCycleOut, style=shape.labeldown, size=size.normal, transp=50, color=color.red, textcolor=color.white, text="DCA")
+
+// DCA LEVELS LAMBS YEARLY 1-3
+signalDCALe1Year = crossunder(smaLevel, sma1Y)
+plotshape(isDaily and showIndicatorDCA and signalDCALe1Year, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.green, textcolor=color.white, text="LAMB\n1Y")
+
+signalDCALe2Year = crossunder(smaLevel, sma2Y)
+plotshape(isDaily and showIndicatorDCA and signalDCALe2Year, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.green, textcolor=color.white, text="LAMB\n2Y")
+
+signalDCALe3Year = crossunder(smaLevel, sma3Y)
+plotshape(isDaily and showIndicatorDCA and signalDCALe3Year, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.green, textcolor=color.white, text="LAMB\n3Y")
+
+////////////////////
+// DCA TRUST 777 //
+//////////////////
+signalLevelTrust = if (timeframe.period == "1" and smaLevel > smaTrust)
+    1
+signalBull = if (ema7 < emaLamb)
+    1
+signalBear = if (ema7 > emaLamb)
+    1
+signalFear = if (ema7 > smaEnjoy and ema7 > smaAngel and smaAngel > emaAngel and sma4Y > sma7Y)
+    1
+signalEnjoyment = if (ema7 < smaEnjoy)
+    1
+// TODO configuration point to adjust smaEnergy to smaTrust depending on DCA trust level.
+signalTrustUnderLevel = if (smaEnergy < smaLevel and smaEnjoy < smaBalance and smaGuide < smaChange)
+    1
+
+////////////////////////
+// DCA DOT RED/GREEN //
+//////////////////////
+// signalLamb = if (timeframe.period == "1" or timeframe.period == "5" or timeframe.period == "60")
+signalLamb = if (timeframe.period == "1")
+    crossover(ema7, sma7)
+plotshape(showIndicatorDCA and signalLamb and signalBull and signalEnjoyment and signalTrustUnderLevel, style=shape.circle, size=size.small,  location=location.belowbar, transp=0, color=color.green, textcolor=color.white, text="")
+
+// signalLambBear = if (timeframe.period == "1" or timeframe.period == "5" or timeframe.period == "60")
+signalLambBear = if (timeframe.period == "1")
+    crossover(sma7, ema7)
+plotshape(showIndicatorDCA and signalLambBear and signalBear and signalFear, style=shape.circle, size=size.small,  location=location.abovebar, transp=0, color=color.red, textcolor=color.white, text="")
+
+// DCA LAMB DAILY GREEN
+signalELAMBDailyGreenLimit = if (ema7 < smaReality and ema7 < smaLevel )
+    1
+    
+signalELAMBDailyGreen = if (timeframe.isdaily)
+    crossover(ema7, sma7)
+plotshape(showIndicatorDCALambo and signalELAMBDailyGreen and signalELAMBDailyGreenLimit, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=0, color=color.green, textcolor=color.white, text="LAMB")
+
+// DCA LAMB DAILY RED
+signalELAMBDailyRedLimit = if (ema7 > sma200 * 2.1)
+    1
+signalELAMBDailyRed = if (timeframe.isdaily)
+    crossover(sma7, ema7)
+plotshape(signalELAMBDailyRedLimit and showIndicatorDCALambo and signalELAMBDailyRed, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=0, color=color.red, textcolor=color.black, text="LAMB")
+
+// DCA LAMB RIPPER experimental daily
+signalELAMBDailyOrangeLimit = if (ema7 > sma21 and ema7 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
+    1
+signalELAMBDailyOrange = if (timeframe.isdaily)
+    crossover(ema3, sma3)
+plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="LAMB")
+
+//////////////////////////
+// DCA SIGNAL - YEARLY //
+////////////////////////
+signalYearlyTwoOverSevenYear = if (timeframe.period == "1")
+    crossover(sma2Y, sma7Y)
+plotshape(showIndicatorDCA and signalYearlyTwoOverSevenYear, style=shape.circle, size=size.tiny,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="2Y/7Y")
+signalYearlyThreeOverFourYear = if (timeframe.period == "1")
+    crossover(sma3Y, sma4Y)
+plotshape(showIndicatorDCA and signalYearlyThreeOverFourYear, style=shape.circle, size=size.tiny,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="3Y/4Y")
+signalYearlyThreeOverSevenYear = if (timeframe.period == "1")
+    crossover(sma3Y, sma7Y)
+plotshape(showIndicatorDCA and signalYearlyThreeOverSevenYear, style=shape.circle, size=size.tiny,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="3Y/7Y")
+
+// Yearly Reality
+signalRealityAngel = if (timeframe.period == "1")
+    crossunder(sma1Y, smaReality)
+plotshape(showIndicatorDCA and signalRealityAngel, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.aqua, textcolor=color.white, text="YEAR\nREALITY 666")
+signalRealityAngelOver = if (timeframe.period == "1")
+    crossover(sma1Y, smaReality)
+plotshape(showIndicatorDCA and signalRealityAngelOver, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.orange, textcolor=color.white, text="YEAR\nREALITY 666")
+
+// Yearly Trust
+signalTrustAngel = if (timeframe.period == "1" or timeframe.period == "5")
+    crossunder(sma1Y, smaTrust)
+plotshape(showIndicatorDCA and signalTrustAngel, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nTRUST 777")
+signalTrustAngelOver = if (timeframe.period == "1" or timeframe.period == "5")
+    crossover(sma1Y, smaTrust)
+plotshape(showIndicatorDCA and signalTrustAngelOver, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.orange, textcolor=color.white, text="YEAR\nTRUST 777")
+
+// Yearly Energy
+signalEnergyAngel = if (timeframe.period == "1" or timeframe.period == "5")
+    crossunder(sma1Y, smaEnergy)
+plotshape(showIndicatorDCA and signalEnergyAngel, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nENERGY 888")
+signalEnergyAngelOver = if (timeframe.period == "1")
+    crossover(sma1Y, smaEnergy)
+plotshape(showIndicatorDCA and signalEnergyAngelOver, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nENERGY 888")
+
+// WARNING Yearly Level diamond
+signalLevelAngel = if (timeframe.period == "1" or timeframe.period == "5")
+    crossunder(sma1Y, smaLevel)
+plotshape(showIndicatorDCA and signalLevelAngel, style=shape.diamond, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nLEVEL 999")
+signalLevelAngelOver = if (timeframe.period == "1")
+    crossover(sma1Y, smaLevel)
+plotshape(showIndicatorDCA and signalLevelAngelOver, style=shape.diamond, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nLEVEL 999")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - ANGEL 111
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Average 111
+// Study of the Angel Average eventually on both EMA/SMA and relationship with
+// the pair plus the relationship with other Angel Averages 
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// Helper variables
+signalIsDaily = if (timeframe.isdaily)
+    1
+
+signalIsMinute = if (timeframe.period == "1")
+    1
+    
+// MINUTE / Angel / Yearly
+signalAngelOverOneYear = if (timeframe.period == "1")
+    crossover(smaAngel, sma1Y)
+plotshape(showIndicatorDCA and signalAngelOverOneYear, style=shape.circle, size=size.small,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="ANGEL 1Y")
+signalAngelOverOneYearUnder = if (timeframe.period == "1")
+    crossunder(smaAngel, sma1Y)
+plotshape(showIndicatorDCA and signalAngelOverOneYearUnder, style=shape.circle, size=size.small,  location=location.abovebar, transp=10, color=color.orange, textcolor=color.white, text="ANGEL 1Y")
+
+// MINUTE / Angel / 2 Year
+signalAngelOverTwoYear = if (timeframe.period == "1")
+    crossover(smaAngel, sma2Y)
+plotshape(showIndicatorDCA and signalAngelOverTwoYear, style=shape.circle, size=size.small,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="ANGEL 2Y")
+signalAngelOverTwoYearUnder = if (timeframe.period == "1")
+    crossunder(smaAngel, sma2Y)
+plotshape(showIndicatorDCA and signalAngelOverTwoYearUnder, style=shape.circle, size=size.small,  location=location.abovebar, transp=10, color=color.orange, textcolor=color.white, text="ANGEL 2Y")
+
+// MINUTE / GROWTH / ANGEL green
+detectedAngelCreation = if (timeframe.period == "1")
+    crossunder(sma350, smaAngel)
+plotshape(signalIsMinute and showIndicatorAngelManifestation and detectedAngelCreation, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="ANGEL")
+
+// // MINUTE / ANGEL / GROWTH red
+detectedAngelDeath = crossunder(smaAngel, sma350)
+plotshape(signalIsMinute and showIndicatorAngelManifestation and detectedAngelDeath, style=shape.circle,  location=location.abovebar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="ANGEL")
+
+// MINUTE / ANGEL / EMA ANGEL
+signalAngelBeingBorn = crossunder(smaAngel, emaAngel)
+plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL CROSS")
+signalAngelBeingBorn1 = crossunder(emaAngel, smaAngel)
+plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn1, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL HELL")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - ENJOY 222
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Enjoy 222
+//
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - BALANCE 333
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Balance 333
+//
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - GUIDE 444
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Average 444
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// signalGuideLevel = if (timeframe.period == "1")
+//     crossover(smaGuide, smaLevel)
+// plotshape(showIndicatorAngelTrust and signalGuideLevel, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.blue, textcolor=color.black, text="GUIDE 444\nLEVEL 999")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - CHANGE 555
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Average 555
+//
+////////////////////////////////////////////////////////////////////////////////
+
+signalChangeTrust1 = if (timeframe.period == "1")
+    crossover(smaChange, smaTrust)
+plotshape(showIndicatorAngelTrust and signalChangeTrust1, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="CHANGE 555\nTRUST 777")
+signalChangeEnergy1 = if (timeframe.period == "1")
+    crossover(smaChange, smaEnergy)
+plotshape(showIndicatorAngelTrust and signalChangeEnergy1, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="CHANGE 555\nENERGY 888")
+
+// CHANGE / LEVEL blue (PIVOT POINT Change Level)
+signalChangeLevel2 = if (timeframe.period == "1")
+    crossover(smaChange, smaLevel)
+plotshape(showIndicatorAngelTrust and signalChangeLevel2, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="CHANGE 555\nLEVEL 999")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - REALITY 666
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Average 666
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// DAILY PRE OUT signal
+signalRealityBalanceDailyEnjoy = if (timeframe.isdaily)
+    crossover(smaReality, smaEnjoy)
+plotshape(showIndicatorDCA and signalRealityBalanceDailyEnjoy, style=shape.labelup, size=size.large,  location=location.belowbar, transp=50, color=color.green, textcolor=color.white, text="DCA")
+// DCA BALANCE
+signalRealityBalanceDailyBalance = if (timeframe.isdaily)
+    crossover(smaReality, smaBalance)
+plotshape(showIndicatorDCA and signalRealityBalanceDailyBalance, style=shape.labelup, size=size.large,  location=location.belowbar, transp=0, color=color.green, textcolor=color.white, text="DCA")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - TRUST 777
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Average 777 
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// TRUST / LEVEL 
+// signalTrustLevelBull = if (timeframe.period == "1")
+//     crossover(smaTrust, smaLevel)
+// plotshape(showIndicatorAngelTrust and signalTrustLevelBull, style=shape.labelup, location=location.belowbar, size=size.large, transp=0, color=color.green, textcolor=color.white, text="TRUST 777\nLEVEL 999")
+// signalTrustLevelBear = if (timeframe.period == "1")
+//     crossunder(smaTrust, smaLevel)
+// plotshape(showIndicatorAngelTrust and signalTrustLevelBear, style=shape.labeldown, location=location.abovebar, size=size.large, transp=0, color=color.red, textcolor=color.white, text="TRUST 777\nLEVEL 999")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - ENERGY 888
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Average 888
+//
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DGA SIGNAL - LEVEL 999
+////////////////////////////////////////////////////////////////////////////////
+//
+// Angel Average 999
+//
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////

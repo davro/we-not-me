@@ -1,0 +1,320 @@
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// WE not ME (Bitcoin Indicator)
+//
+// Telegram: https://t.me/we_not_me
+//
+// David Stevens <mail.davro@gmail.com>
+// 
+// Donations are accepted here
+// Bitcoin: 3Ph9wP4vgASFbFP9DAabZETycXY66ebA8Y
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//@version=4
+study("WE-Indicator", "WE", overlay=true)
+
+// Strength
+showOverBought = input(false, title="Over Bought")
+showOverSold   = input(false, title="Over Sold")
+
+// Tom Demark
+showSellTDs = input(true, title="TD Sell")
+showBuyTDs  = input(true, title="TD Buy")
+show1to8TDs = input(false, title="TD 1-8")
+
+showMayerMultiplier = input(false, title="Mayer Multiplier")
+
+// Relative Strength helpers
+rsi = rsi(close, 21)
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// RSI Visual Vertical (Green IN, Red OUT)
+//   Red for over bought, out, sell, take, profits, take a short position 
+//   Green for oversold, in, buy, maybe take a long position
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// Overbought
+
+// Minute
+overBoughtMinute1 = if (timeframe.period == '1' and showOverBought and rsi > 70)
+    #df2121
+bgcolor(overBoughtMinute1)
+// overBoughtMinute2 = if (timeframe.period == '1' and showOverBought and rsi > 75)
+//     #c04141
+// bgcolor(overBoughtMinute2)
+// overBoughtMinute3 = if (timeframe.period == '1' and showOverBought and rsi > 70)
+//     #8b7575si
+// bgcolor(overBoughtMinute3)
+
+// Hourly
+overBoughtHourly1 = if (timeframe.period == '60' and showOverBought and rsi > 82)
+    #df2121
+bgcolor(overBoughtHourly1)
+overBoughtHourly2 = if (timeframe.period == '60' and showOverBought and rsi > 75)
+    #c04141
+bgcolor(overBoughtHourly2)
+overBoughtHourly3 = if (timeframe.period == '60' and showOverBought and rsi > 70)
+    #8b7575
+bgcolor(overBoughtHourly3)
+
+// 4 Hourly
+overBought4Hourly1 = if (timeframe.period == '240' and showOverBought and rsi > 82)
+    #df2121
+bgcolor(overBought4Hourly1)
+overBought4Hourly2 = if (timeframe.period == '240' and showOverBought and rsi > 75)
+    #c04141
+bgcolor(overBought4Hourly2)
+overBought4Hourly3 = if (timeframe.period == '240' and showOverBought and rsi > 70)
+    #8b7575
+bgcolor(overBought4Hourly3)
+
+// Daily 
+overBoughtDaily1 = if (timeframe.isdaily and showOverBought and rsi > 82)
+    #df2121
+bgcolor(overBoughtDaily1)
+overBoughtDaily2 = if (timeframe.isdaily and showOverBought and rsi > 77)
+    #c04141
+bgcolor(overBoughtDaily2)
+
+// overBoughtDaily3 = if (timeframe.isdaily and showOverBought and rsi > 70)
+//     #8b7575
+// bgcolor(overBoughtDaily3)
+
+// Weekly MORE TESTING
+overBoughtWeekly1 = if (timeframe.isweekly and showOverBought and rsi > 87)
+    #df2121
+bgcolor(overBoughtWeekly1)
+overBoughtWeekly2 = if (timeframe.isweekly and showOverBought and rsi > 85)
+    #c04141
+bgcolor(overBoughtWeekly2)
+overBoughtWeekly3 = if (timeframe.isweekly and showOverBought and rsi > 80)
+    #8b7575
+bgcolor(overBoughtWeekly3)
+overBoughtWeekly4 = if (timeframe.isweekly and showOverBought and rsi > 70)
+    #8b7575
+bgcolor(overBoughtWeekly4)
+
+//////////////
+// Monthly // MORE TESTING
+overBoughtMonthly1 = if (timeframe.ismonthly and showOverBought and rsi > 93)
+    #df2121
+bgcolor(overBoughtMonthly1)
+overBoughtMonthly2 = if (timeframe.ismonthly and showOverBought and rsi > 86)
+    #c04141
+bgcolor(overBoughtMonthly2)
+overBoughtMonthly3 = if (timeframe.ismonthly and showOverBought and rsi > 85)
+    #8b7575
+bgcolor(overBoughtMonthly3)
+
+////////////////////////////////////////////////////////////////////////////////
+// OVER SOLD
+////////////////////////////////////////////////////////////////////////////////
+
+// Minute MORE TESTING
+overSoldMinute1 = if (timeframe.period == '1' and showOverSold and rsi < 30)
+    color.green
+bgcolor(overSoldMinute1)
+// overSoldMinute1 = if (timeframe.period == '60' and showOverSold and rsi < 38)
+//     color.lime
+// bgcolor(overSoldMinute1)
+
+// Hourly MORE TESTING
+overSoldHourly1 = if (timeframe.period == '60' and showOverSold and rsi < 40)
+    color.green
+bgcolor(overSoldHourly1)
+overSoldHourly2 = if (timeframe.period == '60' and showOverSold and rsi < 38)
+    color.lime
+bgcolor(overSoldHourly2)
+
+// 4 Hourly MORE TESTING
+overSold4Hourly1 = if (timeframe.period == '240' and showOverSold and rsi < 35)
+    color.green
+bgcolor(overSold4Hourly1)
+overSold4Hourly2 = if (timeframe.period == '240' and showOverSold and rsi < 28)
+    color.lime
+bgcolor(overSold4Hourly2)
+
+// Daily  MORE TESTING
+overSoldDaily1 = if (timeframe.isdaily and showOverSold and rsi < 32)
+    color.green
+bgcolor(overSoldDaily1)
+
+overSoldDaily2 = if (timeframe.isdaily and showOverSold and rsi < 22)
+    color.lime
+bgcolor(overSoldDaily2)
+
+// Weekly
+overSoldWeekly1 = if (timeframe.isweekly and showOverSold and rsi < 40)
+    color.green
+bgcolor(overSoldWeekly1)
+overSoldWeekly2 = if (timeframe.isweekly and showOverSold and rsi < 38)
+    color.lime
+bgcolor(overSoldWeekly2)
+
+// Monthly
+overSoldMontly1 = if (timeframe.ismonthly and showOverSold and rsi < 51)
+    color.green
+bgcolor(overSoldMontly1)
+overSoldMontly2 = if (timeframe.ismonthly and showOverSold and rsi < 48)
+    color.lime
+bgcolor(overSoldMontly2)
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// TD Sequential 
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+buySignals = 0
+buySignals := (close < close[4]) ? buySignals[1] == 9 ? 1 : buySignals[1] + 1 : 0
+
+sellSignals = 0
+sellSignals := (close > close[4]) ? sellSignals[1] == 9 ? 1 : sellSignals[1] + 1 : 0
+
+BuyOrSell = max(buySignals, sellSignals)
+
+// Commented out to save on outputs
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 1, char="", text="1", textcolor=color.green, location=location.belowbar, transp=40)
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 2, char="", text="2", textcolor=color.green, location=location.belowbar, transp=40)
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 3, char="", text="3", textcolor=color.green, location=location.belowbar, transp=40)
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 4, char="", text="4", textcolor=color.green, location=location.belowbar, transp=40)
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 5, char="", text="5", textcolor=color.green, location=location.belowbar, transp=40)
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 6, char="", text="6", textcolor=color.green, location=location.belowbar, transp=40)
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 7, char="", text="7", textcolor=color.green, location=location.belowbar, transp=40)
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 8, char="", text="8", textcolor=color.green, location=location.belowbar, transp=20)
+plotshape(showBuyTDs and buySignals and BuyOrSell == 9, text="9",color=color.green, textcolor=color.green, size=size.tiny, location=location.belowbar, transp=0)
+
+// Commented out to save on outputs
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 1, char="", text="1", textcolor=color.red, location=location.abovebar, transp=40)
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 2, char="", text="2", textcolor=color.red, location=location.abovebar, transp=40)
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 3, char="", text="3", textcolor=color.red, location=location.abovebar, transp=40)
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 4, char="", text="4", textcolor=color.red, location=location.abovebar, transp=40)
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 5, char="", text="5", textcolor=color.red, location=location.abovebar, transp=40)
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 6, char="", text="6", textcolor=color.red, location=location.abovebar, transp=40)
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 7, char="", text="7", textcolor=color.red, location=location.abovebar, transp=40)
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 8, char="", text="8", textcolor=color.red, location=location.abovebar, transp=20)
+plotshape(showSellTDs and sellSignals and BuyOrSell == 9, text="9",color=color.red, textcolor=color.red, size=size.tiny, location=location.abovebar, transp=0)
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// Bitcoin Log Growth Curves
+//
+// Features
+//
+// RISK Curve
+// Curve Projection
+//
+// Inspired by @Quantadelic aka Pinescript Pleb
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+darkOrLight =    input("Dark", title="Dark mode or Light mode?", options=["Dark", "Light"])
+showFibs =       input("Y", title="Show Fibonacci Levels?", options=["Y","N"])
+showExtensions = input("Y", title="Show Curve Projections?", options=["Y","N"])
+highIntercept =  input(1.06930947, title="Top Curve Intercept", step=0.001)
+highSlope =      input(0.00076, title="Top Curve Slope", step=0.00001)
+lowIntercept =   input(-3.0269716, title="Bottom Curve Intercept", step=0.001)
+lowSlope =       input(0.001329, title="Bottom Curve Slope", step=0.00001)
+
+// TIME CALCS
+timeIndex =     time < 1279670400000 ? 3.0 : (time - 1279670400000) / 86400000
+weight =        (log10(timeIndex + 10) * timeIndex * timeIndex - timeIndex) / 30000
+timeDelta =     time - time[1]
+
+// TOP OF CHANNEL INTERCEPT & SLOPE CALCS
+highSlopeCum =  highSlope * timeIndex
+highLogDev =    timeIndex > 2 ? log(weight) + highIntercept + highSlopeCum : na
+
+// BOTTOM OF CHANNEL INTERCEPT & SLOPE CALCS
+lowSlopeCum = lowSlope * timeIndex
+LowLogDev = timeIndex > 2 ? log(weight) + lowIntercept + lowSlopeCum : na
+
+// TOTAL CHANNEL LOG RANGE
+LogRange = highLogDev - LowLogDev
+
+// FIBONACCI LEVELS
+fib9098Calc = (LogRange * 0.9098) + LowLogDev
+fib8541Calc = (LogRange * 0.8541) + LowLogDev
+fib7639Calc = (LogRange * 0.7639) + LowLogDev
+fib618Calc  = (LogRange * 0.618) + LowLogDev
+midCalc     = (LogRange * 0.5) + LowLogDev
+fib382Calc  = (LogRange * 0.382) + LowLogDev
+fib2361Calc = (LogRange * 0.2361) + LowLogDev
+fib1459Calc = (LogRange * 0.1459) + LowLogDev
+fib0902Calc = (LogRange * 0.0902) + LowLogDev
+
+// SCALE LOG VARIABLES TO LINEAR
+highDev    = pow(2.718281828459, highLogDev)
+fib9098Dev = showFibs == "Y" ? pow(2.718281828459, fib9098Calc) : na
+fib8541Dev = showFibs == "Y" ? pow(2.718281828459, fib8541Calc) : na
+fib7639Dev = showFibs == "Y" ? pow(2.718281828459, fib7639Calc) : na
+fib618Dev  = showFibs == "Y" ? pow(2.718281828459, fib618Calc) : na
+midDev     = pow(2.718281828459, midCalc)
+fib382Dev  = showFibs == "Y" ? pow(2.718281828459, fib382Calc) : na
+fib2361Dev = showFibs == "Y" ? pow(2.718281828459, fib2361Calc) : na
+fib1459Dev = showFibs == "Y" ? pow(2.718281828459, fib1459Calc) : na
+fib0902Dev = showFibs == "Y" ? pow(2.718281828459, fib0902Calc) : na
+lowDev     = pow(2.718281828459, LowLogDev)
+
+// COLOR SCHEME
+colorBullScheme = darkOrLight == "Dark" ? color(color.red) : color(color.black)
+colorBearScheme = darkOrLight == "Dark" ? color(color.green) : color(color.black)
+
+// PLOTS - Fibonacci Levels
+plot(highDev, color=colorBullScheme, transp=0, title="RISK 100%")
+plot(fib9098Dev, color=colorBullScheme, transp=30, title="RISK  90.98%")
+plot(fib8541Dev, color=colorBullScheme, transp=40, title="RISK 85.41% ")
+plot(fib7639Dev, color=colorBullScheme, transp=50, title="RISK  76.39%")
+plot(fib618Dev, color=colorBullScheme, transp=60, title="RISK 61.80%")
+plot(midDev, color=color.white, transp=10, title="RISK 50%")
+plot(fib382Dev, color=colorBearScheme, transp=60, title="RISK 38.20%")
+plot(fib1459Dev, color=colorBearScheme, transp=40, title="RISK 14.59%")
+plot(fib0902Dev, color=colorBearScheme, transp=50, title="RISK 9.02%")
+plot(lowDev, color=colorBearScheme, transp=0, title="RISK 0%")
+
+// Curve Extension drawing function and helper variables
+ExtenZe(_i, _slope, _intercept) =>
+    TI = ((time + timeDelta *_i) -1279670400000) / 86400000
+    W = (log10(TI + 10) * TI * TI - TI) / 30000
+    HSC = _slope * TI
+    HLD = log(W) + _intercept + HSC
+    HD = pow(2.718281828459, HLD)
+    HD
+
+// VARIABLES FOR ADJUSTING LENGTH OF CURVE EXTENSIONS RELATIVE TO CHART TIME-FRAME
+forLoopStep = timeframe.ismonthly == 1 ? ceil( 12 / timeframe.multiplier) : 
+              timeframe.isweekly == 1 ? ceil(26 / timeframe.multiplier) : 
+              timeframe.isdaily == 1 ? ceil(91 / timeframe.multiplier) : 
+              (timeframe.isminutes == 1) and (timeframe.multiplier > 59) ? ceil(10080 / timeframe.multiplier) : na
+forLoopMax = na(forLoopStep) ? na : forLoopStep * 13
+
+// MID CURVE SLOPE & INTERCEPT
+midSlope =      (highSlope + lowSlope) * 0.5
+midIntercept =  (highIntercept + lowIntercept) * 0.5
+
+// COLOR SCHEME
+ColorSchemeProjected =   darkOrLight == "Dark" ? color(color.blue) : color(color.black)
+ColorSchemeMidProjected =   darkOrLight == "Dark" ? color(color.white) : color(color.black)
+
+// CHECK IF LAST BAR & "Show Curve Projections" IS CHECKED, THEN DRAW CURVE EXTENZES
+if barstate.islast and showExtensions == "Y"
+    for i = 0 to forLoopMax-1 by forLoopStep
+        // line.new(time + timeDelta * i, ExtenZe(i, highSlope, highIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, highSlope, highIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
+        
+        line.new(time + timeDelta * i, ExtenZe(i, highSlope, highIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, highSlope, highIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
+        line.new(time + timeDelta * i, ExtenZe(i, midSlope, midIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, midSlope, midIntercept), xloc=xloc.bar_time, color=ColorSchemeMidProjected)
+        line.new(time + timeDelta * i, ExtenZe(i, lowSlope, lowIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, lowSlope, lowIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
+
+////////////////////////////////////////////////////////////////////////////////
