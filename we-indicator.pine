@@ -24,8 +24,6 @@ showSellTDs = input(true, title="TD Sell")
 showBuyTDs  = input(true, title="TD Buy")
 show1to8TDs = input(false, title="TD 1-8")
 
-showMayerMultiplier = input(false, title="Mayer Multiplier")
-
 // Relative Strength helpers
 rsi = rsi(close, 21)
 
