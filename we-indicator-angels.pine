@@ -24,8 +24,8 @@ showIndicatorAngelSMA           = input(false, title="SMA (Angel Rainbow)")
 showIndicatorAngelSMAYearly     = input(false, title="SMA (Yearly)")
 showIndicatorMayerMultiplier    = input(false, title="Mayer Multiplier")
 showIndicatorDCA                = input(true,  title="DCA")
-showIndicatorDCALambo           = input(true,  title="DCA LAMBo (daily)")
-showIndicatorDCALamboRipper     = input(false, title="DCA LAMBo Ripper (daily beta)")
+showIndicatorDCALambo           = input(true,  title="DCA LAMBo (daily sell when should I sell?)")
+showIndicatorDCALamboRipper     = input(true,  title="DCA LAMBo (daily buy when should I buy?)")
 showIndicatorAngelManifestation = input(true,  title="Angel Manifestation (111)")
 showIndicatorAngelEnjoy         = input(true,  title="Angel Enjoy (222)")
 showIndicatorAngelBalance       = input(false, title="Angel Balance (333)")
@@ -154,8 +154,8 @@ plot(sma21Data, color=color.orange, linewidth=1, transp=0, title="SMA 21")
 plot(smaLambData, color=color.green, linewidth=1, transp=0, title="SMA LAMB")
 plot(sma50Data, color=color.aqua, linewidth=1, transp=0, title="SMA 50")
 plot(sma200Data, color=color.blue, linewidth=1, transp=0, title="SMA 200")
-plot(sma200 * 2.1, color=color.aqua, linewidth=1, transp=0, title="SMA 200 * 2.1")
-// plot( sma200 * 2.4, color=color.white, linewidth=1, transp=0, title="SMA  sma200 * 2.4")
+plot(sma200 * 2.1, color=color.aqua, linewidth=1, transp=0, title="SMA BB")
+
 
 // SMA ANGELS
 smaAngelData = if (showIndicatorAngelSMA)
@@ -223,6 +223,10 @@ ema7 = ema(close, 7)
 ema7Data = if (showEMA)
     ema7
 
+ema21 = ema(close, 21)
+ema21Data = if (showEMA)
+    ema21
+
 // Number 28 - The Trusting Lamb 
 emaLamb = ema(close, 28)
 
@@ -249,10 +253,31 @@ emaBalance = ema(close, 333)
 // PLOTS
 plot(ema7Data, color=color.red, linewidth=1, transp=0, title="EMA 7")
 plot(emaLamb, color=color.red, linewidth=1, transp=0, title="EMA LAMB")
+plot(ema21Data, color=color.yellow, linewidth=1, transp=0, title="EMA 21")
 plot(ema50Data, color=color.olive, linewidth=1, transp=0, title="EMA 50")
-// plot(ema100Data, color=color.red, linewidth=2, transp=0, title="EMA 100")    
+// plot(ema100Data, color=color.red, linewidth=2, transp=0, title="EMA 100")
 // plot(ema150Data, color=color.blue, linewidth=1, transp=0, title="EMA 150")
+
+ema200 = ema(close, 200)
+plot(ema200 * 2.1, color=color.green, linewidth=1, transp=0, title="EMA BB")
+
 // plot(emaAngelData, color=color.orange, linewidth=2, transp=0, title="ANGEL EMA")
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Signal Core Helper Variables
+//
+// Calculate and plot the MM2.4 MM4 MM5 multipliers
+//
+////////////////////////////////////////////////////////////////////////////////
+
+isDaily = if (timeframe.isdaily)
+    1
+
+isMinute = if (timeframe.period == "1")
+    1
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -285,12 +310,11 @@ plot(mm24Data, color=color.green, transp=30, linewidth=1, title="MM 2.4")
 
 // TOP red
 topDetected = crossunder(fairValue, smaAngel)
-plotshape(topDetected, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
+plotshape(isDaily and topDetected, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
 
 // BOTTOM green
-signalBottom = if (timeframe.isdaily)
-    crossunder(sma1Y, (sma2Y))
-plotshape(signalBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
+signalBottom = crossunder(sma1Y, (sma2Y))
+plotshape(isDaily and signalBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
 
 // Original code
 // CYCLE green (offset) (DEFAULT)
@@ -310,9 +334,6 @@ plotshape(signalBottom, style=shape.labelup, color=color.green, size=size.large,
 // DCA need more studying 
 //
 ////////////////////////////////////////////////////////////////////////////////
-
-isDaily = if (timeframe.isdaily)
-    1
 
 detectedPreCycleOut = crossover(sma21, sma200 * 2.4)
 plotshape(isDaily and showIndicatorDCA and detectedPreCycleOut, style=shape.labeldown, size=size.normal, transp=50, color=color.red, textcolor=color.white, text="DCA")
@@ -372,7 +393,7 @@ signalELAMBDailyRed = if (timeframe.isdaily)
     crossover(sma7, ema7)
 plotshape(signalELAMBDailyRedLimit and showIndicatorDCALambo and signalELAMBDailyRed, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=0, color=color.red, textcolor=color.black, text="LAMB")
 
-// DCA LAMB RIPPER experimental daily
+// DCA LAMB RIPPER experimental daily buy
 signalELAMBDailyOrangeLimit = if (ema7 > sma21 and ema7 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
     1
 signalELAMBDailyOrange = if (timeframe.isdaily)
