@@ -1,17 +1,20 @@
 //@version=4
 study("BTC RSI indicator", "RSI", overlay=true)
 rsi = rsi(close, 21)
-showOverBought = input(true, title="Show over bought background")
-rsiOverHighColor = input(color.new(color.red, 70), title=".....RSI over High", type=input.color)
-rsiOverHigherColor = input(color.new(color.red, 40), title=".....RSI over Higher", type=input.color)
-showOverSold= input(true, title="Show over sold background")
-rsiUnderLowColor = input(color.new(color.green, 70), title=".....RSI under Low", type=input.color)
-rsiUnderLowerColor = input(color.new(color.green, 40), title=".....RSI under Lower", type=input.color)
+showOverBought      = input(true, title="Show over bought background")
+rsiOverHighColor    = input(color.new(color.red, 70), title=".....RSI over High", type=input.color)
+rsiOverHigherColor  = input(color.new(color.red, 40), title=".....RSI over Higher", type=input.color)
+showOverSold        = input(true, title="Show over sold background")
+rsiUnderLowColor    = input(color.new(color.green, 70), title=".....RSI under Low", type=input.color)
+rsiUnderLowerColor  = input(color.new(color.green, 40), title=".....RSI under Lower", type=input.color)
+
+defaultRsiLow = 30
+defaultRsiHigh = 70
 
 backgroundColorByRSI = if (timeframe.isminutes)
 
     rsiValueHigh = if (timeframe.period == '1')
-        70
+        defaultRsiHigh
     else if (timeframe.period == '15')
         // TODO
         100
@@ -19,7 +22,7 @@ backgroundColorByRSI = if (timeframe.isminutes)
         // TODO
         100
     else if (timeframe.period == '60')
-        70
+        defaultRsiHigh
     else
         na
     
@@ -50,7 +53,7 @@ backgroundColorByRSI = if (timeframe.isminutes)
         na
     
     rsiValueLower = if (timeframe.period == '1')
-        30
+        defaultRsiLow
     else if (timeframe.period == '15')
         // TODO
         0
@@ -58,7 +61,7 @@ backgroundColorByRSI = if (timeframe.isminutes)
         // TODO
         0
     else if (timeframe.period == '60')
-        30
+        defaultRsiLow
     else
         na
 

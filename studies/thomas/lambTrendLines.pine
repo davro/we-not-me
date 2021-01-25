@@ -1,0 +1,14 @@
+var barNumber = 0
+sma7 = sma(close, 7)
+ema7 = ema(close, 7)
+
+signalELAMBDailyRedLimit = ema7 > (sma200 * 2.1)
+signalELAMBDailyRed = crossover(sma7, ema7)
+barNumber := timeframe.isdaily and crossover(sma7, ema7) ? barNumber : barssince(crossover(sma7, ema7))
+var line lbl = na
+currentGo = signalELAMBDailyRedLimit and showIndicatorDCALambo and signalELAMBDailyRed
+previousGo = ema(close[float(barNumber + 2)], 7) > sma(close[float(barNumber + 2)], 200) * 2.1
+lbl := if barNumber != 0 and currentGo and previousGo
+    line.new(x1=bar_index[barNumber + 2], y1=high[float(barNumber + 2)], x2=bar_index, y2=high, extend=extend.right, color=color.red)
+else
+    na
