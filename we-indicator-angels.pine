@@ -35,6 +35,7 @@ showIndicatorAngelReality       = input(false, title="Angel Reality (666)")
 showIndicatorAngelTrust         = input(true,  title="Angel Trust (777)")
 showIndicatorAngelEnergy        = input(false, title="Angel Energy (888)")
 showIndicatorAngelLevel         = input(false, title="Angel Level (999)")
+showIndicatorDebug              = input(false, title="DEBUG")
 
 ////////////////////////////////////////////////////////////////////////////////
 // SMA & ANGEL NUMBERS
@@ -96,6 +97,8 @@ smaLevel = sma(close, 999)
 // SMA Helpers
 ////////////////////////////////////////////////////////////////////////////////
 sma3  = sma(close, 3)
+sma3Data = if (showSMA)
+    sma3
 
 sma7 = sma(close, 7)
 sma7Data = if (showSMA)
@@ -144,18 +147,21 @@ sma7YData = if (showIndicatorAngelSMAYearly)
     
 // sma8Y  = sma(close, 2905)
 // sma9Y  = sma(close, 3255)
-// sma10Y  = sma(close, 3605)
+// sma10Y  = sma(close, 3605) 
+
+smaBB = sma200 * 2.1
 
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTS (SMA)
 ////////////////////////////////////////////////////////////////////////////////
+plot(sma3Data, color=color.blue, linewidth=1, transp=0, title="SMA 3")
 plot(sma7Data, color=color.blue, linewidth=1, transp=0, title="SMA 7")
 plot(sma21Data, color=color.orange, linewidth=1, transp=0, title="SMA 21")
 plot(smaLambData, color=color.green, linewidth=1, transp=0, title="SMA LAMB")
-plot(sma50Data, color=color.aqua, linewidth=1, transp=0, title="SMA 50")
-plot(sma200Data, color=color.blue, linewidth=1, transp=0, title="SMA 200")
-plot(sma200 * 2.1, color=color.aqua, linewidth=1, transp=0, title="SMA BB")
+// plot(sma50Data, color=color.aqua, linewidth=1, transp=0, title="SMA 50")
+// plot(sma200Data, color=color.blue, linewidth=1, transp=0, title="SMA 200")
 
+plot(smaBB, color=color.aqua, linewidth=1, transp=0, title="SMA BB")
 
 // SMA ANGELS
 smaAngelData = if (showIndicatorAngelSMA)
@@ -218,7 +224,9 @@ plot(sma7YData, color=color.gray, linewidth=1, transp=0, title="7Y")
 // TODO STUDY higher SMA/EMA cross over/under in bull bear markets
 ////////////////////////////////////////////////////////////////////////////////
 ema3 = ema(close, 3)
-
+ema3Data = if (showEMA)
+    ema3
+    
 ema7 = ema(close, 7)
 ema7Data = if (showEMA)
     ema7
@@ -251,6 +259,7 @@ emaEnjoy = ema(close, 222)
 emaBalance = ema(close, 333)
 
 // PLOTS
+plot(ema3Data, color=color.red, linewidth=1, transp=0, title="EMA 3")
 plot(ema7Data, color=color.red, linewidth=1, transp=0, title="EMA 7")
 plot(emaLamb, color=color.red, linewidth=1, transp=0, title="EMA LAMB")
 plot(ema21Data, color=color.yellow, linewidth=1, transp=0, title="EMA 21")
@@ -272,10 +281,10 @@ plot(ema200 * 2.1, color=color.green, linewidth=1, transp=0, title="EMA BB")
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-isDaily = if (timeframe.isdaily)
-    1
-
 isMinute = if (timeframe.period == "1")
+    1
+    
+isDaily = if (timeframe.isdaily)
     1
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -305,7 +314,6 @@ plot(mm24Data, color=color.green, transp=30, linewidth=1, title="MM 2.4")
 // SIGNAL - TOP BOTTOM
 //
 // Detect the TOP and BOTTOM in a market, rendered as a RED or GREEN CYCLE 
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 // TOP red
@@ -351,7 +359,7 @@ plotshape(isDaily and showIndicatorDCA and signalDCALe3Year, style=shape.labelup
 ////////////////////
 // DCA TRUST 777 //
 //////////////////
-signalLevelTrust = if (timeframe.period == "1" and smaLevel > smaTrust)
+signalLevelTrust = if (isMinute and smaLevel > smaTrust)
     1
 signalBull = if (ema7 < emaLamb)
     1
@@ -369,36 +377,37 @@ signalTrustUnderLevel = if (smaEnergy < smaLevel and smaEnjoy < smaBalance and s
 // DCA DOT RED/GREEN //
 //////////////////////
 // signalLamb = if (timeframe.period == "1" or timeframe.period == "5" or timeframe.period == "60")
-signalLamb = if (timeframe.period == "1")
+signalLamb = if (isMinute)
     crossover(ema7, sma7)
 plotshape(showIndicatorDCA and signalLamb and signalBull and signalEnjoyment and signalTrustUnderLevel, style=shape.circle, size=size.small,  location=location.belowbar, transp=0, color=color.green, textcolor=color.white, text="")
 
 // signalLambBear = if (timeframe.period == "1" or timeframe.period == "5" or timeframe.period == "60")
-signalLambBear = if (timeframe.period == "1")
+signalLambBear = if (isMinute)
     crossover(sma7, ema7)
 plotshape(showIndicatorDCA and signalLambBear and signalBear and signalFear, style=shape.circle, size=size.small,  location=location.abovebar, transp=0, color=color.red, textcolor=color.white, text="")
 
-// DCA LAMB DAILY GREEN
+// DCA GREEN LAMB DAILY
 signalELAMBDailyGreenLimit = if (ema7 < smaReality and ema7 < smaLevel )
     1
     
-signalELAMBDailyGreen = if (timeframe.isdaily)
+signalELAMBDailyGreen = if (isDaily)
     crossover(ema7, sma7)
-plotshape(showIndicatorDCALambo and signalELAMBDailyGreen and signalELAMBDailyGreenLimit, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=0, color=color.green, textcolor=color.white, text="LAMB")
+plotshape(showIndicatorDCALambo and signalELAMBDailyGreen and signalELAMBDailyGreenLimit, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="LAMB")
 
-// DCA LAMB DAILY RED
-signalELAMBDailyRedLimit = if (ema7 > sma200 * 2.1)
+// DCA RED LAMB DAILY
+// smaBB = sma200 * 2.1
+signalELAMBDailyRedLimit = if (ema7 > smaBB)
     1
-signalELAMBDailyRed = if (timeframe.isdaily)
+signalELAMBDailyRed = if (isDaily)
     crossover(sma7, ema7)
-plotshape(signalELAMBDailyRedLimit and showIndicatorDCALambo and signalELAMBDailyRed, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=0, color=color.red, textcolor=color.black, text="LAMB")
+plotshape(signalELAMBDailyRedLimit and showIndicatorDCALambo and signalELAMBDailyRed, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.red, textcolor=color.black, text="LAMB")
 
-// DCA LAMB RIPPER experimental daily buy
+// DCA GREEN/TEAL LAMB RIPPER daily green lamb experimental 
 signalELAMBDailyOrangeLimit = if (ema7 > sma21 and ema7 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
     1
-signalELAMBDailyOrange = if (timeframe.isdaily)
+signalELAMBDailyOrange = if (isDaily)
     crossover(ema3, sma3)
-plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="LAMB")
+plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="L")
 
 //////////////////////////
 // DCA SIGNAL - YEARLY //
@@ -445,6 +454,60 @@ signalLevelAngelOver = if (timeframe.period == "1")
     crossover(sma1Y, smaLevel)
 plotshape(showIndicatorDCA and signalLevelAngelOver, style=shape.diamond, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nLEVEL 999")
 ////////////////////////////////////////////////////////////////////////////////
+
+truncate(number, decimals) =>
+    factor = pow(10, decimals)
+    int(number * factor) / factor
+    
+color cLabel  = input(color.blue, "Debug Color Label", type = input.color)
+color cText   = input(color.white, "Debug Color Text", type = input.color)
+int pLabel    = input(5, "Debug Position Panel", minval = 2)
+
+// bool candle2  = input(false, "Previous Candle")
+// color cLabel2 = input(color.blue, "Color Label", type = input.color)
+// color cText2  = input(color.white, "Color Text", type = input.color)
+// int pLabel2   = input(5, "Position Panel", minval = 2)
+
+var tCandle     = " HIGH/LOW  "
+var tBody       = " CLOSE/OPEN"
+var tTopWick    = " WICK HIGH "
+var tBottomWick = " WICK LOW  "
+var tTWBody     = " WH + BODY "
+var tBWBody     = " WL + BODY "
+
+LongCandle = abs(high-low)
+LongBody = abs(close-open)
+LongTopWick = high - (close > open ? close : open)
+LongBottomWick = (close > open ? open : close) - low
+PorBody = truncate(LongBody*100/LongCandle, 2)
+
+infoLbText = 
+  tostring(round(LongCandle[0])) + " " + tCandle + "\n" + 
+//   tBody       + tostring(LongBody[0]) + " - " + tostring( PorBody[0] ) + " %\n" + 
+  tostring(round(LongBody[0])) + " " + tBody + "\n" + 
+  tostring(round(LongTopWick[0])) + " " + tTopWick + "\n" + 
+  tostring(round(LongBottomWick[0])) + " " + tBottomWick + "\n" +
+  tostring(round(LongTopWick[0] + LongBody[0])) + " " + tTWBody + "\n" + 
+  tostring(round(LongBottomWick[0] + LongBody[0])) + " " + tBWBody
+
+infoLabelData = if (showIndicatorDebug)
+    label infoLabel = label.new(time, close, xloc=xloc.bar_time, color=cLabel, textcolor=cText, style=label.style_label_left, size=size.normal)
+    
+label.set_text(id=infoLabelData, text=infoLbText) 
+label.set_x(infoLabelData, label.get_x(infoLabelData) + round(change(time) * pLabel)), label.delete(infoLabelData[1])
+
+// if (candle2)
+//     infoLbText := tCandle + tostring( LongCandle[1] ) + "\n" + 
+//       tBody + tostring( LongBody[1] ) + " - " + tostring( PorBody[1] ) + " %\n" + 
+//       tTopWick + tostring( LongTopWick[1] ) + "\n" + 
+//       tBottomWick + tostring( LongBottomWick[1] ) + "\n" +
+//       tTWBody + tostring( LongTopWick[1] + LongBody[1] ) + "\n" + 
+//       tBWBody + tostring( LongBottomWick[1] + LongBody[1] )    
+//     label infoLabel2 = label.new(time, close, xloc=xloc.bar_time, 
+//          color=cLabel2, textcolor=cText2, style=label.style_label_right, size=size.normal)
+//     label.set_text(id=infoLabel2, text=infoLbText) 
+//     label.set_x(infoLabel2, label.get_x(infoLabel2) - round(change(time) * pLabel2)), label.delete(infoLabel2[1])
+        
 
 
 ////////////////////////////////////////////////////////////////////////////////

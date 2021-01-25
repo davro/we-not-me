@@ -16,13 +16,14 @@
 study("WE-Indicator", "WE", overlay=true)
 
 // Strength
-showOverBought = input(false, title="Over Bought")
-showOverSold   = input(false, title="Over Sold")
+showOverBought = input(true, title="Vertical Heatmap - Show over bought")
+showOverSold= input(true, title="Vertical Heatmap - Show over sold")
 
 // Tom Demark
-showSellTDs = input(true, title="TD Sell")
-showBuyTDs  = input(true, title="TD Buy")
-show1to8TDs = input(false, title="TD 1-8")
+showSellTDs      = input(true, title="TD Sell")
+showBuyTDs       = input(true, title="TD Buy")
+show1to8TDs      = input(false, title="TD 1-8")
+showTDTrendlines = input(true, title="TD Trend Lines")
 
 // Relative Strength helpers
 rsi = rsi(close, 21)
@@ -36,6 +37,79 @@ rsi = rsi(close, 21)
 //
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+// rsiOverHighColor = input(color.new(color.red, 70), title=".....RSI over High", type=input.color)
+// rsiOverHigherColor = input(color.new(color.red, 40), title=".....RSI over Higher", type=input.color)
+// rsiUnderLowColor = input(color.new(color.green, 70), title=".....RSI under Low", type=input.color)
+// rsiUnderLowerColor = input(color.new(color.green, 40), title=".....RSI under Lower", type=input.color)
+
+// // Minutes 
+// backgroundColorByRSI = if (timeframe.isminutes)
+
+//     rsiValueHigh = if (timeframe.period == '1')
+//         70
+//     else if (timeframe.period == '15')
+//         // TODO
+//         100
+//     else if (timeframe.period == '30')
+//         // TODO
+//         100
+//     else if (timeframe.period == '60')
+//         70
+//     else
+//         na
+    
+//     rsiValueHigher = if (timeframe.period == '1')
+//         75
+//     else if (timeframe.period == '15')
+//         // TODO
+//         100
+//     else if (timeframe.period == '30')
+//         // TODO
+//         100
+//     else if (timeframe.period == '60')
+//         75
+//     else
+//         na
+    
+//     rsiValueLow = if (timeframe.period == '1')
+//         32
+//     else if (timeframe.period == '15')
+//         // TODO
+//         0
+//     else if (timeframe.period == '30')
+//         // TODO
+//         0
+//     else if (timeframe.period == '60')
+//         38
+//     else
+//         na
+    
+//     rsiValueLower = if (timeframe.period == '1')
+//         30
+//     else if (timeframe.period == '15')
+//         // TODO
+//         0
+//     else if (timeframe.period == '30')
+//         // TODO
+//         0
+//     else if (timeframe.period == '60')
+//         30
+//     else
+//         na
+
+//     if (showOverBought and rsi > rsiValueHigher)
+//         rsiOverHigherColor
+//     else if (showOverBought and rsi > rsiValueHigh)
+//         rsiOverHighColor
+//     else if (showOverSold and rsi < rsiValueLower)
+//         rsiUnderLowerColor
+//     else if (showOverSold and rsi < rsiValueLow)
+//         rsiUnderLowColor
+// else
+//     na
+// bgcolor(color=backgroundColorByRSI)
+
 
 // Overbought
 
@@ -180,7 +254,7 @@ sellSignals := (close > close[4]) ? sellSignals[1] == 9 ? 1 : sellSignals[1] + 1
 BuyOrSell = max(buySignals, sellSignals)
 
 // Commented out to save on outputs
-plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 1, char="", text="1", textcolor=color.green, location=location.belowbar, transp=40)
+// plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 1, char="", text="1", textcolor=color.green, location=location.belowbar, transp=40)
 plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 2, char="", text="2", textcolor=color.green, location=location.belowbar, transp=40)
 plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 3, char="", text="3", textcolor=color.green, location=location.belowbar, transp=40)
 plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 4, char="", text="4", textcolor=color.green, location=location.belowbar, transp=40)
@@ -191,7 +265,7 @@ plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 8, char="", 
 plotshape(showBuyTDs and buySignals and BuyOrSell == 9, text="9",color=color.green, textcolor=color.green, size=size.tiny, location=location.belowbar, transp=0)
 
 // Commented out to save on outputs
-plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 1, char="", text="1", textcolor=color.red, location=location.abovebar, transp=40)
+// plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 1, char="", text="1", textcolor=color.red, location=location.abovebar, transp=40)
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 2, char="", text="2", textcolor=color.red, location=location.abovebar, transp=40)
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 3, char="", text="3", textcolor=color.red, location=location.abovebar, transp=40)
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 4, char="", text="4", textcolor=color.red, location=location.abovebar, transp=40)
@@ -200,6 +274,25 @@ plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 6, char=""
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 7, char="", text="7", textcolor=color.red, location=location.abovebar, transp=40)
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 8, char="", text="8", textcolor=color.red, location=location.abovebar, transp=20)
 plotshape(showSellTDs and sellSignals and BuyOrSell == 9, text="9",color=color.red, textcolor=color.red, size=size.tiny, location=location.abovebar, transp=0)
+
+////////////////////////////////////////////////////////////////////////////////
+// TD Sequential - Trend Lines
+////////////////////////////////////////////////////////////////////////////////
+highest9 = highest(9)
+highTrendLine = 0.0
+highTrendLine := buySignals == 9 ? highest9
+              : close > highTrendLine[1] ? 0
+              : highTrendLine[1]
+               
+lowest9 = lowest(9)
+lowTrendLine = 0.0
+lowTrendLine := sellSignals == 9 ? lowest9
+              : close < lowTrendLine[1] ? 0
+              : lowTrendLine[1]
+
+plot(showTDTrendlines and highTrendLine > 0 ? highTrendLine : na, title="Trendline", color=color.blue, style=plot.style_circles, linewidth=1, transp=0)
+plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline", color=color.white, style=plot.style_circles, linewidth=1, transp=0)
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
