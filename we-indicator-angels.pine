@@ -19,7 +19,7 @@ study("WE-Angels", "WE-Angels", overlay=true)
 showEMA = input(false, title="EMA")
 
 // Simple Moving Averages
-showSMA                         = input(false, title="SMA")
+showSMA                         = input(true, title="SMA")
 showIndicatorAngelSMA           = input(false, title="SMA (Angel Rainbow)")
 showIndicatorAngelSMAYearly     = input(false, title="SMA (Yearly)")
 showIndicatorMayerMultiplier    = input(false, title="Mayer Multiplier")
@@ -155,13 +155,12 @@ smaBB = sma200 * 2.1
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTS (SMA)
 ////////////////////////////////////////////////////////////////////////////////
-// plot(sma3Data, color=color.blue, linewidth=1, transp=0, title="SMA 3")
+plot(sma3Data, color=color.blue, linewidth=1, transp=0, title="SMA 3")
 // plot(sma7Data, color=color.blue, linewidth=1, transp=0, title="SMA 7")
 plot(sma21Data, color=color.orange, linewidth=1, transp=0, title="SMA 21")
 plot(smaLambData, color=color.green, linewidth=1, transp=0, title="SMA LAMB")
-plot(sma50Data, color=color.aqua, linewidth=1, transp=0, title="SMA 50")
-// plot(sma200Data, color=color.blue, linewidth=1, transp=0, title="SMA 200")
-
+plot(sma50Data, color=color.blue, linewidth=3, transp=0, title="SMA 50")
+plot(sma200Data, color=color.white, linewidth=4, transp=0, title="SMA 200")
 plot(smaBB, color=color.aqua, linewidth=1, transp=0, title="SMA BB")
 
 // SMA ANGELS
@@ -209,10 +208,10 @@ fairValue = sma350 * 2
 plot(fairValue, color=color.white, transp=0, linewidth=2, title="FAIR")
 
 // YEARLY
-plot(sma1YData, color=color.white, linewidth=1, transp=0, title="1Y")
-plot(sma2YData, color=color.gray, linewidth=1, transp=0, title="2Y")
-plot(sma3YData, color=color.blue, linewidth=1, transp=0, title="3Y")
-plot(sma4YData, color=color.orange, linewidth=1, transp=0, title="4Y")
+// plot(sma1YData, color=color.white, linewidth=1, transp=0, title="1Y")
+// plot(sma2YData, color=color.gray, linewidth=1, transp=0, title="2Y")
+// plot(sma3YData, color=color.blue, linewidth=1, transp=0, title="3Y")
+// plot(sma4YData, color=color.orange, linewidth=1, transp=0, title="4Y")
 // plot(sma7YData, color=color.gray, linewidth=1, transp=0, title="7Y")
 // plot(sma8Y, color=color.gray, linewidth=1, transp=0, title="8Y")
 // plot(sma9Y, color=color.gray, linewidth=1, transp=0, title="9Y")
@@ -260,7 +259,7 @@ emaEnjoy = ema(close, 222)
 emaBalance = ema(close, 333)
 
 // PLOTS
-// plot(ema3Data, color=color.red, linewidth=1, transp=0, title="EMA 3")
+plot(ema3Data, color=color.red, linewidth=1, transp=0, title="EMA 3")
 // plot(ema7Data, color=color.red, linewidth=1, transp=0, title="EMA 7")
 plot(emaLamb, color=color.red, linewidth=1, transp=0, title="EMA LAMB")
 plot(ema21Data, color=color.yellow, linewidth=1, transp=0, title="EMA 21")
@@ -286,13 +285,22 @@ plot(emaBB, color=color.green, linewidth=1, transp=0, title="EMA BB")
 isDailyOrWeekly = if (timeframe.isdaily or timeframe.isweekly)
     1
 
+isMonthly = if (timeframe.ismonthly)
+    1
+    
 isWeekly = if (timeframe.isweekly)
     1
 
-isMinute = if (timeframe.period == "1")
-    1
-    
 isDaily = if (timeframe.isdaily)
+    1
+
+isFourHour = if (timeframe.period == "240")
+    240
+    
+isHour = if (timeframe.period == "60")
+    60
+    
+isMinute = if (timeframe.period == "1")
     1
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -313,13 +321,19 @@ mm24Data = if (showIndicatorMayerMultiplier)
     mm24 = sma200 * 2.4
 
 // plot(mm5Data, color=color.red,  transp=10, linewidth=1, title="MM 5")
-plot(mm4Data, color=color.orange,  transp=20, linewidth=1, title="MM 4")
+// plot(mm4Data, color=color.orange,  transp=20, linewidth=1, title="MM 4")
 plot(mm24Data, color=color.green, transp=30, linewidth=1, title="MM 2.4") 
 
 // samBB
 //sma200 * 2.1
 ////////////////////////////////////////////////////////////////////////////////
 
+
+signalDeathCross = crossover(sma200, sma50)
+plotshape((isFourHour or isDaily) and signalDeathCross, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="DEATH")
+
+signalGoldenCross = crossunder(sma200, sma50)
+plotshape((isFourHour or isDaily) and signalGoldenCross, style=shape.labelup, color=color.yellow, size=size.large, location=location.belowbar, transp=0, textcolor=color.black, text="GOLDEN")
 
 ////////////////////////////////////////////////////////////////////////////////
 // SIGNAL - TOP BOTTOM
@@ -328,7 +342,7 @@ plot(mm24Data, color=color.green, transp=30, linewidth=1, title="MM 2.4")
 ////////////////////////////////////////////////////////////////////////////////
 
 // DAILY GREEN BOTTOM
-signalBottom = crossunder(sma1Y, (sma2Y))
+signalBottom = crossunder(sma1Y, sma2Y)
 plotshape(isDaily and signalBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
 
 // DAILY RED TOP
@@ -347,7 +361,6 @@ weeklyTop = if (timeframe.isweekly and weeklyTopEMALAMBEMABB)
     // crossunder(ema7, sma3)
     
 plotshape(isWeekly and weeklyTop, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
-
 
 // Original code 
 // CYCLE green (offset) (DEFAULT)
@@ -434,9 +447,17 @@ plotshape(signalELAMBDailyRedLimit and showIndicatorDCALambo and signalELAMBDail
 // DCA GREEN/TEAL lamb
 signalELAMBDailyOrangeLimit = if (ema3 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
     1
-signalELAMBDailyOrange = if (isDailyOrWeekly)
+
+// DCA LAMBo 
+signalELAMBDailyOrange = if (isMinute or isDailyOrWeekly or isFourHour or isHour)
     crossover(ema3, sma3)
-plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="LAMBo")
+// plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="LAMBo")
+plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="L")
+
+signalELAMBODailyGreen = if (isMinute or isDailyOrWeekly or isFourHour or isHour)
+    crossover(sma3, ema3)
+// plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBODailyGreen, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="LAMBo")
+plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBODailyGreen, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="L")
 
 // DCA GREEN MOON / BULL
 signalELAMBDailyBull = if (isDailyOrWeekly)
@@ -496,60 +517,6 @@ signalLevelAngelOver = if (timeframe.period == "1")
     crossover(sma1Y, smaLevel)
 plotshape(showIndicatorDCA and signalLevelAngelOver, style=shape.diamond, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nLEVEL 999")
 ////////////////////////////////////////////////////////////////////////////////
-
-truncate(number, decimals) =>
-    factor = pow(10, decimals)
-    int(number * factor) / factor
-    
-color cLabel  = input(color.blue, "Debug Color Label", type = input.color)
-color cText   = input(color.white, "Debug Color Text", type = input.color)
-int pLabel    = input(5, "Debug Position Panel", minval = 2)
-
-// bool candle2  = input(false, "Previous Candle")
-// color cLabel2 = input(color.blue, "Color Label", type = input.color)
-// color cText2  = input(color.white, "Color Text", type = input.color)
-// int pLabel2   = input(5, "Position Panel", minval = 2)
-
-var tCandle     = " HIGH/LOW  "
-var tBody       = " CLOSE/OPEN"
-var tTopWick    = " WICK HIGH "
-var tBottomWick = " WICK LOW  "
-var tTWBody     = " WH + BODY "
-var tBWBody     = " WL + BODY "
-
-LongCandle = abs(high-low)
-LongBody = abs(close-open)
-LongTopWick = high - (close > open ? close : open)
-LongBottomWick = (close > open ? open : close) - low
-PorBody = truncate(LongBody*100/LongCandle, 2)
-
-infoLbText = 
-  tostring(round(LongCandle[0])) + " " + tCandle + "\n" + 
-//   tBody       + tostring(LongBody[0]) + " - " + tostring( PorBody[0] ) + " %\n" + 
-  tostring(round(LongBody[0])) + " " + tBody + "\n" + 
-  tostring(round(LongTopWick[0])) + " " + tTopWick + "\n" + 
-  tostring(round(LongBottomWick[0])) + " " + tBottomWick + "\n" +
-  tostring(round(LongTopWick[0] + LongBody[0])) + " " + tTWBody + "\n" + 
-  tostring(round(LongBottomWick[0] + LongBody[0])) + " " + tBWBody
-
-infoLabelData = if (showIndicatorDebug)
-    label infoLabel = label.new(time, close, xloc=xloc.bar_time, color=cLabel, textcolor=cText, style=label.style_label_left, size=size.normal)
-    
-label.set_text(id=infoLabelData, text=infoLbText) 
-label.set_x(infoLabelData, label.get_x(infoLabelData) + round(change(time) * pLabel)), label.delete(infoLabelData[1])
-
-// if (candle2)
-//     infoLbText := tCandle + tostring( LongCandle[1] ) + "\n" + 
-//       tBody + tostring( LongBody[1] ) + " - " + tostring( PorBody[1] ) + " %\n" + 
-//       tTopWick + tostring( LongTopWick[1] ) + "\n" + 
-//       tBottomWick + tostring( LongBottomWick[1] ) + "\n" +
-//       tTWBody + tostring( LongTopWick[1] + LongBody[1] ) + "\n" + 
-//       tBWBody + tostring( LongBottomWick[1] + LongBody[1] )    
-//     label infoLabel2 = label.new(time, close, xloc=xloc.bar_time, 
-//          color=cLabel2, textcolor=cText2, style=label.style_label_right, size=size.normal)
-//     label.set_text(id=infoLabel2, text=infoLbText) 
-//     label.set_x(infoLabel2, label.get_x(infoLabel2) - round(change(time) * pLabel2)), label.delete(infoLabel2[1])
-        
 
 
 ////////////////////////////////////////////////////////////////////////////////
