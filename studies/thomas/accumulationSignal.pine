@@ -1,0 +1,16 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+
+//@version=4
+study("Accumulation Zones", "AZ", overlay=true)
+
+o = input(1231502400, 'Genesis block timestamp in seconds', minval=8)
+// The signal has to be valid for 3 days before showing on the chart
+c = input(3, 'Confirmations', minval=0)
+td = time - time[1]
+t = round((time - o * 1000) / td) // Current time duration since genesis
+
+//Feigenbaum constant
+lm = round(t/4.669201609102990671853203820466)
+clm = close[lm]
+plotshape(crossover(clm[c], close[c]) and clm > close, text='Buy', location=location.belowbar, style=shape.triangleup, color=#00ff88, size=size.tiny)
+bgcolor(clm > close ? color.new(#00ff88, 95) : color.new(#ff0088, 100))
