@@ -20,10 +20,10 @@ showOverBought = input(true, title="Vertical Heatmap - Show over bought")
 showOverSold= input(true, title="Vertical Heatmap - Show over sold")
 
 // Tom Demark
-showSellTDs      = input(true, title="TD Sell")
-showBuyTDs       = input(true, title="TD Buy")
+showSellTDs      = input(false, title="TD Sell")
+showBuyTDs       = input(false, title="TD Buy")
 show1to8TDs      = input(false, title="TD 1-8")
-showTDTrendlines = input(true, title="TD Trend Lines")
+showTDTrendlines = input(false, title="TD Trend Lines")
 
 // Relative Strength helpers
 rsi = rsi(close, 21)
@@ -365,14 +365,14 @@ colorBearScheme = darkOrLight == "Dark" ? color(color.green) : color(color.black
 
 // PLOTS - Fibonacci Levels
 plot(highDev, color=colorBullScheme, transp=0, title="RISK 100%")
-plot(fib9098Dev, color=colorBullScheme, transp=30, title="RISK  90.98%")
-plot(fib8541Dev, color=colorBullScheme, transp=40, title="RISK 85.41% ")
-plot(fib7639Dev, color=colorBullScheme, transp=50, title="RISK  76.39%")
-plot(fib618Dev, color=colorBullScheme, transp=60, title="RISK 61.80%")
-plot(midDev, color=color.white, transp=10, title="RISK 50%")
-plot(fib382Dev, color=colorBearScheme, transp=60, title="RISK 38.20%")
-plot(fib1459Dev, color=colorBearScheme, transp=40, title="RISK 14.59%")
-plot(fib0902Dev, color=colorBearScheme, transp=50, title="RISK 9.02%")
+plot(fib9098Dev, color=colorBullScheme, transp=10, title="RISK  90.98%")
+plot(fib8541Dev, color=colorBullScheme, transp=20, title="RISK 85.41% ")
+plot(fib7639Dev, color=colorBullScheme, transp=20, title="RISK  76.39%")
+plot(fib618Dev, color=colorBullScheme, transp=0, title="RISK 61.80%")
+plot(midDev, color=color.white, transp=0, title="RISK 50%")
+plot(fib382Dev, color=colorBearScheme, transp=0, title="RISK 38.20%")
+plot(fib1459Dev, color=colorBearScheme, transp=20, title="RISK 14.59%")
+plot(fib0902Dev, color=colorBearScheme, transp=10, title="RISK 9.02%")
 plot(lowDev, color=colorBearScheme, transp=0, title="RISK 0%")
 
 // Curve Extension drawing function and helper variables
@@ -409,3 +409,23 @@ if barstate.islast and showExtensions == "Y"
         line.new(time + timeDelta * i, ExtenZe(i, lowSlope, lowIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, lowSlope, lowIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// len=input(10)
+// o=ema(open,len)
+// c=ema(close,len)
+// h=ema(high,len)
+// l=ema(low,len)
+
+// haclose = (o+h+l+c)/4
+// haopen = na(haopen[1]) ? (o + c)/2 : (haopen[1] + haclose[1]) / 2
+// hahigh = max (h, max(haopen,haclose))
+// halow = min (l, min(haopen,haclose))
+
+// len2=input(10)
+// o2=ema(haopen, len2)
+// c2=ema(haclose, len2)
+// h2=ema(hahigh, len2)
+// l2=ema(halow, len2)
+
+// col=o2>c2 ? red : lime
+// plotcandle(o2, h2, l2, c2, title="heikin smoothed", color=col)
