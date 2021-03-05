@@ -30,10 +30,10 @@ The RSI Background Indicator is working as follow
 * When the price starts being oversold, a green slightly transparent background will show up.
 * When the price is oversold, the background becomes less transparent
 ### Example of oversold price
-![](readme-images\rsi_2.JPG)
+![img1](readme-images/rsi_2.JPG)
 
 ### Example of a divergence
 When the price is overbought, but the price keeps increasing, it is a sign of a divergence. Mind the reversal !
-![](readme-images\rsi_1.JPG)
+![img2](readme-images/rsi_1.JPG)
 
 
