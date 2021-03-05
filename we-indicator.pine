@@ -15,9 +15,6 @@
 //@version=4
 study("WE-Indicator", "WE", overlay=true)
 
-// Strength
-showOverBought = input(true, title="Vertical Heatmap - Show over bought")
-showOverSold= input(true, title="Vertical Heatmap - Show over sold")
 
 // Tom Demark
 showSellTDs      = input(false, title="TD Sell")
@@ -25,23 +22,21 @@ showBuyTDs       = input(false, title="TD Buy")
 show1to8TDs      = input(false, title="TD 1-8")
 showTDTrendlines = input(false, title="TD Trend Lines")
 
-// Relative Strength helpers
-rsi = rsi(close, 21)
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
-// RSI Visual Vertical (Green IN, Red OUT)
+// RSI Visual Vertical (Green IN, Red OUT) 
 //   Red for over bought, out, sell, take, profits, take a short position 
 //   Green for oversold, in, buy, maybe take a long position
 //
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// rsi = rsi(close, 30) 
+showVerticalHeatmap = input(false, title="Vertical Heatmap - Show/Hide")
 
+rsi = rsi(close, 30) 
 
-backgroundColorByRSI = if (timeframe.isminutes)
+backgroundColorByRSI = if (showVerticalHeatmap and timeframe.isminutes)
 
     rsiValueHigh = if (timeframe.period == '1')
         66
@@ -111,7 +106,7 @@ backgroundColorByRSI = if (timeframe.isminutes)
         color.new(color.green, 40)
     else if (rsi < rsiValueLow)
         color.new(color.green, 70)
-else if (timeframe.isdaily)
+else if (showVerticalHeatmap and timeframe.isdaily)
     rsiValueHigh = 72
     
     rsiValueHigher = 77  
@@ -128,7 +123,7 @@ else if (timeframe.isdaily)
         color.new(color.green, 40)
     else if (rsi <= rsiValueLow)
         color.new(color.green, 70)
-else if (timeframe.isweekly)
+else if (showVerticalHeatmap and timeframe.isweekly)
     rsiValueHigh = 83
     
     rsiValueHigher = 90
