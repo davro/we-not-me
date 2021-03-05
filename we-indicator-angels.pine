@@ -367,8 +367,9 @@ topDetected = crossunder(fairValue, smaAngel)
 plotshape(isDaily and topDetected, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
 
 // WEEKLY GREEN CYCLE
-weeklyBottom = crossover(ema21, sma200 * 2.1)
-plotshape(isWeekly and weeklyBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
+// weeklyBottom = crossover(ema21, sma200 * 2.1)
+// plotshape(isWeekly and weeklyBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
+
 // WEEKLY RED CYCLE
 weeklyTopEMALAMBEMABB = if (timeframe.isweekly and emaLamb > emaBB and ema21 > sma21)
     1
@@ -469,10 +470,10 @@ signalShortTimeframe = if (isMinute or isFiveMinute or isThrityMinute or isHour 
     crossover(sma3, ema3)
 plotshape(signalLimit and showIndicatorDCALamboRipper and signalShortTimeframe, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="S")
 
-// DCA BLUE MOON / BULL
-signalELAMBDailyBull = if (isDailyOrWeekly)
-    crossover(emaLamb, smaBB)
-plotshape(signalELAMBDailyBull and showIndicatorDCAMoon, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=10, color=color.blue, textcolor=color.white, text="SHORT\nLONG")
+// // DCA BLUE MOON / BULL
+// signalELAMBDailyBull = if (isDailyOrWeekly)
+//     crossover(emaLamb, smaBB)
+// plotshape(signalELAMBDailyBull and showIndicatorDCAMoon, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=10, color=color.blue, textcolor=color.white, text="SHORT\nLONG")
 
 
 // DCA GREEN/TEAL LAMB RIPPER daily green lamb experimental 
@@ -734,14 +735,10 @@ plotshape(showIndicatorDCA and signalRealityBalanceDailyBalance, style=shape.lab
 //     smaLevel
 // plot(smaLevelData, color=color.red, linewidth=1, transp=0, title="LEVEL")
 
-
-
 // Reverse Pi Cycle Bitcoin Top Indicator
 // Much respect the creator of the Pi Cycle Top indicator idea Philip Swift 
 // I have based this indicator on the Pi Cycle Top Indicator by Tradingview Author Ninorigo
 //
-
-// study ("CT Reverse Pi Cycle Bitcoin Top Indicator", "CT R Pi Cycle", overlay=true)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Inputs
