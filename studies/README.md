@@ -1,14 +1,8 @@
-# we-not-me Thomas
+# we-not-me
 Bitcoin Indicator - Studies
 
-## Personal Macro Indicator
+The devotion of time and attention to gaining knowledge of an academic subject.
 
-### Cycle 1
-![img5](readme-images/cycle_1.JPG)
-
-### Cycle 2
-![img5](readme-images/cycle_2.JPG)
-
-### Cycle 3 (Current)
-![img5](readme-images/cycle_3.JPG)
+This area is to hold all files and directories relating to we-indicator studies.
+Use telegram names as directory names if you want a personal study area.
 
