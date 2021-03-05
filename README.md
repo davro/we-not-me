@@ -23,3 +23,17 @@ Documentation coming **Soon**
 
 Documentation coming **Soon** 
 
+## WE RSI Background Indicator
+The RSI Background Indicator is working as follow
+* When the price starts being overbought, a red slightly transparent background will show up.
+* When the price is overbought, the background becomes less transparent
+* When the price starts being oversold, a green slightly transparent background will show up.
+* When the price is oversold, the background becomes less transparent
+### Example of oversold price
+![](readme-images\rsi_2.JPG)
+
+### Example of a divergence
+When the price is overbought, but the price keeps increasing, it is a sign of a divergence. Mind the reversal !
+![](readme-images\rsi_1.JPG)
+
+
