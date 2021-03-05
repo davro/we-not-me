@@ -38,11 +38,9 @@ rsi = rsi(close, 21)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
 // rsi = rsi(close, 30) 
-=======
-rsi = rsi(close, 30)
->>>>>>> b99d92c7afcd3625e27ed114c6b682211f57f88b
+
+
 backgroundColorByRSI = if (timeframe.isminutes)
 
     rsiValueHigh = if (timeframe.period == '1')
