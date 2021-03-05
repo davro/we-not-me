@@ -38,204 +38,114 @@ rsi = rsi(close, 21)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// rsiOverHighColor = input(color.new(color.red, 70), title=".....RSI over High", type=input.color)
-// rsiOverHigherColor = input(color.new(color.red, 40), title=".....RSI over Higher", type=input.color)
-// rsiUnderLowColor = input(color.new(color.green, 70), title=".....RSI under Low", type=input.color)
-// rsiUnderLowerColor = input(color.new(color.green, 40), title=".....RSI under Lower", type=input.color)
+rsi = rsi(close, 30)
+backgroundColorByRSI = if (timeframe.isminutes)
 
-// // Minutes 
-// backgroundColorByRSI = if (timeframe.isminutes)
-
-//     rsiValueHigh = if (timeframe.period == '1')
-//         70
-//     else if (timeframe.period == '15')
-//         // TODO
-//         100
-//     else if (timeframe.period == '30')
-//         // TODO
-//         100
-//     else if (timeframe.period == '60')
-//         70
-//     else
-//         na
+    rsiValueHigh = if (timeframe.period == '1')
+        66
+    else if (timeframe.period == '5')
+        70
+    else if (timeframe.period == '15')
+        70
+    else if (timeframe.period == '30')
+        72
+    else if (timeframe.period == '60')
+        72
+    else if (timeframe.period == '240')
+        70
+    else
+        na
     
-//     rsiValueHigher = if (timeframe.period == '1')
-//         75
-//     else if (timeframe.period == '15')
-//         // TODO
-//         100
-//     else if (timeframe.period == '30')
-//         // TODO
-//         100
-//     else if (timeframe.period == '60')
-//         75
-//     else
-//         na
+    rsiValueHigher = if (timeframe.period == '1')
+        70
+    else if (timeframe.period == '5')
+        72
+    else if (timeframe.period == '15')
+        73
+    else if (timeframe.period == '30')
+        74
+    else if (timeframe.period == '60')
+        72
+    else if (timeframe.period == '240')
+        74  
+    else
+        na
     
-//     rsiValueLow = if (timeframe.period == '1')
-//         32
-//     else if (timeframe.period == '15')
-//         // TODO
-//         0
-//     else if (timeframe.period == '30')
-//         // TODO
-//         0
-//     else if (timeframe.period == '60')
-//         38
-//     else
-//         na
+    rsiValueLow = if (timeframe.period == '1')
+        30
+    else if (timeframe.period == '5')
+        35
+    else if (timeframe.period == '15')
+        32
+    else if (timeframe.period == '30')
+        37
+    else if (timeframe.period == '60')
+        38
+    else if (timeframe.period == '240')
+        42
+    else
+        na
     
-//     rsiValueLower = if (timeframe.period == '1')
-//         30
-//     else if (timeframe.period == '15')
-//         // TODO
-//         0
-//     else if (timeframe.period == '30')
-//         // TODO
-//         0
-//     else if (timeframe.period == '60')
-//         30
-//     else
-//         na
+    rsiValueLower = if (timeframe.period == '1')
+        27
+    else if (timeframe.period == '5')
+        33
+    else if (timeframe.period == '15')
+        30
+    else if (timeframe.period == '30')
+        32
+    else if (timeframe.period == '60')
+        30
+    else if (timeframe.period == '240')
+        40
+    else
+        na
 
-//     if (showOverBought and rsi > rsiValueHigher)
-//         rsiOverHigherColor
-//     else if (showOverBought and rsi > rsiValueHigh)
-//         rsiOverHighColor
-//     else if (showOverSold and rsi < rsiValueLower)
-//         rsiUnderLowerColor
-//     else if (showOverSold and rsi < rsiValueLow)
-//         rsiUnderLowColor
-// else
-//     na
-// bgcolor(color=backgroundColorByRSI)
+    if (rsi > rsiValueHigher)
+        color.new(color.red, 40)
+    else if (rsi > rsiValueHigh)
+        color.new(color.red, 70)
+    else if (rsi < rsiValueLower)
+        color.new(color.green, 40)
+    else if (rsi < rsiValueLow)
+        color.new(color.green, 70)
+else if (timeframe.isdaily)
+    rsiValueHigh = 72
+    
+    rsiValueHigher = 77  
+    
+    rsiValueLow = 30
+    
+    rsiValueLower = 30
 
+    if (rsi >= rsiValueHigher)
+        color.new(color.red, 40)
+    else if (rsi >= rsiValueHigh)
+        color.new(color.red, 70)
+    else if (rsi <= rsiValueLower)
+        color.new(color.green, 40)
+    else if (rsi <= rsiValueLow)
+        color.new(color.green, 70)
+else if (timeframe.isweekly)
+    rsiValueHigh = 83
+    
+    rsiValueHigher = 90
+    
+    rsiValueLow = 44
+    
+    rsiValueLower = 42
 
-// Overbought
-
-// Minute
-overBoughtMinute1 = if (timeframe.period == '1' and showOverBought and rsi > 70)
-    #df2121
-bgcolor(overBoughtMinute1)
-// overBoughtMinute2 = if (timeframe.period == '1' and showOverBought and rsi > 75)
-//     #c04141
-// bgcolor(overBoughtMinute2)
-// overBoughtMinute3 = if (timeframe.period == '1' and showOverBought and rsi > 70)
-//     #8b7575si
-// bgcolor(overBoughtMinute3)
-
-// Hourly
-overBoughtHourly1 = if (timeframe.period == '60' and showOverBought and rsi > 82)
-    #df2121
-bgcolor(overBoughtHourly1)
-overBoughtHourly2 = if (timeframe.period == '60' and showOverBought and rsi > 75)
-    #c04141
-bgcolor(overBoughtHourly2)
-overBoughtHourly3 = if (timeframe.period == '60' and showOverBought and rsi > 70)
-    #8b7575
-bgcolor(overBoughtHourly3)
-
-// 4 Hourly
-overBought4Hourly1 = if (timeframe.period == '240' and showOverBought and rsi > 82)
-    #df2121
-bgcolor(overBought4Hourly1)
-overBought4Hourly2 = if (timeframe.period == '240' and showOverBought and rsi > 75)
-    #c04141
-bgcolor(overBought4Hourly2)
-overBought4Hourly3 = if (timeframe.period == '240' and showOverBought and rsi > 70)
-    #8b7575
-bgcolor(overBought4Hourly3)
-
-// Daily 
-overBoughtDaily1 = if (timeframe.isdaily and showOverBought and rsi > 82)
-    #df2121
-bgcolor(overBoughtDaily1)
-overBoughtDaily2 = if (timeframe.isdaily and showOverBought and rsi > 77)
-    #c04141
-bgcolor(overBoughtDaily2)
-
-// overBoughtDaily3 = if (timeframe.isdaily and showOverBought and rsi > 70)
-//     #8b7575
-// bgcolor(overBoughtDaily3)
-
-// Weekly MORE TESTING
-overBoughtWeekly1 = if (timeframe.isweekly and showOverBought and rsi > 87)
-    #df2121
-bgcolor(overBoughtWeekly1)
-overBoughtWeekly2 = if (timeframe.isweekly and showOverBought and rsi > 85)
-    #c04141
-bgcolor(overBoughtWeekly2)
-overBoughtWeekly3 = if (timeframe.isweekly and showOverBought and rsi > 80)
-    #8b7575
-bgcolor(overBoughtWeekly3)
-overBoughtWeekly4 = if (timeframe.isweekly and showOverBought and rsi > 70)
-    #8b7575
-bgcolor(overBoughtWeekly4)
-
-//////////////
-// Monthly // MORE TESTING
-overBoughtMonthly1 = if (timeframe.ismonthly and showOverBought and rsi > 93)
-    #df2121
-bgcolor(overBoughtMonthly1)
-overBoughtMonthly2 = if (timeframe.ismonthly and showOverBought and rsi > 86)
-    #c04141
-bgcolor(overBoughtMonthly2)
-overBoughtMonthly3 = if (timeframe.ismonthly and showOverBought and rsi > 85)
-    #8b7575
-bgcolor(overBoughtMonthly3)
-
-////////////////////////////////////////////////////////////////////////////////
-// OVER SOLD
-////////////////////////////////////////////////////////////////////////////////
-
-// Minute MORE TESTING
-overSoldMinute1 = if (timeframe.period == '1' and showOverSold and rsi < 30)
-    color.green
-bgcolor(overSoldMinute1)
-// overSoldMinute1 = if (timeframe.period == '60' and showOverSold and rsi < 38)
-//     color.lime
-// bgcolor(overSoldMinute1)
-
-// Hourly MORE TESTING
-overSoldHourly1 = if (timeframe.period == '60' and showOverSold and rsi < 40)
-    color.green
-bgcolor(overSoldHourly1)
-overSoldHourly2 = if (timeframe.period == '60' and showOverSold and rsi < 38)
-    color.lime
-bgcolor(overSoldHourly2)
-
-// 4 Hourly MORE TESTING
-overSold4Hourly1 = if (timeframe.period == '240' and showOverSold and rsi < 35)
-    color.green
-bgcolor(overSold4Hourly1)
-overSold4Hourly2 = if (timeframe.period == '240' and showOverSold and rsi < 28)
-    color.lime
-bgcolor(overSold4Hourly2)
-
-// Daily  MORE TESTING
-overSoldDaily1 = if (timeframe.isdaily and showOverSold and rsi < 32)
-    color.green
-bgcolor(overSoldDaily1)
-
-overSoldDaily2 = if (timeframe.isdaily and showOverSold and rsi < 22)
-    color.lime
-bgcolor(overSoldDaily2)
-
-// Weekly
-overSoldWeekly1 = if (timeframe.isweekly and showOverSold and rsi < 40)
-    color.green
-bgcolor(overSoldWeekly1)
-overSoldWeekly2 = if (timeframe.isweekly and showOverSold and rsi < 38)
-    color.lime
-bgcolor(overSoldWeekly2)
-
-// Monthly
-overSoldMontly1 = if (timeframe.ismonthly and showOverSold and rsi < 51)
-    color.green
-bgcolor(overSoldMontly1)
-overSoldMontly2 = if (timeframe.ismonthly and showOverSold and rsi < 48)
-    color.lime
-bgcolor(overSoldMontly2)
+    if (rsi >= rsiValueHigher)
+        color.new(color.red, 40)
+    else if (rsi >= rsiValueHigh)
+        color.new(color.red, 70)
+    else if (rsi <= rsiValueLower)
+        color.new(color.green, 40)
+    else if (rsi <= rsiValueLow)
+        color.new(color.green, 70)
+else
+    na
+bgcolor(color=backgroundColorByRSI)
 
 
 ////////////////////////////////////////////////////////////////////////////////
