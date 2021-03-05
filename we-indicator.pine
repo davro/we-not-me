@@ -223,13 +223,10 @@ plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Bitcoin Log Growth Curves
-//
-// Features
 //
 // RISK Curve
 // Curve Projection
@@ -337,23 +334,3 @@ if barstate.islast and showExtensions == "Y"
         line.new(time + timeDelta * i, ExtenZe(i, lowSlope, lowIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, lowSlope, lowIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
 
 ////////////////////////////////////////////////////////////////////////////////
-
-// len=input(10)
-// o=ema(open,len)
-// c=ema(close,len)
-// h=ema(high,len)
-// l=ema(low,len)
-
-// haclose = (o+h+l+c)/4
-// haopen = na(haopen[1]) ? (o + c)/2 : (haopen[1] + haclose[1]) / 2
-// hahigh = max (h, max(haopen,haclose))
-// halow = min (l, min(haopen,haclose))
-
-// len2=input(10)
-// o2=ema(haopen, len2)
-// c2=ema(haclose, len2)
-// h2=ema(hahigh, len2)
-// l2=ema(halow, len2)
-
-// col=o2>c2 ? red : lime
-// plotcandle(o2, h2, l2, c2, title="heikin smoothed", color=col)
