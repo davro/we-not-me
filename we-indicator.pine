@@ -25,7 +25,7 @@ showTDTrendlines = input(false, title="TD Trend Lines")
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
-// RSI Visual Vertical (Green IN, Red OUT) 
+// RSI + MACD Visual Vertical (Green IN, Red OUT, Orange OUT) 
 //   Red for over bought, out, sell, take, profits, take a short position 
 //   Green for oversold, in, buy, maybe take a long position
 //
@@ -34,7 +34,20 @@ showTDTrendlines = input(false, title="TD Trend Lines")
 
 showVerticalHeatmap = input(false, title="Vertical Heatmap - Show/Hide")
 
-rsi = rsi(close, 30) 
+fastMA = ema(high, 12)
+slowMA = ema(high, 26)
+rsi = rsi(close, 30)
+macd = fastMA - slowMA
+macdOverExtended = if (timeframe.isdaily)
+    100 + (high - macd) / high * 100 <= 191.4 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isminutes and timeframe.period == '240')
+    100 + (high - macd) / high * 100 <= 197.4 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isminutes and timeframe.period == '15')
+    100 + (high - macd) / high * 100 <= 199 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isminutes and timeframe.period == '60')
+    100 + (high - macd) / high * 100 <= 198 ? 100 + (high - macd) / high * 100 : 0
+else
+    0
 
 backgroundColorByRSI = if (showVerticalHeatmap and timeframe.isminutes)
 
@@ -98,7 +111,11 @@ backgroundColorByRSI = if (showVerticalHeatmap and timeframe.isminutes)
     else
         na
 
-    if (rsi > rsiValueHigher)
+    if (rsi > rsiValueHigher and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi > rsiValueHigh and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi > rsiValueHigher)
         color.new(color.red, 40)
     else if (rsi > rsiValueHigh)
         color.new(color.red, 70)
@@ -115,7 +132,11 @@ else if (showVerticalHeatmap and timeframe.isdaily)
     
     rsiValueLower = 30
 
-    if (rsi >= rsiValueHigher)
+    if (rsi >= rsiValueHigher and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi >= rsiValueHigh and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi >= rsiValueHigher)
         color.new(color.red, 40)
     else if (rsi >= rsiValueHigh)
         color.new(color.red, 70)

@@ -29,11 +29,26 @@ The RSI Background Indicator is working as follow
 * When the price is overbought, the background becomes less transparent
 * When the price starts being oversold, a green slightly transparent background will show up.
 * When the price is oversold, the background becomes less transparent
+* When the price is overbought and the MACD is identifying some reversal, the background becomes orange
+    * ONLY EFFECTIVE IN A BULL RUN, ISN'T EFFICIENT IN ACCUMULATION / BEAR PHASE
+
 ### Example of oversold price
 ![img1](readme-images/rsi_2.JPG)
 
 ### Example of a divergence
 When the price is overbought, but the price keeps increasing, it is a sign of a divergence. Mind the reversal !
 ![img2](readme-images/rsi_1.JPG)
+
+### Example of overbought + MACD potential reversal (BULL RUN ONLY)
+Daily Time Frame
+![img3](readme-images/rsi_3.JPG)
+
+4H Time Frame
+![img4](readme-images/rsi_4.JPG)
+
+1H Time Frame
+![img5](readme-images/rsi_5.JPG)
+15min Time Frame
+![img5](readme-images/rsi_6.JPG)
 
 
