@@ -1,0 +1,251 @@
+//@version=4
+
+study(title="My Macro Cycle Indicator", shorttitle="mci", overlay=true)
+var cycleOutCrossed = 0
+var cycleInCrossed = 0
+var currentPreInValue = 0
+
+/////////////////
+// State
+/////////////////
+
+timeInterval = ''
+
+colorBackground = #2A2E39 // light dark
+colorPositive   = #39d348
+colorNegative   = #ed6565
+colorWarning    = #fcac00
+colorWhite      = #fcac00
+colorSma21      = #e5de14
+colorSma111     = #5263e5
+colorSma200     = #000000
+colorSma350By2  = #000000
+colorMM24       = #63ea54
+colorMM5        = #e85376
+
+colorDashed(barIndex, color) => bar_index % 2 == 0 ? color : colorBackground
+
+currentCandleCloseRef = security(syminfo.tickerid, timeInterval, close)
+
+/////////////////
+// Input
+/////////////////
+
+/////////////////////////////
+// Simple Moving Average
+/////////////////////////////
+
+// Def
+sma21  = security(syminfo.tickerid, timeInterval, sma(close, 21))
+sma111 = security(syminfo.tickerid, timeInterval, sma(close, 111))
+sma200 = security(syminfo.tickerid, timeInterval, sma(close, 200))
+sma350By2 = security(syminfo.tickerid, timeInterval, sma(close, 350)*2)
+
+coloxr = (sma111 < sma21) ? color.green : color.red
+plotEmaRoc = plot(sma111, transp=100)
+plotHoriz  = plot(sma21, transp=100)
+fill(plotEmaRoc, plotHoriz,
+     color=coloxr, transp=90)
+
+// Plot
+plot(sma21, color=colorSma21, linewidth=1, title="SMA 21")
+// plot(sma111, color=colorSma111, linewidth=1, title="SMA 111")
+// plot(sma200, color=colorSma200, linewidth=1, transp=80, title="SMA 200")
+// plot(sma350By2, color=colorSma350By2, linewidth=1, transp=80, title="SMA 350*2")
+
+
+///////////////////////////
+// Mayers Multiple Lines
+//////////////////////////
+
+// Def
+mayersMultiple065 = sma200 * 0.65
+mayersMultiple06 = sma200 * 0.6
+mayersMultiple24 = sma200 * 2.4
+mayersMultiple5 = sma200 * 5
+
+// Plot
+plot(mayersMultiple24, color=colorDashed(bar_index, colorMM24), linewidth=1, title="MM 2.4")
+plot(mayersMultiple5, color=colorDashed(bar_index, colorMM5), linewidth=1, title="MM 5")
+plot(mayersMultiple065, color=colorDashed(bar_index, colorMM5), linewidth=1, title="MM 065")
+
+
+/////////////////////////////////////////////
+// Cycle Pre In  - In - Pre Out - Cycle Out
+////////////////////////////////////////////
+
+// Global variable to store if we met a cycle out or cycle previously.
+if (cycleOutCrossed == 0 and crossunder(sma350By2, sma111))
+    cycleOutCrossed := 1
+    cycleInCrossed := 0
+if (cycleInCrossed == 0 and crossover(mayersMultiple06, sma21))
+    cycleOutCrossed := 0
+    cycleInCrossed := 1
+    
+currentPreInValue := round(100 + (mayersMultiple06 - sma21) / sma21 * 100)
+var label lbl = na
+label.delete(lbl)
+percColor = if currentPreInValue > 87
+    colorPositive
+else if currentPreInValue > 65
+    colorWarning
+else 
+    colorNegative
+lbl := if barstate.islast and cycleOutCrossed == 1
+    label.new(bar_index[0], close, tostring(currentPreInValue) + "%", yloc = yloc.price, color = percColor, style = label.style_label_upper_right)
+else
+    na
+
+// plotshape(cyclePreIn, style=shape.labeldown,size=size.small, text=tx, color=colorWarning, textcolor=colorBackground, location=location.abovebar)
+
+cycleIn = crossover(mayersMultiple06, sma21) ? currentCandleCloseRef + (currentCandleCloseRef/100 * 10) : na
+plotshape(cycleIn, style=shape.labelup,size=size.small, text="Cycle In", color=colorPositive, textcolor=colorBackground, location=location.belowbar)
+
+cyclePreOut = crossover(sma21, mayersMultiple24) ? currentCandleCloseRef + (currentCandleCloseRef/100 * 10) : na
+plotshape(cyclePreOut, style=shape.labeldown,size=size.small, text="Pre Cycle Out", color=colorWarning, textcolor=colorBackground, location=location.abovebar)
+
+cycleOut = crossunder(sma350By2, sma111) ? currentCandleCloseRef + (currentCandleCloseRef/100 * 10) : na
+plotshape(cycleOut, style=shape.labeldown,size=size.small, text="Cycle Out", color=colorNegative, textcolor=colorBackground, location=location.abovebar)
+
+td = time - time[1]
+t = round((time - 1231502400 * 1000) / td) // Current time duration since genesis
+
+//Feigenbaum constant
+lm = round(t/4.669201609102990671853203820466)
+clm = close[lm]
+plotshape(crossover(clm[3], close[3]) and clm > close, text='DCA', location=location.belowbar, style=shape.triangleup, color=#00ff88, size=size.tiny)
+bgcolor(clm > close ? color.new(#00ff88, 95) : color.new(#ff0088, 100))
+
+///////////////////////////////////////
+// RSI + MACD Background Indicator
+///////////////////////////////////////
+fastMA = ema(high, 12)
+slowMA = ema(high, 26)
+rsi = rsi(close, 30)
+macd = fastMA - slowMA
+macdOverExtended = if (timeframe.isdaily)
+    100 + (high - macd) / high * 100 <= 191.5 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isminutes and timeframe.period == '240')
+    100 + (high - macd) / high * 100 <= 197.4 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isminutes and timeframe.period == '15')
+    100 + (high - macd) / high * 100 <= 199 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isminutes and timeframe.period == '60')
+    100 + (high - macd) / high * 100 <= 198 ? 100 + (high - macd) / high * 100 : 0
+else
+    0
+
+backgroundColorByRSI = if (timeframe.isminutes)
+
+    rsiValueHigh = if (timeframe.period == '1')
+        66
+    else if (timeframe.period == '5')
+        70
+    else if (timeframe.period == '15')
+        70
+    else if (timeframe.period == '30')
+        72
+    else if (timeframe.period == '60')
+        69
+    else if (timeframe.period == '240')
+        70
+    else
+        na
+    
+    rsiValueHigher = if (timeframe.period == '1')
+        70
+    else if (timeframe.period == '5')
+        72
+    else if (timeframe.period == '15')
+        73
+    else if (timeframe.period == '30')
+        74
+    else if (timeframe.period == '60')
+        72
+    else if (timeframe.period == '240')
+        74  
+    else
+        na
+    
+    rsiValueLow = if (timeframe.period == '1')
+        30
+    else if (timeframe.period == '5')
+        35
+    else if (timeframe.period == '15')
+        32
+    else if (timeframe.period == '30')
+        37
+    else if (timeframe.period == '60')
+        38
+    else if (timeframe.period == '240')
+        42
+    else
+        na
+    
+    rsiValueLower = if (timeframe.period == '1')
+        27
+    else if (timeframe.period == '5')
+        33
+    else if (timeframe.period == '15')
+        30
+    else if (timeframe.period == '30')
+        32
+    else if (timeframe.period == '60')
+        30
+    else if (timeframe.period == '240')
+        40
+    else
+        na
+
+    if (rsi > rsiValueHigher and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi > rsiValueHigh and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi >= rsiValueHigher)
+        color.new(color.red, 40)
+    else if (rsi >= rsiValueHigh)
+        color.new(color.red, 70)
+    else if (rsi < rsiValueLower)
+        color.new(color.green, 40)
+    else if (rsi < rsiValueLow)
+        color.new(color.green, 70)
+else if (timeframe.isdaily)
+    rsiValueHigh = 72
+    
+    rsiValueHigher = 77  
+    
+    rsiValueLow = 30
+    
+    rsiValueLower = 30
+
+    if (rsi >= rsiValueHigher and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi >= rsiValueHigh and macdOverExtended > 0)
+        color.new(color.orange, 40)
+    else if (rsi >= rsiValueHigher)
+        color.new(color.red, 40)
+    else if (rsi >= rsiValueHigh)
+        color.new(color.red, 70)
+    else if (rsi <= rsiValueLower)
+        color.new(color.green, 40)
+    else if (rsi <= rsiValueLow)
+        color.new(color.green, 70)
+else if (timeframe.isweekly)
+    rsiValueHigh = 83
+    
+    rsiValueHigher = 90
+    
+    rsiValueLow = 44
+    
+    rsiValueLower = 42
+
+    if (rsi >= rsiValueHigher)
+        color.new(color.red, 40)
+    else if (rsi >= rsiValueHigh)
+        color.new(color.red, 70)
+    else if (rsi <= rsiValueLower)
+        color.new(color.green, 40)
+    else if (rsi <= rsiValueLow)
+        color.new(color.green, 70)
+else
+    na
+bgcolor(color=backgroundColorByRSI)
