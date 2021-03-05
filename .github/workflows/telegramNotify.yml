@@ -1,0 +1,22 @@
+name: telegram notify
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: send custom message with args
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        format: html
+        message: |
+          ⚡️ <em> <a href="https://github.com/davro/we-not-me">Repo updated by</a> ${{ github.actor }}</em> ⚡️ 
+          commit message: 
+          ${{ github.event.head_commit.message }}
+          
+          Go to repo directly <a href="https://github.com/davro/we-not-me">here</a>
+          Go to commit directly <a href="https://github.com/davro/we-not-me/commit/${{ github.sha }}">here</a>
