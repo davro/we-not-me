@@ -43,6 +43,7 @@ This is the fundamental starting point of this rapidly growing project, this pro
 - [DEBUG](#debug)
 
 ## WE Indicator Alpha
+Coming soon to be released .
 
 
 # Installation
@@ -72,7 +73,7 @@ Documentation **coming soon**.
 Documentation **coming soon**.
 
 # Tom Demark
-The WE indicator only has TD Sequential, because Tradingview outputs are limited so these are kept to a minimum during this initial development phase, but this part of the project could be massively expanded as the Tom DeMARK indicators are a vast.
+The WE indicator has an implementation of the TD Sequential with the we-indicator, but eventually WE plan on implementing more studies relating to the Tom DeMark 
 
 Tom DeMark, is used by many of the top money managers of all time, the DeMARK Indicators on heavily used on Bloomberg  it's an approach to those seeking a deeper, more comprehensive understanding of the market, these are not 'technical' indicators in the conventional sense rather market timing tools that are compatible with fundamental analysis.
 
