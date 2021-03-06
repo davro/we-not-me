@@ -114,7 +114,11 @@ Documentation **coming soon**.
 
 # Short Long
 Documentation **coming soon**.
+Daily Short Long
 ![img5](readme-images/short-long.png)
+![img5](readme-images/short-long-1.png)
+Weekly Short Long
+![img5](readme-images/short-long-weekly.png)
 
 # PI Cycle
 Pi Cycle is a very useful indication of when the market is very overheated, so overheated that the shorter term moving average, which is the 111 day moving average, has reached a x2 multiple of the 350 day moving average. 
