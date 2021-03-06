@@ -30,12 +30,13 @@ This is the fundamental starting point of this rapidly growing project, this pro
 - [SMA Angel Rainbow Averages](#sma-angel-rainbow-averages)
 - [SMA Yearly Averages](#sma-yearly-averages)
 - [Mayer Multiplier](#mayer-multiplier)
-- Golden/Death Crosses
+- [Golden/Death Crosses](#golden-death-crosses)
+- [DCA](#dca)
+- [LAMB](#lamb)
 - [Short/Long](#short-long)
 - [PI Cycle](#pi-cycle)
 - [PI Cycle Inverse](#pi-cycle-inverse)
-- [DCA](#dca)
-- [LAMB](#lamb)
+- [Bull Bear Average](#bull-bear-average)
 - [DEBUG](#debug)
 
 ## WE Indicator Alpha
@@ -98,6 +99,10 @@ Documentation **coming soon**.
 # Mayer Multiplier
 Documentation **coming soon**.
 ![img2](readme-images/mayer-multiplier.png)
+
+# Golden Death Crosses
+Documentation **coming soon**.
+![img2](readme-images/golden-death-crosses.png)
 
 # DCA
 Documentation **coming soon**.
