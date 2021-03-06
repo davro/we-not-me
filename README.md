@@ -20,7 +20,7 @@ This is the fundamental starting point of this rapidly growing project, this pro
 - [PI Cycle](#pi-cycle)
 - [PI Cycle Inverse](#pi-cycle-inverse)
 - [DCA](#dca)
-- [LAMBS](#lamb)
+- [LAMB](#lamb)
 - [Tom Demark (TD)](#tom-demark)
 - Mayer multiples
 - Golden/Death Crosses
@@ -69,8 +69,9 @@ Documentation **coming soon**.
 Documentation **coming soon**.
 ![img5](readme-images/dca.png)
 
-# LAMBS
+# LAMB
 Documentation **coming soon**.
+![img5](readme-images/lamb.png)
 
 # Tom Demark
 The WE indicator has an implementation of the TD Sequential with the we-indicator, but eventually WE plan on implementing more studies relating to the Tom DeMark 
