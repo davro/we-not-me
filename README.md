@@ -15,7 +15,7 @@ The WE indicator is the first indicator of three, the other two indicators are c
 
 This is the fundamental starting point of this rapidly growing project, this project was initially started to develop a Macro Investment plan, and brings together many different techniques into one project that runs on Tradingview using the pine programming language and is designed and programmed to efficient enough that it will run on the free account until WE have more indicators and develop into Tradingview paid plans, but the goal is to keep the barrier to entry for new investors and traders to an absolute minimum.
 
-**Features** of the indicator.
+**Features** of the WE indicator.
 
 - [PI Cycle](#pi-cycle)
 - [PI Cycle Inverse](#pi-cycle-inverse)
@@ -25,16 +25,22 @@ This is the fundamental starting point of this rapidly growing project, this pro
 - [Tom Demark (TD)](#tom-demark)
 - Mayer multiples
 - Golden/Death Crosses
-- Short and Long entries
 - Bitcoin Log Growth Curves
 - RISK Curves, Curve Projection 
 - [RSI Background](#rsi-background)
 
 ## WE Indicator Angels
 
-Documentation coming **Soon** 
+**Features** of the WE Angels indicator.
 
-**Features** of the first indicator.
+- [SMA Averages](#sma-averages)
+- [SMA Angel Rainbow Averages](#sma-angel-rainbow-averages)
+- [SMA Yearly Averages](#sma-yearly-averages)
+- [Mayer Multiplier](#mayer-multiplier)
+- [Short/Long](#short-long)
+- [DCA](#dca)
+- [DCA Lamb](#dca-lamb)
+- [DEBUG](#debug)
 
 ## WE Indicator Alpha
 
@@ -46,6 +52,7 @@ Then you save it into the TradingView pine editor then it's available in my scri
 There are two indicators one called we-indicator.pine and another called we-indicator-angels.pine
 Documentation coming soon.
 
+# WE-INDICATOR
 # PI Cycle
 Pi Cycle is a very useful indication of when the market is very overheated, so overheated that the shorter term moving average, which is the 111 day moving average, has reached a x2 multiple of the 350 day moving average. 
 Historically it has proved advantageous to sell Bitcoin at this time in Bitcoin's price Cycle
@@ -114,3 +121,35 @@ Daily Time Frame
 ![img5](readme-images/rsi_6.JPG)
 
 
+# WE-ANGELS-INDICATOR
+
+# SMA Averages
+Documentation **coming soon**.
+
+# SMA Angel Averages
+Documentation **coming soon**.
+
+# SMA Angel Rainbow Averages
+Documentation **coming soon**.
+
+# SMA Yearly Averages
+Documentation **coming soon**.
+
+# Mayer Multiplier
+Documentation **coming soon**.
+
+# Short Long
+Documentation **coming soon**.
+
+# DCA
+Documentation **coming soon**.
+
+# DCA Lamb
+Documentation **coming soon**.
+
+# DEBUG
+Documentation **coming soon**.
+
+
+# WE-ALPHA-INDICATOR
+Documentation **coming soon**.
