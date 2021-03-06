@@ -19,7 +19,6 @@ This is the fundamental starting point of this rapidly growing project, this pro
 
 - [PI Cycle](#pi-cycle)
 - [PI Cycle Inverse](#pi-cycle-inverse)
-- [Macro Cycles](#macro-cycles)
 - [DCA](#dca)
 - [LAMBS](#lamb)
 - [Tom Demark (TD)](#tom-demark)
@@ -60,13 +59,12 @@ Historically it has proved advantageous to sell Bitcoin at this time in Bitcoin'
 
 https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
 
+![img5](readme-images/pi-cycle.png)
+
 # PI Cycle Inverse
 Documentation **coming soon**.
 
-![img5](readme-images/pi-cycle.png)
-
-# Macro Cycle
-Documentation **coming soon**.
+![img5](readme-images/pi-cycle-inverse.png)
 
 # DCA
 Documentation **coming soon**.
