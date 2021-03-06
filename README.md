@@ -17,13 +17,7 @@ This is the fundamental starting point of this rapidly growing project, this pro
 
 **Features** of the WE indicator.
 
-- [PI Cycle](#pi-cycle)
-- [PI Cycle Inverse](#pi-cycle-inverse)
-- [DCA](#dca)
-- [LAMBS](#lamb)
 - [Tom Demark (TD)](#tom-demark)
-- Mayer multiples
-- Golden/Death Crosses
 - Bitcoin Log Growth Curves
 - RISK Curves, Curve Projection 
 - [RSI Background](#rsi-background)
@@ -36,9 +30,12 @@ This is the fundamental starting point of this rapidly growing project, this pro
 - [SMA Angel Rainbow Averages](#sma-angel-rainbow-averages)
 - [SMA Yearly Averages](#sma-yearly-averages)
 - [Mayer Multiplier](#mayer-multiplier)
+- Golden/Death Crosses
 - [Short/Long](#short-long)
+- [PI Cycle](#pi-cycle)
+- [PI Cycle Inverse](#pi-cycle-inverse)
 - [DCA](#dca)
-- [DCA Lamb](#dca-lamb)
+- [LAMB](#lamb)
 - [DEBUG](#debug)
 
 ## WE Indicator Alpha
@@ -53,45 +50,7 @@ There are two indicators one called we-indicator.pine and another called we-indi
 Documentation coming soon.
 
 # WE-INDICATOR
-# PI Cycle
-Pi Cycle is a very useful indication of when the market is very overheated, so overheated that the shorter term moving average, which is the 111 day moving average, has reached a x2 multiple of the 350 day moving average. 
-Historically it has proved advantageous to sell Bitcoin at this time in Bitcoin's price Cycle
 
-https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
-
-![img5](readme-images/pi-cycle.png)
-
-# PI Cycle Inverse
-Documentation **coming soon**.
-![img5](readme-images/pi-cycle-inverse.png)
-
-# DCA
-Documentation **coming soon**.
-![img5](readme-images/dca.png)
-
-# LAMBS
-Documentation **coming soon**.
-
-# Tom Demark
-The WE indicator has an implementation of the TD Sequential with the we-indicator, but eventually WE plan on implementing more studies relating to the Tom DeMark 
-
-Tom DeMark, is used by many of the top money managers of all time, the DeMARK Indicators on heavily used on Bloomberg  it's an approach to those seeking a deeper, more comprehensive understanding of the market, these are not 'technical' indicators in the conventional sense rather market timing tools that are compatible with fundamental analysis.
-
-- **[TD Sequential](https://hackernoon.com/how-to-buy-sell-cryptocurrency-with-number-indicator-td-sequential-5af46f0ebce1)**
-- TD Combo 
-- TD Alignment
-- TD DeMarker
-- TD Pressure
-- TD REI
-- TD ROC
-- TD Channel
-- TD Differential
-- TD D-Wave
-- TD Lines
-- TD Propulsion
-- TD Range
-
-https://demark.com/bookshelf/
 
 # RSI Background 
 The RSI Background Indicator is working as follow
@@ -138,15 +97,51 @@ Documentation **coming soon**.
 
 # Mayer Multiplier
 Documentation **coming soon**.
+![img2](readme-images/mayer-multiplier.png)
+
+# DCA
+Documentation **coming soon**.
+![img5](readme-images/dca.png)
+
+# LAMB
+Documentation **coming soon**.
+![img5](readme-images/lamb.png)
 
 # Short Long
 Documentation **coming soon**.
 
-# DCA
-Documentation **coming soon**.
+# PI Cycle
+Pi Cycle is a very useful indication of when the market is very overheated, so overheated that the shorter term moving average, which is the 111 day moving average, has reached a x2 multiple of the 350 day moving average. 
+Historically it has proved advantageous to sell Bitcoin at this time in Bitcoin's price Cycle
 
-# DCA Lamb
+https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
+
+![img5](readme-images/pi-cycle.png)
+
+# PI Cycle Inverse
 Documentation **coming soon**.
+![img5](readme-images/pi-cycle-inverse.png)
+
+# Tom Demark
+The WE indicator has an implementation of the TD Sequential with the we-indicator, but eventually WE plan on implementing more studies relating to the Tom DeMark 
+
+Tom DeMark, is used by many of the top money managers of all time, the DeMARK Indicators on heavily used on Bloomberg  it's an approach to those seeking a deeper, more comprehensive understanding of the market, these are not 'technical' indicators in the conventional sense rather market timing tools that are compatible with fundamental analysis.
+
+- **[TD Sequential](https://hackernoon.com/how-to-buy-sell-cryptocurrency-with-number-indicator-td-sequential-5af46f0ebce1)**
+- TD Combo 
+- TD Alignment
+- TD DeMarker
+- TD Pressure
+- TD REI
+- TD ROC
+- TD Channel
+- TD Differential
+- TD D-Wave
+- TD Lines
+- TD Propulsion
+- TD Range
+
+https://demark.com/bookshelf/
 
 # DEBUG
 Documentation **coming soon**.
