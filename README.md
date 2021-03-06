@@ -63,11 +63,11 @@ https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
 
 # PI Cycle Inverse
 Documentation **coming soon**.
-
 ![img5](readme-images/pi-cycle-inverse.png)
 
 # DCA
 Documentation **coming soon**.
+![img5](readme-images/dca.png)
 
 # LAMBS
 Documentation **coming soon**.
