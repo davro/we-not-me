@@ -17,15 +17,16 @@ study("WE-Indicator", "WE", overlay=true)
 
 
 // Tom Demark
-showSellTDs      = input(false, title="TD Sell")
-showBuyTDs       = input(false, title="TD Buy")
-show1to8TDs      = input(false, title="TD 1-8")
-showTDTrendlines = input(false, title="TD Trend Lines")
+showSellTDs         = input(false, title="TD Sell")
+showBuyTDs          = input(false, title="TD Buy")
+show1to8TDs         = input(false, title="TD 1-8")
+showTDTrendlines    = input(false, title="TD Trend Lines")
+showLogGrowthCurves = input(false, title="Log Growth Curves")
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
-// RSI + MACD Visual Vertical (Green IN, Red OUT, Orange OUT) 
+// RSI Visual Vertical (Green IN, Red OUT) 
 //   Red for over bought, out, sell, take, profits, take a short position 
 //   Green for oversold, in, buy, maybe take a long position
 //
@@ -34,20 +35,7 @@ showTDTrendlines = input(false, title="TD Trend Lines")
 
 showVerticalHeatmap = input(false, title="Vertical Heatmap - Show/Hide")
 
-fastMA = ema(high, 12)
-slowMA = ema(high, 26)
-rsi = rsi(close, 30)
-macd = fastMA - slowMA
-macdOverExtended = if (timeframe.isdaily)
-    100 + (high - macd) / high * 100 <= 191.4 ? 100 + (high - macd) / high * 100 : 0
-else if (timeframe.isminutes and timeframe.period == '240')
-    100 + (high - macd) / high * 100 <= 197.4 ? 100 + (high - macd) / high * 100 : 0
-else if (timeframe.isminutes and timeframe.period == '15')
-    100 + (high - macd) / high * 100 <= 199 ? 100 + (high - macd) / high * 100 : 0
-else if (timeframe.isminutes and timeframe.period == '60')
-    100 + (high - macd) / high * 100 <= 198 ? 100 + (high - macd) / high * 100 : 0
-else
-    0
+rsi = rsi(close, 30) 
 
 backgroundColorByRSI = if (showVerticalHeatmap and timeframe.isminutes)
 
@@ -111,11 +99,7 @@ backgroundColorByRSI = if (showVerticalHeatmap and timeframe.isminutes)
     else
         na
 
-    if (rsi > rsiValueHigher and macdOverExtended > 0)
-        color.new(color.orange, 40)
-    else if (rsi > rsiValueHigh and macdOverExtended > 0)
-        color.new(color.orange, 40)
-    else if (rsi > rsiValueHigher)
+    if (rsi > rsiValueHigher)
         color.new(color.red, 40)
     else if (rsi > rsiValueHigh)
         color.new(color.red, 70)
@@ -132,11 +116,7 @@ else if (showVerticalHeatmap and timeframe.isdaily)
     
     rsiValueLower = 30
 
-    if (rsi >= rsiValueHigher and macdOverExtended > 0)
-        color.new(color.orange, 40)
-    else if (rsi >= rsiValueHigh and macdOverExtended > 0)
-        color.new(color.orange, 40)
-    else if (rsi >= rsiValueHigher)
+    if (rsi >= rsiValueHigher)
         color.new(color.red, 40)
     else if (rsi >= rsiValueHigh)
         color.new(color.red, 70)
@@ -223,10 +203,13 @@ plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Bitcoin Log Growth Curves
+//
+// Features
 //
 // RISK Curve
 // Curve Projection
@@ -272,17 +255,38 @@ fib1459Calc = (LogRange * 0.1459) + LowLogDev
 fib0902Calc = (LogRange * 0.0902) + LowLogDev
 
 // SCALE LOG VARIABLES TO LINEAR
-highDev    = pow(2.718281828459, highLogDev)
-fib9098Dev = showFibs == "Y" ? pow(2.718281828459, fib9098Calc) : na
-fib8541Dev = showFibs == "Y" ? pow(2.718281828459, fib8541Calc) : na
-fib7639Dev = showFibs == "Y" ? pow(2.718281828459, fib7639Calc) : na
-fib618Dev  = showFibs == "Y" ? pow(2.718281828459, fib618Calc) : na
-midDev     = pow(2.718281828459, midCalc)
-fib382Dev  = showFibs == "Y" ? pow(2.718281828459, fib382Calc) : na
-fib2361Dev = showFibs == "Y" ? pow(2.718281828459, fib2361Calc) : na
-fib1459Dev = showFibs == "Y" ? pow(2.718281828459, fib1459Calc) : na
-fib0902Dev = showFibs == "Y" ? pow(2.718281828459, fib0902Calc) : na
-lowDev     = pow(2.718281828459, LowLogDev)
+highDev = if (showLogGrowthCurves)
+    pow(2.718281828459, highLogDev)
+    
+fib9098Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib9098Calc) : na
+    
+fib8541Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib8541Calc) : na
+    
+fib7639Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib7639Calc) : na
+    
+fib618Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib618Calc) : na
+    
+midDev = if (showLogGrowthCurves)
+    pow(2.718281828459, midCalc)
+    
+fib382Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib382Calc) : na
+    
+fib2361Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib2361Calc) : na
+    
+fib1459Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib1459Calc) : na
+    
+fib0902Dev = if (showLogGrowthCurves)
+    showFibs == "Y" ? pow(2.718281828459, fib0902Calc) : na
+
+lowDev = if (showLogGrowthCurves)
+    pow(2.718281828459, LowLogDev)
 
 // COLOR SCHEME
 colorBullScheme = darkOrLight == "Dark" ? color(color.red) : color(color.black)
@@ -334,3 +338,23 @@ if barstate.islast and showExtensions == "Y"
         line.new(time + timeDelta * i, ExtenZe(i, lowSlope, lowIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, lowSlope, lowIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// len=input(10)
+// o=ema(open,len)
+// c=ema(close,len)
+// h=ema(high,len)
+// l=ema(low,len)
+
+// haclose = (o+h+l+c)/4
+// haopen = na(haopen[1]) ? (o + c)/2 : (haopen[1] + haclose[1]) / 2
+// hahigh = max (h, max(haopen,haclose))
+// halow = min (l, min(haopen,haclose))
+
+// len2=input(10)
+// o2=ema(haopen, len2)
+// c2=ema(haclose, len2)
+// h2=ema(hahigh, len2)
+// l2=ema(halow, len2)
+
+// col=o2>c2 ? red : lime
+// plotcandle(o2, h2, l2, c2, title="heikin smoothed", color=col)

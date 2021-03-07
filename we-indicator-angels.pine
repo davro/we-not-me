@@ -19,23 +19,28 @@ study("WE-Angels", "WE-Angels", overlay=true)
 showEMA = input(false, title="EMA")
 
 // Simple Moving Averages
-showSMA                         = input(true, title="SMA")
-showIndicatorAngelSMA           = input(false, title="SMA (Angel Rainbow)")
-showIndicatorAngelSMAYearly     = input(false, title="SMA (Yearly)")
-showIndicatorMayerMultiplier    = input(true, title="Mayer Multiplier")
-showIndicatorDCA                = input(true,  title="DCA")
-showIndicatorDCAMoon            = input(true,  title="DCA MOON (emaLamb over FAIR)")
-showIndicatorDCALambo           = input(false,  title="DCA LAMB (daily sell when should I sell?)")
-showIndicatorDCALamboRipper     = input(false,  title="DCA LAMBo (daily buy when should I buy?)")
+showSMA                                 = input(false, title="SMA")
+showIndicatorAngelSMA                   = input(false, title="SMA (Angel Rainbow)")
+showIndicatorAngelSMAYearly             = input(false, title="SMA (Yearly)")
+showIndicatorMayerMultiplier            = input(false, title="Mayer Multiplier")
+showIndicatorGoldenDeathWithAverages    = input(false, title="Golden/Death Crosses with Averages")
+
+showIndicatorDCA                        = input(false, title="DCA")
+showIndicatorDCALambo                   = input(false, title="LAMB (buy and sell)")
+showIndicatorShortLong                  = input(false, title="Short or Long")
+showIndicatorPICycle                    = input(true,  title="PI Cycle")
+showIndicatorPICycleInverse             = input(false, title="PI Cycle Inverse")
+showIndicatorBullBearAverage            = input(false, title="Bull Bear Average")
+
 showIndicatorAngelManifestation = input(true,  title="Angel Manifestation (111)")
-showIndicatorAngelEnjoy         = input(true,  title="Angel Enjoy (222)")
-showIndicatorAngelBalance       = input(false, title="Angel Balance (333)")
-showIndicatorAngelGuide         = input(false, title="Angel Guide (444)")
-showIndicatorAngelChange        = input(false, title="Angel Change (555)")
-showIndicatorAngelReality       = input(false, title="Angel Reality (666)")
+// showIndicatorAngelEnjoy         = input(true,  title="Angel Enjoy (222)")
+// showIndicatorAngelBalance       = input(false, title="Angel Balance (333)")
+// showIndicatorAngelGuide         = input(false, title="Angel Guide (444)")
+// showIndicatorAngelChange        = input(false, title="Angel Change (555)")
+// showIndicatorAngelReality       = input(false, title="Angel Reality (666)")
 showIndicatorAngelTrust         = input(true,  title="Angel Trust (777)")
-showIndicatorAngelEnergy        = input(false, title="Angel Energy (888)")
-showIndicatorAngelLevel         = input(false, title="Angel Level (999)")
+// showIndicatorAngelEnergy        = input(false, title="Angel Energy (888)")
+// showIndicatorAngelLevel         = input(false, title="Angel Level (999)")
 showIndicatorDebug              = input(false, title="DEBUG")
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +53,8 @@ showIndicatorDebug              = input(false, title="DEBUG")
 // So when you see this sequence, ensuring your thoughts and energy are focused on what you want can help usher that energy into existence
 // according to numerology.
 smaAngel = sma(close, 111)
+smaAngelData = if (showIndicatorPICycle)
+    smaAngel
 
 // ANGEL 222 - In this sometimes-rigidly goal-prioritizing world where we live, 
 // it can be easy to get tripped up on not being at a certain progress point, which can lead you to compare yourself to others. 
@@ -120,7 +127,12 @@ smaLambData = if (showSMA)
     smaLamb
 
 sma50 = sma(close, 50)
+sma50Data = if (showIndicatorGoldenDeathWithAverages)
+    sma50
+
 sma200 = sma(close, 200)
+sma200Data = if (showIndicatorGoldenDeathWithAverages)
+    sma200
 
 sma350 = sma(close, 350)
 
@@ -149,6 +161,8 @@ sma7YData = if (showIndicatorAngelSMAYearly)
 // sma10Y  = sma(close, 3605) 
 
 smaBB = sma200 * 2.1
+smaBBData = if (showIndicatorBullBearAverage)
+    smaBB
 
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTS (SMA)
@@ -160,12 +174,18 @@ plot(sma21Data, color=color.orange, linewidth=1, transp=0, title="SMA 21")
 
 // plot(smaLambData, color=color.green, linewidth=1, transp=0, title="SMA LAMB")
 
-plot(sma50, color=color.blue, linewidth=2, transp=0, title="SMA 50")
-plot(sma200, color=color.white, linewidth=2, transp=0, title="SMA 200")
-plot(smaBB, color=color.aqua, linewidth=1, transp=0, title="SMA BB")
+// showIndicatorGoldenDeathWithAverages
+plot(sma50Data, color=color.blue, linewidth=2, transp=0, title="SMA 50")
+plot(sma200Data, color=color.white, linewidth=2, transp=0, title="SMA 200")
+plot(smaBBData, color=color.aqua, linewidth=1, transp=0, title="SMA BB")
+
+// FAIR
+fairValue = if (showIndicatorPICycle)
+    sma350 * 2
+plot(fairValue, color=color.white, transp=0, linewidth=2, title="FAIR")
 
 // SMA ANGELS
-plot(smaAngel, color=color.yellow, linewidth=2, transp=0, title="ANGEL")
+plot(smaAngelData, color=color.yellow, linewidth=2, transp=0, title="ANGEL")
 
 smaEnjoyData = if (showIndicatorAngelSMA)
     smaEnjoy
@@ -201,10 +221,6 @@ plot(smaLevelData, color=color.red, linewidth=1, transp=0, title="LEVEL")
 
 // GROWTH
 // plot(sma350, color=color.white, linewidth=1, transp=0, title="GROWTH")
-
-// FAIR
-fairValue = sma350 * 2
-plot(fairValue, color=color.white, transp=0, linewidth=2, title="FAIR")
 
 // YEARLY
 plot(sma1YData, color=color.white, linewidth=1, transp=0, title="1Y")
@@ -274,7 +290,10 @@ plot(ema111Data, color=color.red, linewidth=2, transp=0, title="EMA 111")
 // plot(ema150Data, color=color.blue, linewidth=1, transp=0, title="EMA 150")
 
 ema200 = ema(close, 200)
-emaBB  = ema200 * 2.1
+
+// showIndicatorBullBearAverage
+emaBB = if (showIndicatorBullBearAverage)
+    ema200 * 2.1
 plot(emaBB, color=color.green, linewidth=1, transp=0, title="EMA BB")
 
 // plot(emaAngelData, color=color.orange, linewidth=2, transp=0, title="ANGEL EMA")
@@ -344,11 +363,11 @@ plot(mm24Data, color=color.yellow, transp=0, linewidth=1, title="MM 2.4")
 ////////////////////////////////////////////////////////////////////////////////
 
 
-signalDeathCross = if(crossover(sma200, sma50))
+signalDeathCross = if(showIndicatorGoldenDeathWithAverages and crossover(sma200, sma50))
     sma200
 plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDaily) and signalDeathCross, style=shape.xcross, color=color.red, size=size.small, location=location.abovebar  , transp=0, textcolor=color.white, text="DEATH")
 
-signalGoldenCross = if (crossunder(sma200, sma50))
+signalGoldenCross = if (showIndicatorGoldenDeathWithAverages and crossunder(sma200, sma50))
     sma200
 plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDaily) and signalGoldenCross, style=shape.xcross, color=color.yellow, size=size.small, location=location.abovebar  , transp=0, textcolor=color.white, text="GOLDEN")
 
@@ -359,11 +378,13 @@ plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDail
 ////////////////////////////////////////////////////////////////////////////////
 
 // DAILY GREEN BOTTOM
-signalBottom = crossunder(sma1Y, sma2Y)
+signalBottom = if (showIndicatorPICycle)
+    crossunder(sma1Y, sma2Y)
 plotshape(isDaily and signalBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
 
 // DAILY RED TOP
-topDetected = crossunder(fairValue, smaAngel)
+topDetected = if (showIndicatorPICycle)
+    crossunder(fairValue, smaAngel)
 plotshape(isDaily and topDetected, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
 
 // WEEKLY GREEN CYCLE
@@ -398,7 +419,7 @@ plotshape(isWeekly and weeklyTop, style=shape.labeldown, color=color.red, size=s
 ////////////////////////////////////////////////////////////////////////////////
 
 detectedPreCycleOut = crossover(sma21, sma200 * 2.4)
-plotshape(isDaily and showIndicatorDCA and detectedPreCycleOut, style=shape.labeldown, size=size.normal, transp=50, color=color.red, textcolor=color.white, text="DCA")
+plotshape(isDaily and showIndicatorDCA and detectedPreCycleOut, style=shape.labeldown, size=size.normal, transp=20, color=color.red, textcolor=color.white, text="DCA")
 
 // DCA LEVELS LAMBS YEARLY 1-3
 // signalDCALe1Year = crossunder(smaLevel, sma1Y)
@@ -462,13 +483,15 @@ signalLimit = if (ema3 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
     1
 
 // DCA LONG/SHORT
+signalLong = crossover(ema3, sma3)
 signalLongTimeframe = if (isMinute or isFiveMinute or isThrityMinute or isHour or isFourHour or isDailyOrWeekly)
-    crossover(ema3, sma3)
-plotshape(signalLimit and showIndicatorDCALamboRipper and signalLongTimeframe, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="L")
+    signalLong
+plotshape(signalLimit and showIndicatorShortLong and signalLongTimeframe, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="L")
 
+signalShort = crossover(sma3, ema3)
 signalShortTimeframe = if (isMinute or isFiveMinute or isThrityMinute or isHour or isFourHour or isDailyOrWeekly)
-    crossover(sma3, ema3)
-plotshape(signalLimit and showIndicatorDCALamboRipper and signalShortTimeframe, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="S")
+    signalShort
+plotshape(signalLimit and showIndicatorShortLong and signalShortTimeframe, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="S")
 
 // // DCA BLUE MOON / BULL
 // signalELAMBDailyBull = if (isDailyOrWeekly)
@@ -481,7 +504,7 @@ plotshape(signalLimit and showIndicatorDCALamboRipper and signalShortTimeframe, 
 //     1
 // signalELAMBDailyOrange = if (isDailyOrWeekly)
 //     crossover(ema3, sma3)
-// plotshape(signalELAMBDailyOrangeLimit and showIndicatorDCALamboRipper and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="LAMBo")
+// plotshape(signalELAMBDailyOrangeLimit and showIndicatorShortLong and signalELAMBDailyOrange, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="LAMBo")
 
 //////////////////////////
 // DCA SIGNAL - YEARLY //
@@ -747,7 +770,9 @@ i_long_ma_days  = input ( 350, "Long MA")
 i_short_ma_days = input ( 111, "Short MA")
 i_show_ma       = input (true, "Show Moving Averages?", input.bool)
 i_show_cross    = input (true, "Show cross level?", input.bool)
-i_show_anticip  = input (true, "Show Anticipated cross level?", input.bool)
+
+// 
+// i_show_anticip  = input (true, "Show PICycleInverse?", input.bool)
 
 i_show_label_pi_cycle_top  = input( true, "Show label of Pi Cycle Top Cross?", input.bool)
 i_show_label_pi_cycle_down = input( true, "Show label of crossback?", input.bool)
@@ -771,8 +796,8 @@ text_eq ( p, x, d ) =>
     text = p < x ? "WE Angel - Cycle\n\n" + tostring(round(close)) + " Current\n" + tostring(round(open)) + " Open\n" + tostring(round(sma21)) + " SMA21\n"  + tostring(round(sma50)) + " SMA50\n"  + tostring(round(sma200)) + " SMA200\n" + tostring(round(fairValue)) + " FAIR\n\n"  + tostring(round(smaAngel)) + " ANGEL\n" + tostring(round(smaEnjoy)) + " ENJOY\n" + tostring(round(smaBalance)) + " BALANCE\n"  + tostring(round(smaGuide)) + " GUIDE\n"  + tostring(round(smaChange)) + " CHANGE\n"  + tostring(round(smaReality)) + " REALITY\n" + tostring(round(smaTrust)) + " TRUST\n"  + tostring(round(smaEnergy)) + " ENERGY\n"  + tostring(round(smaLevel)) + " LEVEL" + "\n\n" + tostring(int(x*pow(10,d))/pow(10,d)) + " Cycle (currentdata)" : "WE Angel - Cycle\n\nCycle : " + tostring(int(x*pow(10,d))/pow(10,d)) 
 
 text_eq2 ( p, x, d ) => 
-    // text = i_show_anticip and p < x ?  "\n" +"Anticipated Cycle Top\nCross Above on next bar close\n" + tostring(int(x*pow(10,d))/pow(10,d)) : i_show_anticip ? "\n\n" + "Anticipated Pi Cycle\n Cross Down on next bar close\n" + tostring(int(x*pow(10,d))/pow(10,d)) : na
-    text = i_show_anticip and p < x ?  "\n" + tostring(int(x*pow(10,d))/pow(10,d)) + " Cycle (anticipated)" : i_show_anticip ? "\n\n" + "Cycle Anticipated:" + tostring(int(x*pow(10,d))/pow(10,d)) : na
+    // text = showIndicatorPICycleInverse and p < x ?  "\n" +"Anticipated Cycle Top\nCross Above on next bar close\n" + tostring(int(x*pow(10,d))/pow(10,d)) : showIndicatorPICycleInverse ? "\n\n" + "Anticipated Pi Cycle\n Cross Down on next bar close\n" + tostring(int(x*pow(10,d))/pow(10,d)) : na
+    text = showIndicatorPICycleInverse and p < x ?  "\n" + tostring(int(x*pow(10,d))/pow(10,d)) + " Cycle (anticipated)" : showIndicatorPICycleInverse ? "\n\n" + "Cycle Anticipated:" + tostring(int(x*pow(10,d))/pow(10,d)) : na
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calculations
@@ -801,12 +826,13 @@ pi_cycle_down = crossover(long_ma, short_ma) ? src_data - (src_data/100 * 20) : 
 pi_cycle_top2 = crossunder(pi_anticipated_cross, src_data) ? src_data + (src_data/100 * 90) : na
 pi_cycle_down2 = crossover(pi_anticipated_cross, src_data) ? src_data - (src_data/100 * 70) : na
 
-///////////////////////////////////////////////////////////////////////////////\
-// Plot the MAs
-// plot (i_show_ma ? long_ma : na, color=color.green)         // show the long MA
-// plot (i_show_ma ? short_ma : na, color=color.orange)       // show the short MA
-plot (i_show_cross ? pi_cross : na, color=color.aqua)       // show the MA cross level
-plot (i_show_anticip ? pi_anticipated_cross : na, color=color.fuchsia, offset = 1 )       // show the MA cross level
+///////////////////////////////////////////////////////////////////////////////
+// plot(i_show_ma ? long_ma : na, color=color.green)         // show the long MA
+// plot(i_show_ma ? short_ma : na, color=color.orange)       // show the short MA
+// plot(i_show_cross ? pi_cross : na, color=color.aqua)       // show the MA cross level
+
+plot(showIndicatorPICycleInverse ? pi_cross : na, color=color.aqua)       // show the MA cross level
+plot(showIndicatorPICycleInverse ? pi_anticipated_cross : na, color=color.fuchsia, offset = 1 )       // show the MA cross level
 
 
 
