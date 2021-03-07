@@ -17,11 +17,12 @@ study("WE-Indicator", "WE", overlay=true)
 
 
 // Tom Demark
-showSellTDs         = input(false, title="TD Sell")
-showBuyTDs          = input(false, title="TD Buy")
-show1to8TDs         = input(false, title="TD 1-8")
-showTDTrendlines    = input(false, title="TD Trend Lines")
-showLogGrowthCurves = input(false, title="Log Growth Curves")
+showSellTDs                     = input(false, title="TD Sell")
+showBuyTDs                      = input(false, title="TD Buy")
+show1to8TDs                     = input(false, title="TD 1-8")
+showTDTrendlines                = input(false, title="TD Trend Lines")
+showLogGrowthCurves             = input(false, title="Log Growth Curves")
+showLogGrowthProjectionCurves   = input(false, title="Log Growth Projection Curves")
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,11 +201,9 @@ lowTrendLine := sellSignals == 9 ? lowest9
 
 plot(showTDTrendlines and highTrendLine > 0 ? highTrendLine : na, title="Trendline", color=color.blue, style=plot.style_circles, linewidth=1, transp=0)
 plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline", color=color.white, style=plot.style_circles, linewidth=1, transp=0)
-
 ////////////////////////////////////////////////////////////////////////////////
 
 
-////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Bitcoin Log Growth Curves
@@ -217,33 +216,32 @@ plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline
 // Inspired by @Quantadelic aka Pinescript Pleb
 //
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 darkOrLight =    input("Dark", title="Dark mode or Light mode?", options=["Dark", "Light"])
 showFibs =       input("Y", title="Show Fibonacci Levels?", options=["Y","N"])
-showExtensions = input("Y", title="Show Curve Projections?", options=["Y","N"])
+// showExtensions = input("Y", title="Show Curve Projections?", options=["Y","N"])
 highIntercept =  input(1.06930947, title="Top Curve Intercept", step=0.001)
 highSlope =      input(0.00076, title="Top Curve Slope", step=0.00001)
 lowIntercept =   input(-3.0269716, title="Bottom Curve Intercept", step=0.001)
 lowSlope =       input(0.001329, title="Bottom Curve Slope", step=0.00001)
 
-// TIME CALCS
+// Time Calcs
 timeIndex =     time < 1279670400000 ? 3.0 : (time - 1279670400000) / 86400000
 weight =        (log10(timeIndex + 10) * timeIndex * timeIndex - timeIndex) / 30000
 timeDelta =     time - time[1]
 
-// TOP OF CHANNEL INTERCEPT & SLOPE CALCS
+// Top of Channel Intercept & Slope Calcs
 highSlopeCum =  highSlope * timeIndex
 highLogDev =    timeIndex > 2 ? log(weight) + highIntercept + highSlopeCum : na
 
-// BOTTOM OF CHANNEL INTERCEPT & SLOPE CALCS
+// Bottom of channel intercept & slope calcs
 lowSlopeCum = lowSlope * timeIndex
 LowLogDev = timeIndex > 2 ? log(weight) + lowIntercept + lowSlopeCum : na
 
-// TOTAL CHANNEL LOG RANGE
+// Total channel log range
 LogRange = highLogDev - LowLogDev
 
-// FIBONACCI LEVELS
+// Fibonacci Levels
 fib9098Calc = (LogRange * 0.9098) + LowLogDev
 fib8541Calc = (LogRange * 0.8541) + LowLogDev
 fib7639Calc = (LogRange * 0.7639) + LowLogDev
@@ -254,7 +252,7 @@ fib2361Calc = (LogRange * 0.2361) + LowLogDev
 fib1459Calc = (LogRange * 0.1459) + LowLogDev
 fib0902Calc = (LogRange * 0.0902) + LowLogDev
 
-// SCALE LOG VARIABLES TO LINEAR
+// Scale Log variables to linear
 highDev = if (showLogGrowthCurves)
     pow(2.718281828459, highLogDev)
     
@@ -288,7 +286,7 @@ fib0902Dev = if (showLogGrowthCurves)
 lowDev = if (showLogGrowthCurves)
     pow(2.718281828459, LowLogDev)
 
-// COLOR SCHEME
+// Colour Scheme
 colorBullScheme = darkOrLight == "Dark" ? color(color.red) : color(color.black)
 colorBearScheme = darkOrLight == "Dark" ? color(color.green) : color(color.black)
 
@@ -313,23 +311,22 @@ ExtenZe(_i, _slope, _intercept) =>
     HD = pow(2.718281828459, HLD)
     HD
 
-// VARIABLES FOR ADJUSTING LENGTH OF CURVE EXTENSIONS RELATIVE TO CHART TIME-FRAME
+// Variables for adjusting length of curve extension  relative to chart timeframe
 forLoopStep = timeframe.ismonthly == 1 ? ceil( 12 / timeframe.multiplier) : 
               timeframe.isweekly == 1 ? ceil(26 / timeframe.multiplier) : 
               timeframe.isdaily == 1 ? ceil(91 / timeframe.multiplier) : 
               (timeframe.isminutes == 1) and (timeframe.multiplier > 59) ? ceil(10080 / timeframe.multiplier) : na
 forLoopMax = na(forLoopStep) ? na : forLoopStep * 13
 
-// MID CURVE SLOPE & INTERCEPT
+// Mid Curve Slope & Intercept
 midSlope =      (highSlope + lowSlope) * 0.5
 midIntercept =  (highIntercept + lowIntercept) * 0.5
 
-// COLOR SCHEME
+// Colour Scheme
 ColorSchemeProjected =   darkOrLight == "Dark" ? color(color.blue) : color(color.black)
 ColorSchemeMidProjected =   darkOrLight == "Dark" ? color(color.white) : color(color.black)
 
-// CHECK IF LAST BAR & "Show Curve Projections" IS CHECKED, THEN DRAW CURVE EXTENZES
-if barstate.islast and showExtensions == "Y"
+if (showLogGrowthProjectionCurves and barstate.islast)
     for i = 0 to forLoopMax-1 by forLoopStep
         // line.new(time + timeDelta * i, ExtenZe(i, highSlope, highIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, highSlope, highIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
         
@@ -338,23 +335,3 @@ if barstate.islast and showExtensions == "Y"
         line.new(time + timeDelta * i, ExtenZe(i, lowSlope, lowIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, lowSlope, lowIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
 
 ////////////////////////////////////////////////////////////////////////////////
-
-// len=input(10)
-// o=ema(open,len)
-// c=ema(close,len)
-// h=ema(high,len)
-// l=ema(low,len)
-
-// haclose = (o+h+l+c)/4
-// haopen = na(haopen[1]) ? (o + c)/2 : (haopen[1] + haclose[1]) / 2
-// hahigh = max (h, max(haopen,haclose))
-// halow = min (l, min(haopen,haclose))
-
-// len2=input(10)
-// o2=ema(haopen, len2)
-// c2=ema(haclose, len2)
-// h2=ema(hahigh, len2)
-// l2=ema(halow, len2)
-
-// col=o2>c2 ? red : lime
-// plotcandle(o2, h2, l2, c2, title="heikin smoothed", color=col)
