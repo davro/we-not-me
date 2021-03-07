@@ -45,9 +45,7 @@ else
     rsi(close, 30)
     
 macd = fastMA - slowMA
-macdOverExtended = if (hideMacdMatch == true)
-    0
-else if (timeframe.isdaily)
+macdOverExtended = if (timeframe.isdaily)
     100 + (high - macd) / high * 100 <= 191.5 ? 100 + (high - macd) / high * 100 : 0
 else if (timeframe.isminutes and timeframe.period == '240') // DONE
     if (rsi > 60)
@@ -73,7 +71,7 @@ else
     0
 
 backgroundColorByRSI = if (showVerticalHeatmap == false)
-    0
+    na
 else if (timeframe.isminutes)
 
     rsiValueHigh = if (timeframe.period == '1')
