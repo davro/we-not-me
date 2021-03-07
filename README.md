@@ -1,17 +1,26 @@
 
+
 # WE not ME 
 
 Welcome to the WE Indicator  (Bitcoin/Stock/$hitcoin Indicator)
 
 **Telegram:** https://t.me/we_not_me
 
-Donations are accepted, but really it's an invitation to give what feels right for the value received, but WE would sooner have you contribute to the project in forms of code, documentation, and helping each other in the Telegram chat.
+The WE Philosophy of Investing.
+In the following introduction you are going to learn exactly how WE go about analyzing and beating the market.  While it certainly isn't easy, it's not nearly as difficult as most investors and traders make it.
+
+**Lesson number one** is consistency, stay consistent and disciplined.  This is very important.  Don't be fundamentalist one week and a technician the next.  And don't follow indicator A one month and switch to indicator B the next.  Find a good method be disciplined, and stick with it.  If it doesn't regularly beat the market, then get a new method. Be be absolutely disciplined and don't ever abandon a successful method because you think this time things are different.
+
+**Lesson number two** is to learn what most investors never do: that you cannot consistently make money in the market by reading today's fundamentals in the media and acting on that information.  That is a prescription for disaster;  You must learn that the market is a discounting mechanism, and that stocks sell on future and not current fundamentals.  WE therefore use a technical approach that deciphers the market's interpretation of all the currently known news as well as future expectations.  Don't be thrown off by the fancy name.  All that technical analysis really consists of is the study of price and volume relationships to gain an insight into future trends.
+
+Donations are accepted, but really it's an invitation to give what feels right for the value received.
+WE would sooner have you contribute to the project in the form of code, documentation, and helping each other.
 **Bitcoin:** 3Ph9wP4vgASFbFP9DAabZETycXY66ebA8Y
 
 
 ## WE Indicator 
 
-The WE indicator is the first indicator of three, the other two indicators are called **Angel** and **Alpha**, the free version of [Tradingview](https://www.tradingview.com) only allows three indicators to be run simultaneously,  but more WE indicators and studies will be implemented once WE expand beyond the initial development phase but keeping these three indicator being able to run on a free trading view account is an important part of the project.
+The WE indicator is the first of indicator three, the other two indicators are called **Angel** and **Alpha**, the free version of [Tradingview](https://www.tradingview.com) only allows three indicators to be run simultaneously,  but more WE indicators and studies will be implemented once WE expand beyond the initial development phase but keeping these three indicator being able to run on a free trading view account is an important part of the project.
 
 This is the fundamental starting point of this rapidly growing project, this project was initially started to develop a Macro Investment plan, and brings together many different techniques into one project that runs on Tradingview using the pine programming language and is designed and programmed to efficient enough that it will run on the free account until WE have more indicators and develop into Tradingview paid plans, but the goal is to keep the barrier to entry for new investors and traders to an absolute minimum.
 
