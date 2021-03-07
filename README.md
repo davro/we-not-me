@@ -153,9 +153,12 @@ Tom DeMark, is used by many of the top money managers of all time, the DeMARK In
 
 https://demark.com/bookshelf/
 
+# Bull Bear Average
+Documentation **coming soon**.
+
 # DEBUG
 Documentation **coming soon**.
 
-
 # WE-ALPHA-INDICATOR
 Documentation **coming soon**.
+![img5](readme-images/alpha-indicator.png)
