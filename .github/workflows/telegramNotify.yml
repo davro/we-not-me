@@ -1,5 +1,11 @@
 name: telegram notify
-on: [push]
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      - main
+#    tags:        
+#      - v*
 jobs:
 
   build:
