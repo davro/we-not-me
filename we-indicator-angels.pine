@@ -392,12 +392,14 @@ plotshape(isDaily and topDetected, style=shape.labeldown, color=color.red, size=
 // plotshape(isWeekly and weeklyBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
 
 // WEEKLY RED CYCLE
-weeklyTopEMALAMBEMABB = if (timeframe.isweekly and emaLamb > emaBB and ema21 > sma21)
-    1
-weeklyTop = if (timeframe.isweekly and weeklyTopEMALAMBEMABB)
-    crossunder(ema7-111, sma7)
-    // crossunder(ema7, sma3)
-plotshape(isWeekly and weeklyTop, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
+// weeklyTopEMALAMBEMABB = if (timeframe.isweekly and emaLamb > emaBB and ema21 > sma21)
+//     1
+
+// weeklyTopCrossUnder = crossunder(ema7-111, sma7)
+// weeklyTop = if (timeframe.isweekly and weeklyTopEMALAMBEMABB)
+//     weeklyTopCrossUnder
+//     // crossunder(ema7, sma3)
+// plotshape(isWeekly and weeklyTop, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
 
 // Original code 
 // CYCLE green (offset) (DEFAULT)
@@ -432,8 +434,9 @@ plotshape(isDaily and showIndicatorDCA and detectedPreCycleOut, style=shape.labe
 // plotshape(isDaily and showIndicatorDCA and signalDCALe3Year, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.green, textcolor=color.white, text="LAMB\n3Y")
 
 // WEEKLY GREEN ALPHA ANGEL
+weeklyExpoAngel = crossover(ema7+111, sma7)
 weeklyExpo = if (isWeekly and ema7+111 < sma50 and ema7+111 < smaBB )
-    crossover(ema7+111, sma7)
+    weeklyExpoAngel
 plotshape(showIndicatorDCA and weeklyExpo, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="ALPHA\nANGEL")
 
 ////////////////////
@@ -793,7 +796,7 @@ pi_cycle_cross ( P, X, Y ) =>
 anticipated_cross_function(P, X, Y) => ( X * (Y - 1) * sma(P, Y - 1) - Y * (X - 1) * sma(P, X - 1) * 2) / (Y*2 - X)
 
 text_eq ( p, x, d ) => 
-    text = p < x ? "WE Angel - Cycle\n\n" + tostring(round(close)) + " Current\n" + tostring(round(open)) + " Open\n" + tostring(round(sma21)) + " SMA21\n"  + tostring(round(sma50)) + " SMA50\n"  + tostring(round(sma200)) + " SMA200\n" + tostring(round(fairValue)) + " FAIR\n\n"  + tostring(round(smaAngel)) + " ANGEL\n" + tostring(round(smaEnjoy)) + " ENJOY\n" + tostring(round(smaBalance)) + " BALANCE\n"  + tostring(round(smaGuide)) + " GUIDE\n"  + tostring(round(smaChange)) + " CHANGE\n"  + tostring(round(smaReality)) + " REALITY\n" + tostring(round(smaTrust)) + " TRUST\n"  + tostring(round(smaEnergy)) + " ENERGY\n"  + tostring(round(smaLevel)) + " LEVEL" + "\n\n" + tostring(int(x*pow(10,d))/pow(10,d)) + " Cycle (currentdata)" : "WE Angel - Cycle\n\nCycle : " + tostring(int(x*pow(10,d))/pow(10,d)) 
+    text = p < x ? "WE Angels\n\n" + tostring(round(close)) + " Current\n" + tostring(round(open)) + " Open\n" + tostring(round(sma21)) + " SMA21\n"  + tostring(round(sma50)) + " SMA50\n"  + tostring(round(sma200)) + " SMA200\n" + tostring(round(fairValue)) + " FAIR\n\n"  + tostring(round(smaAngel)) + " ANGEL\n" + tostring(round(smaEnjoy)) + " ENJOY\n" + tostring(round(smaBalance)) + " BALANCE\n"  + tostring(round(smaGuide)) + " GUIDE\n"  + tostring(round(smaChange)) + " CHANGE\n"  + tostring(round(smaReality)) + " REALITY\n" + tostring(round(smaTrust)) + " TRUST\n"  + tostring(round(smaEnergy)) + " ENERGY\n"  + tostring(round(smaLevel)) + " LEVEL" + "\n\n" + tostring(int(x*pow(10,d))/pow(10,d)) + " Cycle (currentdata)" : "WE Angels\n\nCycle : " + tostring(int(x*pow(10,d))/pow(10,d)) 
 
 text_eq2 ( p, x, d ) => 
     // text = showIndicatorPICycleInverse and p < x ?  "\n" +"Anticipated Cycle Top\nCross Above on next bar close\n" + tostring(int(x*pow(10,d))/pow(10,d)) : showIndicatorPICycleInverse ? "\n\n" + "Anticipated Pi Cycle\n Cross Down on next bar close\n" + tostring(int(x*pow(10,d))/pow(10,d)) : na
@@ -805,15 +808,19 @@ text_eq2 ( p, x, d ) =>
 long_ma  = security ( syminfo.tickerid, "D", sma(close, i_long_ma_days)*2)
 short_ma = security ( syminfo.tickerid, "D", sma(close, i_short_ma_days))
 src_data = security ( syminfo.tickerid, "D", close)
+srcData = if (showIndicatorDebug)
+    src_data
+
 pi_cross = security ( syminfo.tickerid, "D", pi_cycle_cross ( src_data, i_long_ma_days, i_short_ma_days ))
 
 pi_anticipated_cross = security( syminfo.tickerid, "D", anticipated_cross_function ( src_data, i_long_ma_days, i_short_ma_days ))
 
-// DISPLAY LABEL
-// label_text      = text_eq ( src_data, pi_cross, i_dec_places ) + text_eq2 ( src_data, pi_anticipated_cross, i_dec_places )
-// label_X_Loc = time_close + (( time_close - time_close[1] ) * i_label_offset ) // Set Label offset
-// label = label.new ( label_X_Loc, hlc3, label_text , xloc.bar_time, yloc.price, color.black, label.style_label_left, color.white, size=size.normal )
-// label.delete ( label[1] )   // Delete Previous Label
+// DISPLAY LABEL 
+// TODO add config option 
+label_text = text_eq ( srcData, pi_cross, i_dec_places ) + text_eq2 ( srcData, pi_anticipated_cross, i_dec_places )
+label_X_Loc = time_close + (( time_close - time_close[1] ) * i_label_offset ) // Set Label offset
+label = label.new (label_X_Loc, hlc3, label_text , xloc.bar_time, yloc.price, color.black, label.style_label_left, color.white, size=size.normal )
+label.delete ( label[1] )   // Delete Previous Label
 
 //***********
 // Determine and show the Pi Cycle Top
