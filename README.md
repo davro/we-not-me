@@ -15,8 +15,10 @@ In the following introduction you are going to learn exactly how WE go about ana
 
 Donations are accepted, but really it's an invitation to give what feels right for the value received.
 WE would sooner have you contribute to the project in the form of code, documentation, and helping each other.
+
 **Bitcoin:** 3Ph9wP4vgASFbFP9DAabZETycXY66ebA8Y
 
+![img1](readme-images/think-we-not-me.jpg)
 
 ## WE Indicator 
 
