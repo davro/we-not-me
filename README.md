@@ -1,5 +1,3 @@
-
-
 # WE not ME 
 
 Welcome to the WE Indicator  (Bitcoin/Stock/$hitcoin Indicator)
@@ -173,3 +171,14 @@ Documentation **coming soon**.
 # WE-ALPHA-INDICATOR
 Documentation **coming soon**.
 ![img5](readme-images/alpha-indicator.png)
+
+
+# WEBSITES & SERVICES
+Helpful websites and services for trading and investing.
+
+https://cryptoquant.com/
+https://alternative.me/crypto/fear-and-greed-index/
+https://www.lookintobitcoin.com/charts/200-week-moving-average-heatmap/
+https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
+https://www.bybt.com/LongShortRatio
+https://www.quandl.com/
