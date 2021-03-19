@@ -119,25 +119,41 @@ bgcolor(clm > close ? color.new(#00ff88, 95) : color.new(#ff0088, 100))
 ///////////////////////////////////////
 // RSI + MACD Background Indicator
 ///////////////////////////////////////
+showMacdMatchOnly = input(false, title="Show Overbought + MACD match only")
+
 fastMA = ema(high, 12)
 slowMA = ema(high, 26)
-rsi = rsi(close, 30)
+rsi = if (timeframe.isminutes and timeframe.period == '1')
+    rsi(close, 14)
+else if (timeframe.isminutes and timeframe.period == '15')
+    rsi(close, 14)
+else 
+    rsi(close, 30)
+    
 macd = fastMA - slowMA
 macdOverExtended = if (timeframe.isdaily)
     100 + (high - macd) / high * 100 <= 191.5 ? 100 + (high - macd) / high * 100 : 0
 else if (timeframe.isminutes and timeframe.period == '240')
     100 + (high - macd) / high * 100 <= 197.4 ? 100 + (high - macd) / high * 100 : 0
 else if (timeframe.isminutes and timeframe.period == '15')
-    100 + (high - macd) / high * 100 <= 199 ? 100 + (high - macd) / high * 100 : 0
+    if (rsi > 60)
+        100 + (high - macd) / high * 100 <= 199 ? 100 + (high - macd) / high * 100 : 0
+    else
+        100 + (high - macd) / high * 100 >= 201 ? 100 + (high - macd) / high * 100 : 0
 else if (timeframe.isminutes and timeframe.period == '60')
     100 + (high - macd) / high * 100 <= 198 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isminutes and timeframe.period == '1')
+    if (rsi > 60)
+        100 + (high - macd) / high * 100 <= 199.8 ? 100 + (high - macd) / high * 100 : 0
+    else
+        100 + (high - macd) / high * 100 >= 200.5 ? 100 + (high - macd) / high * 100 : 0
 else
     0
 
 backgroundColorByRSI = if (timeframe.isminutes)
 
     rsiValueHigh = if (timeframe.period == '1')
-        66
+        70
     else if (timeframe.period == '5')
         70
     else if (timeframe.period == '15')
@@ -152,7 +168,7 @@ backgroundColorByRSI = if (timeframe.isminutes)
         na
     
     rsiValueHigher = if (timeframe.period == '1')
-        70
+        74
     else if (timeframe.period == '5')
         72
     else if (timeframe.period == '15')
@@ -196,17 +212,33 @@ backgroundColorByRSI = if (timeframe.isminutes)
     else
         na
 
-    if (rsi > rsiValueHigher and macdOverExtended > 0)
-        color.new(color.orange, 40)
-    else if (rsi > rsiValueHigh and macdOverExtended > 0)
-        color.new(color.orange, 40)
-    else if (rsi >= rsiValueHigher)
+    if (rsi >= rsiValueHigher and macdOverExtended > 0)
+        if (showMacdMatchOnly)
+            color.new(color.red, 40)
+        else
+            color.new(color.orange, 40)
+    else if (rsi >= rsiValueHigh and macdOverExtended > 0)
+        if (showMacdMatchOnly)
+            color.new(color.red, 40)
+        else
+            color.new(color.orange, 40)
+    else if (showMacdMatchOnly == false and rsi >= rsiValueHigher)
         color.new(color.red, 40)
-    else if (rsi >= rsiValueHigh)
+    else if (showMacdMatchOnly == false and rsi >= rsiValueHigh)
         color.new(color.red, 70)
-    else if (rsi < rsiValueLower)
+    else if (rsi <= rsiValueLower and macdOverExtended > 0)
+        if (showMacdMatchOnly)
+            color.new(color.green, 40)
+        else
+            color.new(color.blue, 40)
+    else if (rsi <= rsiValueLow and macdOverExtended > 0)
+        if (showMacdMatchOnly)
+            color.new(color.green, 40)
+        else
+            color.new(color.blue, 40)
+    else if (showMacdMatchOnly == false and rsi <= rsiValueLower)
         color.new(color.green, 40)
-    else if (rsi < rsiValueLow)
+    else if (showMacdMatchOnly == false and rsi <= rsiValueLow)
         color.new(color.green, 70)
 else if (timeframe.isdaily)
     rsiValueHigh = 72
@@ -218,16 +250,22 @@ else if (timeframe.isdaily)
     rsiValueLower = 30
 
     if (rsi >= rsiValueHigher and macdOverExtended > 0)
-        color.new(color.orange, 40)
+        if (showMacdMatchOnly)
+            color.new(color.red, 40)
+        else
+            color.new(color.orange, 40)
     else if (rsi >= rsiValueHigh and macdOverExtended > 0)
-        color.new(color.orange, 40)
-    else if (rsi >= rsiValueHigher)
+        if (showMacdMatchOnly)
+            color.new(color.red, 40)
+        else
+            color.new(color.orange, 40)
+    else if (showMacdMatchOnly == false and rsi >= rsiValueHigher)
         color.new(color.red, 40)
-    else if (rsi >= rsiValueHigh)
+    else if (showMacdMatchOnly == false and rsi >= rsiValueHigh)
         color.new(color.red, 70)
-    else if (rsi <= rsiValueLower)
+    else if (showMacdMatchOnly == false and rsi <= rsiValueLower)
         color.new(color.green, 40)
-    else if (rsi <= rsiValueLow)
+    else if (showMacdMatchOnly == false and rsi <= rsiValueLow)
         color.new(color.green, 70)
 else if (timeframe.isweekly)
     rsiValueHigh = 83
@@ -238,13 +276,13 @@ else if (timeframe.isweekly)
     
     rsiValueLower = 42
 
-    if (rsi >= rsiValueHigher)
+    if (showMacdMatchOnly == false and rsi >= rsiValueHigher)
         color.new(color.red, 40)
-    else if (rsi >= rsiValueHigh)
+    else if (showMacdMatchOnly == false and rsi >= rsiValueHigh)
         color.new(color.red, 70)
-    else if (rsi <= rsiValueLower)
+    else if (showMacdMatchOnly == false and rsi <= rsiValueLower)
         color.new(color.green, 40)
-    else if (rsi <= rsiValueLow)
+    else if (showMacdMatchOnly == false and rsi <= rsiValueLow)
         color.new(color.green, 70)
 else
     na
