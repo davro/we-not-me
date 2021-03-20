@@ -15,7 +15,6 @@
 //@version=4
 study("WE-Indicator", "WE", overlay=true)
 
-
 // Tom Demark
 showSellTDs                     = input(false, title="TD Sell")
 showBuyTDs                      = input(false, title="TD Buy")
@@ -23,6 +22,7 @@ show1to8TDs                     = input(false, title="TD 1-8")
 showTDTrendlines                = input(false, title="TD Trend Lines")
 showLogGrowthCurves             = input(false, title="Log Growth Curves")
 showLogGrowthProjectionCurves   = input(false, title="Log Growth Projection Curves")
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,8 +231,13 @@ plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 7, char=""
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 8, char="", text="8", textcolor=color.red, location=location.abovebar, transp=20)
 plotshape(showSellTDs and sellSignals and BuyOrSell == 9, text="9",color=color.red, textcolor=color.red, size=size.tiny, location=location.abovebar, transp=0)
 
+
 ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
 // TD Sequential - Trend Lines
+//
+////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 highest9 = highest(9)
 highTrendLine = 0.0
@@ -248,9 +253,9 @@ lowTrendLine := sellSignals == 9 ? lowest9
 
 plot(showTDTrendlines and highTrendLine > 0 ? highTrendLine : na, title="Trendline", color=color.blue, style=plot.style_circles, linewidth=1, transp=0)
 plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline", color=color.white, style=plot.style_circles, linewidth=1, transp=0)
+
+
 ////////////////////////////////////////////////////////////////////////////////
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Bitcoin Log Growth Curves
@@ -263,41 +268,41 @@ plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline
 // Inspired by @Quantadelic aka Pinescript Pleb
 //
 ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-darkOrLight =    input("Dark", title="Dark mode or Light mode?", options=["Dark", "Light"])
-showFibs =       input("Y", title="Show Fibonacci Levels?", options=["Y","N"])
-// showExtensions = input("Y", title="Show Curve Projections?", options=["Y","N"])
-highIntercept =  input(1.06930947, title="Top Curve Intercept", step=0.001)
-highSlope =      input(0.00076, title="Top Curve Slope", step=0.00001)
-lowIntercept =   input(-3.0269716, title="Bottom Curve Intercept", step=0.001)
-lowSlope =       input(0.001329, title="Bottom Curve Slope", step=0.00001)
+darkOrLight   = input("Dark", title="Dark mode or Light mode?", options=["Dark", "Light"])
+showFibs      = input("Y", title="Show Fibonacci Levels?", options=["Y","N"])
+highIntercept = input(1.06930947, title="Top Curve Intercept", step=0.001)
+highSlope     = input(0.00076, title="Top Curve Slope", step=0.00001)
+lowIntercept  = input(-3.0269716, title="Bottom Curve Intercept", step=0.001)
+lowSlope      = input(0.001329, title="Bottom Curve Slope", step=0.00001)
 
 // Time Calcs
-timeIndex =     time < 1279670400000 ? 3.0 : (time - 1279670400000) / 86400000
-weight =        (log10(timeIndex + 10) * timeIndex * timeIndex - timeIndex) / 30000
-timeDelta =     time - time[1]
+timeIndex = time < 1279670400000 ? 3.0 : (time - 1279670400000) / 86400000
+weight    = (log10(timeIndex + 10) * timeIndex * timeIndex - timeIndex) / 30000
+timeDelta = time - time[1]
 
 // Top of Channel Intercept & Slope Calcs
-highSlopeCum =  highSlope * timeIndex
-highLogDev =    timeIndex > 2 ? log(weight) + highIntercept + highSlopeCum : na
+highSlopeCum = highSlope * timeIndex
+highLogDev   = timeIndex > 2 ? log(weight) + highIntercept + highSlopeCum : na
 
 // Bottom of channel intercept & slope calcs
 lowSlopeCum = lowSlope * timeIndex
-LowLogDev = timeIndex > 2 ? log(weight) + lowIntercept + lowSlopeCum : na
+lowLogDev   = timeIndex > 2 ? log(weight) + lowIntercept + lowSlopeCum : na
 
 // Total channel log range
-LogRange = highLogDev - LowLogDev
+logRange = highLogDev - lowLogDev
 
 // Fibonacci Levels
-fib9098Calc = (LogRange * 0.9098) + LowLogDev
-fib8541Calc = (LogRange * 0.8541) + LowLogDev
-fib7639Calc = (LogRange * 0.7639) + LowLogDev
-fib618Calc  = (LogRange * 0.618) + LowLogDev
-midCalc     = (LogRange * 0.5) + LowLogDev
-fib382Calc  = (LogRange * 0.382) + LowLogDev
-fib2361Calc = (LogRange * 0.2361) + LowLogDev
-fib1459Calc = (LogRange * 0.1459) + LowLogDev
-fib0902Calc = (LogRange * 0.0902) + LowLogDev
+fib9098Calc = (logRange * 0.9098) + lowLogDev
+fib8541Calc = (logRange * 0.8541) + lowLogDev
+fib7639Calc = (logRange * 0.7639) + lowLogDev
+fib618Calc  = (logRange * 0.618) + lowLogDev
+midCalc     = (logRange * 0.5) + lowLogDev
+fib382Calc  = (logRange * 0.382) + lowLogDev
+fib2361Calc = (logRange * 0.2361) + lowLogDev
+fib1459Calc = (logRange * 0.1459) + lowLogDev
+fib0902Calc = (logRange * 0.0902) + lowLogDev
 
 // Scale Log variables to linear
 highDev = if (showLogGrowthCurves)
@@ -331,7 +336,7 @@ fib0902Dev = if (showLogGrowthCurves)
     showFibs == "Y" ? pow(2.718281828459, fib0902Calc) : na
 
 lowDev = if (showLogGrowthCurves)
-    pow(2.718281828459, LowLogDev)
+    pow(2.718281828459, lowLogDev)
 
 // Colour Scheme
 colorBullScheme = darkOrLight == "Dark" ? color(color.red) : color(color.black)
@@ -349,8 +354,8 @@ plot(fib1459Dev, color=colorBearScheme, transp=20, title="RISK 14.59%")
 plot(fib0902Dev, color=colorBearScheme, transp=10, title="RISK 9.02%")
 plot(lowDev, color=colorBearScheme, transp=0, title="RISK 0%")
 
-// Curve Extension drawing function and helper variables
-ExtenZe(_i, _slope, _intercept) =>
+// Curve extension drawing function and helper variables
+Extension(_i, _slope, _intercept) =>
     TI = ((time + timeDelta *_i) -1279670400000) / 86400000
     W = (log10(TI + 10) * TI * TI - TI) / 30000
     HSC = _slope * TI
@@ -363,22 +368,17 @@ forLoopStep = timeframe.ismonthly == 1 ? ceil( 12 / timeframe.multiplier) :
               timeframe.isweekly == 1 ? ceil(26 / timeframe.multiplier) : 
               timeframe.isdaily == 1 ? ceil(91 / timeframe.multiplier) : 
               (timeframe.isminutes == 1) and (timeframe.multiplier > 59) ? ceil(10080 / timeframe.multiplier) : na
+              
 forLoopMax = na(forLoopStep) ? na : forLoopStep * 13
 
-// Mid Curve Slope & Intercept
-midSlope =      (highSlope + lowSlope) * 0.5
-midIntercept =  (highIntercept + lowIntercept) * 0.5
-
-// Colour Scheme
-ColorSchemeProjected =   darkOrLight == "Dark" ? color(color.blue) : color(color.black)
-ColorSchemeMidProjected =   darkOrLight == "Dark" ? color(color.white) : color(color.black)
+// Mid Curve Slope & Intercept and colours
+midSlope                 = (highSlope + lowSlope) * 0.5
+midIntercept             = (highIntercept + lowIntercept) * 0.5
+colourSchemeProjected    = darkOrLight == "Dark" ? color(color.blue) : color(color.black)
+colourSchemeMidProjected = darkOrLight == "Dark" ? color(color.white) : color(color.black)
 
 if (showLogGrowthProjectionCurves and barstate.islast)
     for i = 0 to forLoopMax-1 by forLoopStep
-        // line.new(time + timeDelta * i, ExtenZe(i, highSlope, highIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, highSlope, highIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
-        
-        line.new(time + timeDelta * i, ExtenZe(i, highSlope, highIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, highSlope, highIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
-        line.new(time + timeDelta * i, ExtenZe(i, midSlope, midIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, midSlope, midIntercept), xloc=xloc.bar_time, color=ColorSchemeMidProjected)
-        line.new(time + timeDelta * i, ExtenZe(i, lowSlope, lowIntercept), time + timeDelta * (i + forLoopStep), ExtenZe(i + forLoopStep, lowSlope, lowIntercept), xloc=xloc.bar_time, color=ColorSchemeProjected)
-
-////////////////////////////////////////////////////////////////////////////////
+        line.new(time + timeDelta * i, Extension(i, highSlope, highIntercept), time + timeDelta * (i + forLoopStep), Extension(i + forLoopStep, highSlope, highIntercept), xloc=xloc.bar_time, color=colourSchemeProjected)
+        line.new(time + timeDelta * i, Extension(i, midSlope, midIntercept), time + timeDelta * (i + forLoopStep), Extension(i + forLoopStep, midSlope, midIntercept), xloc=xloc.bar_time, color=colourSchemeMidProjected)
+        line.new(time + timeDelta * i, Extension(i, lowSlope, lowIntercept), time + timeDelta * (i + forLoopStep), Extension(i + forLoopStep, lowSlope, lowIntercept), xloc=xloc.bar_time, color=colourSchemeProjected)
