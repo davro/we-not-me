@@ -113,8 +113,8 @@ t = round((time - 1231502400 * 1000) / td) // Current time duration since genesi
 //Feigenbaum constant
 lm = round(t/4.669201609102990671853203820466)
 clm = close[lm]
-plotshape(crossover(clm[3], close[3]) and clm > close, text='DCA', location=location.belowbar, style=shape.triangleup, color=#00ff88, size=size.tiny)
-bgcolor(clm > close ? color.new(#00ff88, 95) : color.new(#ff0088, 100))
+plotshape(crossover(clm[3], close[3]) and clm > close, text='DCA', location=location.belowbar, style=shape.triangleup, color=color.white, size=size.tiny)
+bgcolor(clm > close ? color.new(color.white, 95) : color.new(color.white, 100))
 
 ///////////////////////////////////////
 // RSI + MACD Background Indicator
