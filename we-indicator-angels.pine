@@ -19,7 +19,7 @@ study("WE-Angels", "WE-Angels", overlay=true)
 showEMA = input(false, title="EMA")
 
 // Simple Moving Averages
-showSMA                                 = input(false, title="SMA")
+showSMA                                 = input(true, title="SMA")
 showIndicatorAngelSMA                   = input(false, title="SMA (Angel Rainbow)")
 showIndicatorAngelSMAYearly             = input(false, title="SMA (Yearly)")
 
@@ -28,8 +28,8 @@ showIndicatorPICycleInverse             = input(true, title="PI Cycle Inverse")
 showIndicatorDCA                        = input(true, title="DCA")
 showIndicatorShortLong                  = input(false, title="Short or Long")
 showIndicatorBullBearAverage            = input(false, title="Bull Bear Average")
-showIndicatorMayerMultiplier            = input(false, title="Mayer Multiplier")
-showIndicatorGoldenDeathWithAverages    = input(false, title="Golden/Death Crosses with Averages")
+showIndicatorMayerMultiplier            = input(true, title="Mayer Multiplier")
+showIndicatorGoldenDeathWithAverages    = input(true, title="Golden/Death Crosses with Averages")
 
 // showIndicatorAngelManifestation = input(true,  title="Angel Manifestation (111)")
 // showIndicatorAngelEnjoy         = input(true,  title="Angel Enjoy (222)")
@@ -163,6 +163,10 @@ smaBB = sma200 * 2.1
 smaBBData = if (showIndicatorBullBearAverage)
     smaBB
 
+smaDCA = sma200 * 2.4
+smaDCAData = if (showSMA)
+    smaDCA
+
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTS (SMA)
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +181,7 @@ plot(sma21Data, color=color.orange, linewidth=1, transp=0, title="SMA 21")
 plot(sma50Data, color=color.blue, linewidth=2, transp=0, title="SMA 50")
 plot(sma200Data, color=color.white, linewidth=2, transp=0, title="SMA 200")
 plot(smaBBData, color=color.aqua, linewidth=1, transp=0, title="SMA BB")
+plot(smaDCAData, color=color.aqua, linewidth=1, transp=0, title="SMA DCA")
 
 // FAIR
 fairValue = if (showIndicatorPICycle)
@@ -618,6 +623,7 @@ plotshape(signalChangeLevel2, style=shape.circle, location=location.abovebar, si
 signalRealityBalanceDailyEnjoy = if (timeframe.isdaily)
     crossover(smaReality, smaEnjoy)
 plotshape(showIndicatorDCA and signalRealityBalanceDailyEnjoy, style=shape.labelup, size=size.large,  location=location.belowbar, transp=50, color=color.green, textcolor=color.white, text="DCA")
+
 // DCA BALANCE
 signalRealityBalanceDailyBalance = if (timeframe.isdaily)
     crossover(smaReality, smaBalance)
@@ -727,7 +733,32 @@ piCycleCross ( P, X, Y ) =>
 anticipatedCrossFunction(P, X, Y) => ( X * (Y - 1) * sma(P, Y - 1) - Y * (X - 1) * sma(P, X - 1) * 2) / (Y*2 - X)
 
 textEQ ( p, x, d ) => 
-    text = p < x ? "WE Angels\n\n" + tostring(round(close)) + " Current\n" + tostring(round(open)) + " Open\n" + tostring(round(sma21)) + " SMA21\n"  + tostring(round(sma50)) + " SMA50\n"  + tostring(round(sma200)) + " SMA200\n" + tostring(round(fairValue)) + " FAIR\n\n"  + tostring(round(smaAngel)) + " ANGEL\n" + tostring(round(smaEnjoy)) + " ENJOY\n" + tostring(round(smaBalance)) + " BALANCE\n"  + tostring(round(smaGuide)) + " GUIDE\n"  + tostring(round(smaChange)) + " CHANGE\n"  + tostring(round(smaReality)) + " REALITY\n" + tostring(round(smaTrust)) + " TRUST\n"  + tostring(round(smaEnergy)) + " ENERGY\n"  + tostring(round(smaLevel)) + " LEVEL" + "\n\n" + " Cycle: " + tostring(int(x*pow(10,d))/pow(10,d)) : "WE Angels\n\nCycle: " + tostring(int(x*pow(10,d))/pow(10,d)) + "\nFairAngel:" + tostring(round(fairValue - smaAngel))
+
+    textOpen    = "\nOpen: "     + tostring(round(open))
+    textSMA21   = "\nSMA21: "    + tostring(round(sma21))
+    textSMA50   = "\nSMA50: "    + tostring(round(sma50)) 
+    textSMA200  = "\nSMA200: "   + tostring(round(sma200))
+    
+    textFAIR    = "\nFAIR: "     + tostring(round(fairValue))
+    textAngel   = "\n\nANGEL: "  + tostring(round(smaAngel))
+    textEnjoy   = "\nENJOY: "    + tostring(round(smaEnjoy))
+    textBalance = "\nBALANCE: "  + tostring(round(smaBalance))
+    textGuide   = "\nGUIDE: "    + tostring(round(smaGuide))
+    textChange  = "\nCHANGE: "   + tostring(round(smaChange))
+    textReality = "\nREALITY: "  + tostring(round(smaReality))
+    textTrust   = "\nTRUST: "    + tostring(round(smaTrust))
+    textEnergy  = "\nENERGY: "   + tostring(round(smaEnergy)) 
+    textLevel   = "\nLEVEL: "    + tostring(round(smaLevel))
+    textAngelAverages = textFAIR + textAngel + textEnjoy + textBalance + textGuide + textChange + textReality + textTrust + textEnergy + textLevel
+    
+    // Show default.
+    textFairAngel = "\nFairAngel: " + tostring(round(fairValue - smaAngel))
+    textDcaAngel  = "\nDCAAngel: "  + tostring(round(smaDCAData - sma21))
+    textCycle     = "\nCycle: "     + tostring(int(x*pow(10,d))/pow(10,d))
+    textDefault   = textCycle       + textFairAngel + textDcaAngel 
+    textVisual    = "WE Angels\n"   + textDefault
+    
+    text = p < x ? textVisual + "\n\n" + "Current:" + tostring(round(close)) + textOpen + textSMA21 + textSMA50 + textSMA200 + textAngelAverages + "\n" : textVisual
 
 // textEQ2 ( p, x, d ) => 
 //     text = showIndicatorPICycleInverse and p < x ?  "\n" + " CycleA: " + tostring(int(x*pow(10,d))/pow(10,d)) : na
