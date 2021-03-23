@@ -27,7 +27,7 @@ showIndicatorPICycle                    = input(true,  title="PI Cycle")
 showIndicatorPICycleInverse             = input(true, title="PI Cycle Inverse")
 showIndicatorDCA                        = input(true, title="DCA")
 showIndicatorShortLong                  = input(false, title="Short or Long")
-showIndicatorBullBearAverage            = input(false, title="Bull Bear Average")
+showIndicatorBullBearAverage            = input(true, title="Bull Bear Average")
 showIndicatorMayerMultiplier            = input(true, title="Mayer Multiplier")
 showIndicatorGoldenDeathWithAverages    = input(true, title="Golden/Death Crosses with Averages")
 
@@ -459,6 +459,19 @@ signalELAMBDailyRedLimit = if (ema7 > smaBB)
 signalELAMBDailyRed = if (isDaily)
     crossover(sma7, ema7)
 plotshape(signalELAMBDailyRedLimit and showIndicatorDCA and signalELAMBDailyRed, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.red, textcolor=color.black, text="LAMB")
+
+////////////////////////////////////////////////////////////////////////////////
+// TESTING
+// smaLamb
+// fairValue
+// signalELAMBDailyBearLimit = if (sma21 > fairValue)
+signalDailyBearEatingRedLambLimit = if (ema7 < sma10 and ema7 < smaBB and sma21 > fairValue)
+    1
+signalELAMBDailyBear = if (isDaily)
+    crossover(sma7, ema7)
+plotshape(showIndicatorDCA and signalELAMBDailyBear and signalDailyBearEatingRedLambLimit, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.yellow, textcolor=color.black, text="POOH")
+
+////////////////////////////////////////////////////////////////////////////////
 
 // Signal Limit 
 signalLimit = if (ema3 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
