@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // @version=4
-study("WE-Angels", "WE-Angels", overlay=true)
+study("WE-Angels", "WE-Angels", overlay=true, precision = 4, linktoseries = true, max_bars_back   = 1000, max_lines_count = 500)
 
 // Exponential Moving Averages
 showEMA = input(false, title="EMA")
@@ -30,6 +30,7 @@ showIndicatorShortLong                  = input(false, title="Short or Long")
 showIndicatorBullBearAverage            = input(true, title="Bull Bear Average")
 showIndicatorMayerMultiplier            = input(true, title="Mayer Multiplier")
 showIndicatorGoldenDeathWithAverages    = input(true, title="Golden/Death Crosses with Averages")
+showIndicatorVolumeProfileVisibleRange  = input(false, title="VPVR (Volume Profile Visible Range)")
 
 // showIndicatorAngelManifestation = input(true,  title="Angel Manifestation (111)")
 // showIndicatorAngelEnjoy         = input(true,  title="Angel Enjoy (222)")
@@ -777,7 +778,8 @@ textEQ ( p, x, d ) =>
 //     text = showIndicatorPICycleInverse and p < x ?  "\n" + " CycleA: " + tostring(int(x*pow(10,d))/pow(10,d)) : na
 
 ///////////////////////////////////////////////////////////////////////////////
-// Calculations
+// CALCULATIONS
+///////////////////////////////////////////////////////////////////////////////
 
 longMA  = security(syminfo.tickerid, "D", sma(close, longMADays)*2)
 shortMA = security(syminfo.tickerid, "D", sma(close, shortMADays))
@@ -835,3 +837,154 @@ plot(showIndicatorPICycleInverse ? piAnticipatedCross : na, color=color.fuchsia,
 // remember: the alertcondition does not start alerts but creates the condition. The alerts must always be created manually in the Create Alert dialog box
 // alertcondition (crossunder(longMA, shortMA), title="Pi Cycle top", message="Pi Cycle top")
 // alertcondition (crossover(longMA, shortMA), title="Long MA above short MA", message="Long MA above short MA"
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// Volume Profile
+//
+// Studies requirements
+//      overlay         = true, 
+//      precision       = 4, 
+//      linktoseries    = true, 
+//      max_bars_back   = 1000, 
+//      max_lines_count = 500
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// INPUTS
+////////////////////////////////////////////////////////////////////////////////
+vpLookback   = input(defval = 200, 
+                     title   = "Volume Lookback Depth [10-1000]", 
+                     type    = input.integer, 
+                     minval  = 10, 
+                     maxval  = 1000)
+
+vpMaxBars   = input(defval = 500, 
+                     title   = "Number of Bars [10-500]",
+                     type    = input.integer, 
+                     minval  = 10, 
+                     maxval  = 500)
+
+vpBarMult   = input(defval = 50, 
+                     title   = "Bar Length Multiplier [10-100]",
+                     type    = input.integer, 
+                     minval  = 10, 
+                     maxval  = 100)
+
+vpBarOffset = input(defval = 30, 
+                     title   = "Bar Horizontal Offset [0-100]", 
+                     type    = input.integer, 
+                     minval  = 0, 
+                     maxval  = 100)
+
+vpBarWidth  = input(defval = 2, 
+                     title   = "Bar Width [1-20]", 
+                     type    = input.integer, 
+                     minval  = 1, 
+                     maxval  = 20)
+
+vpDeltaType = input(defval = "Both",
+                     title   = "Delta Type",
+                     type    = input.string,
+                     options = ['Both', 'Bullish', 'Bearish'])
+
+vpPocShow   = input(defval = true, 
+                     title   = "Show POC Line", 
+                     type    = input.bool)
+
+vpBarColour  = input(defval = color.new(color.gray, 60) , 
+                     title   = "Bar Color", 
+                     type    = input.color)
+
+vpPocColour  = input(defval = color.new(color.orange, 10), 
+                     title   = "POC Color", 
+                     type    = input.color)
+
+////////////////////////////////////////////////////////////////////////////////
+// VARIABLES
+////////////////////////////////////////////////////////////////////////////////
+float vpVmax = 0.0
+int vpVmaxId = 0
+int vpNBARS = vpMaxBars
+
+var int vpFirst = time
+
+vpAP = array.new_float((vpNBARS + 1), 0.0)
+vpAV = array.new_float(vpNBARS, 0.0)
+vpAD = array.new_float(vpNBARS, 0.0)
+vpAW = array.new_int(vpNBARS, 0)
+
+////////////////////////////////////////////////////////////////////////////////
+// CALCULATIONS
+////////////////////////////////////////////////////////////////////////////////
+float vpHH = highest(high, vpLookback)
+float vpLL = lowest(low, vpLookback)
+
+if barstate.islast
+	float vpHL = (vpHH - vpLL) / vpNBARS
+    for j = 1 to (vpNBARS + 1)
+        array.set(vpAP, (j-1), (vpLL + vpHL * j))
+	for i = 0 to (vpLookback - 1)
+		int Dc = 0
+		array.fill(vpAD, 0.0)
+		for j = 0 to (vpNBARS - 1)
+			float Pj = array.get(vpAP, j)
+			if low[i] < Pj and high[i] > Pj and (vpDeltaType == "Bullish" ? 
+			 close[i] >= open[i] : (vpDeltaType == "Bearish" ? close[i] <= open[i] : true))
+				float Dj = array.get(vpAD, j)
+				float dDj = Dj + nz(volume[i])
+				array.set(vpAD, j, dDj)
+				Dc := Dc + 1
+		for j = 0 to (vpNBARS - 1)
+			float Vj = array.get(vpAV, j)
+			float Dj = array.get(vpAD, j)
+			float dVj = Vj + ((Dc > 0) ? (Dj / Dc) : 0.0)
+			array.set(vpAV, j, dVj)
+	vpVmax := array.max(vpAV)
+    vpVmaxId := array.indexof(vpAV, vpVmax)
+    for j = 0 to (vpNBARS - 1)
+        float Vj = array.get(vpAV, j)
+        int Aj = round(vpBarMult * Vj / vpVmax)
+        array.set(vpAW, j, Aj)
+
+////////////////////////////////////////////////////////////////////////////////
+// PLOTING
+////////////////////////////////////////////////////////////////////////////////
+if barstate.isfirst
+    vpFirst := time
+
+vpChange = change(time)
+vpXLoc = timenow + round(vpChange * vpBarOffset)
+
+mainBarSetup(n) =>
+    x1 = ((vpVmaxId == n) and vpPocShow) ? max(time[vpLookback], vpFirst) : 
+		 (timenow + round(vpChange * (vpBarOffset - array.get(vpAW, n))))
+	ys = array.get(vpAP, n)
+    line.new(x1     = x1, 
+             y1     = ys, 
+             x2     = vpXLoc, 
+             y2     = ys, 
+             xloc   = xloc.bar_time, 
+             extend = extend.none, 
+             color  = (vpVmaxId == n ? vpPocColour : vpBarColour), 
+             style  = line.style_solid, 
+             width  = vpBarWidth)
+
+// mainBarSetupController(n) =>
+//     mainBarSetup(n)
+
+if (showIndicatorVolumeProfileVisibleRange and barstate.islast)
+    vpBARSCount = (vpNBARS - 1) 
+    for i = 0 to vpBARSCount by 1
+        // mainBarSetupController(i)
+        mainBarSetup(i)
+    
+   
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////

@@ -20,8 +20,8 @@ showSellTDs                     = input(false, title="TD Sell")
 showBuyTDs                      = input(false, title="TD Buy")
 show1to8TDs                     = input(false, title="TD 1-8")
 showTDTrendlines                = input(false, title="TD Trend Lines")
-showLogGrowthCurves             = input(false, title="Log Growth Curves")
-showLogGrowthProjectionCurves   = input(false, title="Log Growth Projection Curves")
+showLogGrowthCurves             = input(true, title="Log Growth Curves")
+showLogGrowthProjectionCurves   = input(true, title="Log Growth Projection Curves")
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -270,8 +270,6 @@ plot(showTDTrendlines and lowTrendLine > 0 ? lowTrendLine : na, title="Trendline
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-darkOrLight   = input("Dark", title="Dark mode or Light mode?", options=["Dark", "Light"])
-showFibs      = input("Y", title="Show Fibonacci Levels?", options=["Y","N"])
 highIntercept = input(1.06930947, title="Top Curve Intercept", step=0.001)
 highSlope     = input(0.00076, title="Top Curve Slope", step=0.00001)
 lowIntercept  = input(-3.0269716, title="Bottom Curve Intercept", step=0.001)
@@ -283,12 +281,14 @@ weight    = (log10(timeIndex + 10) * timeIndex * timeIndex - timeIndex) / 30000
 timeDelta = time - time[1]
 
 // Top of Channel Intercept & Slope Calcs
-highSlopeCum = highSlope * timeIndex
-highLogDev   = timeIndex > 2 ? log(weight) + highIntercept + highSlopeCum : na
+highSlopeCum  = highSlope * timeIndex
+highLogDev    = timeIndex > 2 ? log(weight) + highIntercept + highSlopeCum : na
+highestLogDev = timeIndex > 2 ? log(weight) + 1.371 + highSlopeCum : na
 
 // Bottom of channel intercept & slope calcs
 lowSlopeCum = lowSlope * timeIndex
 lowLogDev   = timeIndex > 2 ? log(weight) + lowIntercept + lowSlopeCum : na
+lowestLogDev = timeIndex > 2 ? log(weight) + -3.71 + lowSlopeCum : na
 
 // Total channel log range
 logRange = highLogDev - lowLogDev
@@ -305,44 +305,51 @@ fib1459Calc = (logRange * 0.1459) + lowLogDev
 fib0902Calc = (logRange * 0.0902) + lowLogDev
 
 // Scale Log variables to linear
+highestDev = if (showLogGrowthCurves)
+    pow(2.718281828459, highestLogDev)
+    
 highDev = if (showLogGrowthCurves)
     pow(2.718281828459, highLogDev)
     
 fib9098Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib9098Calc) : na
+    pow(2.718281828459, fib9098Calc)
     
 fib8541Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib8541Calc) : na
+    pow(2.718281828459, fib8541Calc)
     
 fib7639Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib7639Calc) : na
+    pow(2.718281828459, fib7639Calc)
     
 fib618Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib618Calc) : na
+    pow(2.718281828459, fib618Calc)
     
 midDev = if (showLogGrowthCurves)
     pow(2.718281828459, midCalc)
     
 fib382Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib382Calc) : na
+    pow(2.718281828459, fib382Calc)
     
 fib2361Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib2361Calc) : na
+    pow(2.718281828459, fib2361Calc)
     
 fib1459Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib1459Calc) : na
+    pow(2.718281828459, fib1459Calc)
     
 fib0902Dev = if (showLogGrowthCurves)
-    showFibs == "Y" ? pow(2.718281828459, fib0902Calc) : na
+    pow(2.718281828459, fib0902Calc)
 
 lowDev = if (showLogGrowthCurves)
     pow(2.718281828459, lowLogDev)
 
+lowestDev = if (showLogGrowthCurves)
+    pow(2.718281828459, lowestLogDev)
+
 // Colour Scheme
-colorBullScheme = darkOrLight == "Dark" ? color(color.red) : color(color.black)
-colorBearScheme = darkOrLight == "Dark" ? color(color.green) : color(color.black)
+colorBullScheme = color(color.red)
+colorBearScheme = color(color.green)
 
 // PLOTS - Fibonacci Levels
+plot(highestDev, color=colorBullScheme, transp=0, title="RISK 00%")
 plot(highDev, color=colorBullScheme, transp=0, title="RISK 100%")
 plot(fib9098Dev, color=colorBullScheme, transp=10, title="RISK  90.98%")
 plot(fib8541Dev, color=colorBullScheme, transp=20, title="RISK 85.41% ")
@@ -351,8 +358,9 @@ plot(fib618Dev, color=colorBullScheme, transp=0, title="RISK 61.80%")
 plot(midDev, color=color.white, transp=0, title="RISK 50%")
 plot(fib382Dev, color=colorBearScheme, transp=0, title="RISK 38.20%")
 plot(fib1459Dev, color=colorBearScheme, transp=20, title="RISK 14.59%")
-plot(fib0902Dev, color=colorBearScheme, transp=10, title="RISK 9.02%")
+// plot(fib0902Dev, color=colorBearScheme, transp=10, title="RISK 9.02%")
 plot(lowDev, color=colorBearScheme, transp=0, title="RISK 0%")
+plot(lowestDev, color=colorBearScheme, transp=0, title="RISK 00%")
 
 // Curve extension drawing function and helper variables
 Extension(_i, _slope, _intercept) =>
@@ -374,8 +382,8 @@ forLoopMax = na(forLoopStep) ? na : forLoopStep * 13
 // Mid Curve Slope & Intercept and colours
 midSlope                 = (highSlope + lowSlope) * 0.5
 midIntercept             = (highIntercept + lowIntercept) * 0.5
-colourSchemeProjected    = darkOrLight == "Dark" ? color(color.blue) : color(color.black)
-colourSchemeMidProjected = darkOrLight == "Dark" ? color(color.white) : color(color.black)
+colourSchemeProjected    = color(color.blue)
+colourSchemeMidProjected = color(color.white)
 
 if (showLogGrowthProjectionCurves and barstate.islast)
     for i = 0 to forLoopMax-1 by forLoopStep
