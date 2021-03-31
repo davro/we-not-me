@@ -709,6 +709,20 @@ plotshape(showIndicatorDCA and signalRealityBalanceDailyBalance, style=shape.lab
 //     smaLevel
 // plot(smaLevelData, color=color.red, linewidth=1, transp=0, title="LEVEL")
 
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Puell Multiple
+//
+// https://digitalik.net/btc/puell_multiple
+///////////////////////////////////////////////////////////////////////////////
+miningRevenue = security("QUANDL:BCHAIN/MIREV", "D", close[1], barmerge.gaps_off, barmerge.lookahead_on)
+ma365 = security("QUANDL:BCHAIN/MIREV", "D", sma(close, 365)[1], barmerge.gaps_off, barmerge.lookahead_on)
+puellMultiple = miningRevenue / ma365
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -721,33 +735,39 @@ plotshape(showIndicatorDCA and signalRealityBalanceDailyBalance, style=shape.lab
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-longMADays  = input ( 350, "Long MA")
-shortMADays = input ( 111, "Short MA")
-showMA      = input (true, "Show Moving Averages?", input.bool)
-showCross   = input (true, "Show cross level?", input.bool)
+longMADays           = input (350,    "Long MA")
+shortMADays          = input (111,    "Short MA")
+showMA               = input (true,   "Show Moving Averages?", input.bool)
+showCross            = input (true,   "Show cross level?", input.bool)
+showLabelPICycleTop  = input(true,    "Show label of Pi Cycle Top Cross?", input.bool)
+showLabelPICycleDown = input(true,    "Show label of crossback?", input.bool)
+decPlaces            = input(0,       "Decimal Places",   input.integer, minval=0, maxval=10)
+labelOffset          = input(6,       "Label Offset",     input.integer, minval=0, maxval=100)
+labelBgColour        = input(#FFFFFF, "Label Text Color", input.color)
 
-// i_show_anticip  = input (true, "Show PICycleInverse?", input.bool)
+// Percentage variables
+piCycleTimeframe  = input("D", "Timeframe [default Daily]",input.resolution)
+piCycleSrcData    = security(syminfo.tickerid, piCycleTimeframe, close)
+piCycleMultiplier = input(2.0, "Multiplier [default 2.0]", input.float, minval=0, maxval=10 , step=0.01)
+piCycleDecPlaces  = input(2, "Decimal Places", input.integer, minval=0, maxval=10)
 
-showLabelPICycleTop  = input( true, "Show label of Pi Cycle Top Cross?", input.bool)
-showLabelPICycleDown = input( true, "Show label of crossback?", input.bool)
-
-decPlaces     = input ( 0,       "Decimal Places",   input.integer, minval = 0, maxval = 10 )
-labelOffset   = input ( 6,       "Label Offset",     input.integer, minval = 0, maxval = 100 )
-labelBgColour = input ( #FFFFFF, "Label Text Color", input.color )
-
-///////////////////////////////////////////////////////////////////////////////
 // Declare functions
+priorSum(p, x) => sum(p[1], x - 1)
 
-priorSum ( p, x ) =>
-    sum ( p[1], x - 1 )
+piCycleCross(P, X, Y , m) => (( priorSum ( P, X ) * Y ) * m - priorSum ( P, Y ) * X ) / ( X - ( Y * m ) )
+// piCycleCross ( P, X, Y )    => (( priorSum ( P, X ) * Y)  * 2 - priorSum ( P, Y ) * X ) / ( X - ( Y * 2 ) )
 
-piCycleCross ( P, X, Y ) => 
-    (( priorSum ( P, X ) * Y)*2 - priorSum ( P, Y ) * X ) / ( X - (Y*2) )
+piCyclePercentage(P, X) => 100 - (( P / X ) * 100)
+
+// f_cross_text ( p, x, d ) => p < x ? "Pi Cycle Top Cross Above : " + tostring(int(x*pow(10,d))/pow(10,d)) : "Pi Cycle Cross Down : " + tostring(int(x*pow(10,d))/pow(10,d))
+piCyclePercentageText ( P, d ) => tostring(int(P*pow(10,d))/pow(10,d))
+
+pi_cross   = security ( syminfo.tickerid, piCycleTimeframe, piCycleCross ( piCycleSrcData, longMADays, shortMADays, piCycleMultiplier ))
+percentage = piCyclePercentage ( close, pi_cross )
 
 anticipatedCrossFunction(P, X, Y) => ( X * (Y - 1) * sma(P, Y - 1) - Y * (X - 1) * sma(P, X - 1) * 2) / (Y*2 - X)
 
-textEQ ( p, x, d ) => 
-
+textEQ( p, x, d ) => 
     textOpen    = "\nOpen: "     + tostring(round(open))
     textSMA21   = "\nSMA21: "    + tostring(round(sma21))
     textSMA50   = "\nSMA50: "    + tostring(round(sma50)) 
@@ -766,16 +786,13 @@ textEQ ( p, x, d ) =>
     textAngelAverages = textFAIR + textAngel + textEnjoy + textBalance + textGuide + textChange + textReality + textTrust + textEnergy + textLevel
     
     // Show default.
-    textFairAngel = "\nFairAngel: " + tostring(round(fairValue - smaAngel))
-    textDcaAngel  = "\nDCAAngel: "  + tostring(round(smaDCAData - sma21))
-    textCycle     = "\nCycle: "     + tostring(int(x*pow(10,d))/pow(10,d))
-    textDefault   = textCycle       + textFairAngel + textDcaAngel 
+    textFairAngel = "\nFair: " + tostring(round(fairValue - smaAngel))
+    textDcaAngel  = "\nDCA: "  + tostring(round(smaDCAData - sma21))
+    textCycle     = "\nCycle: "     + tostring(int(x*pow(10,d))/pow(10,d)) + "\nCycle: " + piCyclePercentageText(percentage, piCycleDecPlaces) + " %" + "\nPuell: " + tostring(puellMultiple, '#.##')
+    textDefault   = textCycle       + textFairAngel + textDcaAngel
     textVisual    = "WE Angels\n"   + textDefault
     
     text = p < x ? textVisual + "\n\n" + "Current:" + tostring(round(close)) + textOpen + textSMA21 + textSMA50 + textSMA200 + textAngelAverages + "\n" : textVisual
-
-// textEQ2 ( p, x, d ) => 
-//     text = showIndicatorPICycleInverse and p < x ?  "\n" + " CycleA: " + tostring(int(x*pow(10,d))/pow(10,d)) : na
 
 ///////////////////////////////////////////////////////////////////////////////
 // CALCULATIONS
@@ -787,9 +804,8 @@ srcData = security(syminfo.tickerid, "D", close)
 srcDataDebug = if (showIndicatorDebug)
     srcData
 
-piCross = security ( syminfo.tickerid, "D", piCycleCross ( srcData, longMADays, shortMADays ))
-
-piAnticipatedCross = security( syminfo.tickerid, "D", anticipatedCrossFunction ( srcData, longMADays, shortMADays ))
+piCross            = security(syminfo.tickerid, "D", piCycleCross ( srcData, longMADays, shortMADays, piCycleMultiplier ))
+piAnticipatedCross = security(syminfo.tickerid, "D", anticipatedCrossFunction ( srcData, longMADays, shortMADays ))
 
 // DISPLAY LABEL 
 // labelText = textEQ ( srcDataDebug, piCross, decPlaces ) + textEQ2 ( srcData, piAnticipatedCross, decPlaces )
@@ -838,8 +854,6 @@ plot(showIndicatorPICycleInverse ? piAnticipatedCross : na, color=color.fuchsia,
 // alertcondition (crossunder(longMA, shortMA), title="Pi Cycle top", message="Pi Cycle top")
 // alertcondition (crossover(longMA, shortMA), title="Long MA above short MA", message="Long MA above short MA"
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -865,11 +879,11 @@ vpLookback   = input(defval = 200,
                      minval  = 10, 
                      maxval  = 1000)
 
-vpMaxBars   = input(defval = 500, 
-                     title   = "Number of Bars [10-500]",
+vpMaxBars   = input(defval = 400, 
+                     title   = "Number of Bars [10-400]",
                      type    = input.integer, 
                      minval  = 10, 
-                     maxval  = 500)
+                     maxval  = 400)
 
 vpBarMult   = input(defval = 50, 
                      title   = "Bar Length Multiplier [10-100]",
@@ -984,6 +998,7 @@ if (showIndicatorVolumeProfileVisibleRange and barstate.islast)
     for i = 0 to vpBARSCount by 1
         // mainBarSetupController(i)
         mainBarSetup(i)
+        
     
    
 ////////////////////////////////////////////////////////////////////////////////
