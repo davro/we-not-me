@@ -3,6 +3,7 @@
 Welcome to the WE Indicator  (Bitcoin/Stock/$hitcoin Indicator)
 
 **Telegram:** https://t.me/we_not_me
+
 **Telegram (Signals):** https://t.me/we_not_me_signals
 
 The WE Philosophy of Investing.
