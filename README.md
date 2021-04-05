@@ -4,6 +4,8 @@ Welcome to the WE Indicator  (Bitcoin/Stock/$hitcoin Indicator)
 
 **Telegram:** https://t.me/we_not_me
 
+**Telegram (Signals):** https://t.me/we_not_me_signals
+
 The WE Philosophy of Investing.
 In the following introduction you are going to learn exactly how WE go about analyzing and beating the market.  While it certainly isn't easy, it's not nearly as difficult as most investors and traders make it.
 
