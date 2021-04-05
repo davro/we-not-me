@@ -16,12 +16,12 @@
 study("WE-Indicator", "WE", overlay=true)
 
 // Tom Demark
-showSellTDs                     = input(false, title="TD Sell")
-showBuyTDs                      = input(false, title="TD Buy")
-show1to8TDs                     = input(false, title="TD 1-8")
-showTDTrendlines                = input(false, title="TD Trend Lines")
-showLogGrowthCurves             = input(true, title="Log Growth Curves")
-showLogGrowthProjectionCurves   = input(true, title="Log Growth Projection Curves")
+showSellTDs                   = input(true, title="TD Sell")
+showBuyTDs                    = input(true, title="TD Buy")
+show1to8TDs                   = input(true, title="TD 1-8")
+showTDTrendlines              = input(true, title="TD Trend Lines")
+showLogGrowthCurves           = input(true, title="Log Growth Curves")
+showLogGrowthProjectionCurves = input(true, title="Log Growth Projection Curves")
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +210,7 @@ sellSignals := (close > close[4]) ? sellSignals[1] == 9 ? 1 : sellSignals[1] + 1
 BuyOrSell = max(buySignals, sellSignals)
 
 // Commented out to save on outputs
-// plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 1, char="", text="1", textcolor=color.green, location=location.belowbar, transp=40, title="TD1 Green")
+plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 1, char="", text="1", textcolor=color.green, location=location.belowbar, transp=40, title="TD1 Green")
 plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 2, char="", text="2", textcolor=color.green, location=location.belowbar, transp=40, title="TD2 Green")
 plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 3, char="", text="3", textcolor=color.green, location=location.belowbar, transp=40, title="TD3 Green")
 plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 4, char="", text="4", textcolor=color.green, location=location.belowbar, transp=40, title="TD4 Green")
@@ -221,7 +221,7 @@ plotchar(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 8, char="", 
 plotshape(showBuyTDs and buySignals and BuyOrSell == 9, text="9",color=color.green, textcolor=color.green, size=size.tiny, location=location.belowbar, transp=0, title="TD9 Green")
 
 // Commented out to save on outputs
-// plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 1, char="", text="1", textcolor=color.red, location=location.abovebar, transp=40, title="TD1 Red")
+plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 1, char="", text="1", textcolor=color.red, location=location.abovebar, transp=40, title="TD1 Red")
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 2, char="", text="2", textcolor=color.red, location=location.abovebar, transp=40, title="TD2 Red")
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 3, char="", text="3", textcolor=color.red, location=location.abovebar, transp=40, title="TD3 Red")
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 4, char="", text="4", textcolor=color.red, location=location.abovebar, transp=40, title="TD4 Red")
@@ -231,6 +231,19 @@ plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 7, char=""
 plotchar(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 8, char="", text="8", textcolor=color.red, location=location.abovebar, transp=20, title="TD8 Red")
 plotshape(showSellTDs and sellSignals and BuyOrSell == 9, text="9",color=color.red, textcolor=color.red, size=size.tiny, location=location.abovebar, transp=0, title="TD9 Red")
 
+// TD ALERTS (green)
+// alertcondition(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 3, title="TD3 Green", message='{"text": "TD3 Green", "view": "dev"}' )
+// alertcondition(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 6, title="TD6 Green", message='{"text": "TD6 Green", "view": "dev"}' )
+// alertcondition(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 7, title="TD7 Green", message='{"text": "TD7 Green", "view": "dev"}' )
+// alertcondition(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 8, title="TD8 Green", message='{"text": "TD8 Green", "view": "dev"}' )
+alertcondition(showBuyTDs and buySignals and BuyOrSell == 9, title="TD9 Green", message='{"text": "{{ticker}}({{exchange}} {{interval}}) TD9 Green"}' )
+
+// TD ALERTS (red)
+// alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 3, title="TD3 Red", message='{"text": "TD3 Red", "view": "dev"}' )
+// alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 6, title="TD6 Red", message='{"text": "TD6 Red", "view": "dev"}' )
+// alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 7, title="TD7 Red", message='{"text": "TD7 Red", "view": "dev"}' )
+// alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 8, title="TD8 Red", message='{"text": "TD8 Red", "view": "dev"}' )
+alertcondition(showSellTDs and sellSignals and BuyOrSell == 9, title="TD9 Red", message='{"text": "{{ticker}}({{exchange}} {{interval}}) TD9 Red"}' )
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
