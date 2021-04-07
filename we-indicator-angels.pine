@@ -378,6 +378,8 @@ plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDail
 ////////////////////////////////////////////////////////////////////////////////
 //
 // SIGNAL - CYCLE (Green/Red)
+//
+// Alertcondition for alert configuration the index allows for natural ordering.
 // 
 // 1 - CYCLE (Green)    TV Alert SET (CYCLE GREEN)
 // 2 - CYCLE (Red)      TV Alert SET (CYCLE RED)
@@ -403,6 +405,8 @@ alertcondition(topDetected, title="2 - CYCLE (Red)", message='{"text": "{{ticker
 ////////////////////////////////////////////////////////////////////////////////
 //
 // SIGNAL - DCA (Green/Red)
+//
+// Alertcondition for alert configuration the index allows for natural ordering.
 //
 // 3 - DCA (Green Enjoy)    TV Alert SET (DCA GREEN (Enjoy))
 // 4 - DCA (Green Balance)  TV Alert SET (DCA GREEN (Balance))
@@ -437,8 +441,10 @@ alertcondition(detectedPreCycleOut, title="5 - DCA (Red)", message='{"text": "{{
 //
 // SIGNAL - LAMB (Green/Red)
 //
-// 6 - LAMB (Green)
-// 7 - LAMB (Red)
+// Alertcondition for alert configuration the index allows for natural ordering.
+//
+// 6 - LAMB (Green)     TV Alert SET (LAMB GREEN)
+// 7 - LAMB (Red)       TV Alert SET (LAMB RED)
 //
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -462,6 +468,25 @@ alertcondition(signalELAMBDailyRedLimit and signalELAMBDailyRed, title="7 - LAMB
 
 
 ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// SIGNAL - POOH (yellow)
+//
+// Alertcondition for alert configuration the index allows for natural ordering.
+//
+// 8 - POOH (Yellow)    TV Alert SET (POOH)
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+signalDailyBearEatingRedLambLimit = if (ema7 < sma10 and ema7 < smaBB and sma21 > fairValue)
+    1
+signalELAMBDailyBear = if (isDaily)
+    crossover(sma7, ema7)
+plotshape(showIndicatorDCA and signalELAMBDailyBear and signalDailyBearEatingRedLambLimit, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.yellow, textcolor=color.black, text="POOH")
+alertcondition(signalELAMBDailyBear, title="8 - POOH", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) POOH (Yellow)"}')
+
+////////////////////////////////////////////////////////////////////////////////
 // WEEKLY GREEN ALPHA ANGEL
 weeklyExpoAngel = crossover(ema7+111, sma7)
 weeklyExpo = if (isWeekly and ema7+111 < sma50 and ema7+111 < smaBB )
@@ -469,6 +494,8 @@ weeklyExpo = if (isWeekly and ema7+111 < sma50 and ema7+111 < smaBB )
 plotshape(showIndicatorDCA and weeklyExpo, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="ALPHA\nANGEL")
 
 
+////////////////////////////////////////////////////////////////////////////////
+// AUDIT CLEAN UP BELOW
 ////////////////////////////////////////////////////////////////////////////////
 signalLevelTrust = if (isMinute and smaLevel > smaTrust)
     1
@@ -483,20 +510,6 @@ signalEnjoyment = if (ema7 < smaEnjoy)
 // TODO configuration point to adjust smaEnergy to smaTrust depending on DCA trust level.
 signalTrustUnderLevel = if (smaEnergy < smaLevel and smaEnjoy < smaBalance and smaGuide < smaChange)
     1
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-// TESTING
-// smaLamb
-// fairValue
-// signalELAMBDailyBearLimit = if (sma21 > fairValue)
-signalDailyBearEatingRedLambLimit = if (ema7 < sma10 and ema7 < smaBB and sma21 > fairValue)
-    1
-signalELAMBDailyBear = if (isDaily)
-    crossover(sma7, ema7)
-plotshape(showIndicatorDCA and signalELAMBDailyBear and signalDailyBearEatingRedLambLimit, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.yellow, textcolor=color.black, text="POOH")
 
 ////////////////////////////////////////////////////////////////////////////////
 
