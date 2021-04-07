@@ -503,7 +503,7 @@ weeklyExpoAngel = crossover(ema7+111, sma7)
 weeklyExpo = if (isWeekly and ema7+111 < sma50 and ema7+111 < smaBB )
     weeklyExpoAngel
 plotshape(showIndicatorDCA and weeklyExpo, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="ALPHA\nANGEL")
-alertcondition(signalELAMBDailyBear, title="9 - ALPHA ANGEL (Green)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) ALPHA ANGEL (Green)"}')
+alertcondition(weeklyExpo, title="9 - ALPHA ANGEL (Green)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) ALPHA ANGEL (Green)"}')
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -528,12 +528,13 @@ signalLong = crossover(ema3, sma3)
 signalLongTimeframe = if (isDailyOrWeekly)
     signalLong
 plotshape(signalLimit and showIndicatorLongShort and signalLongTimeframe, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="L")
+alertcondition(signalLimit and signalLongTimeframe, title="10 - LONG (Green)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) LONG (Green)"}')
 
 signalShort = crossover(sma3, ema3)
 signalShortTimeframe = if (isDailyOrWeekly)
     signalShort
 plotshape(signalLimit and showIndicatorLongShort and signalShortTimeframe, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="S")
-
+alertcondition(signalLimit and signalShortTimeframe, title="11 - SHORT (Red)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) SHORT (Red)"}')
 
 ////////////////////////////////////////////////////////////////////////////////
 // AUDIT CLEAN UP BELOW
