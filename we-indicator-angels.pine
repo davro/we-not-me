@@ -10,10 +10,20 @@
 // Donations are accepted here
 // Bitcoin: 3Ph9wP4vgASFbFP9DAabZETycXY66ebA8Y
 // 
+//
+// Signal   Timeframe   Type    Number  PlotNumber
+//
+// Cycle    Daily       Green   1       .
+// Cycle    Daily       Red     2       .
+// DCA      Daily       Green   3       .
+// DCA      Daily       Red     4       .
+// LAMB     Daily       Green   5       .
+// LAMB     Daily       Red     6       .
+//
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // @version=4
-study("WE-Angels", "WE-Angels", overlay=true, precision = 4, linktoseries = true, max_bars_back   = 1000, max_lines_count = 500)
+study("WE-Angels", "WE-Angels", overlay=true, precision = 4, linktoseries = true, max_bars_back = 1000, max_lines_count = 500)
 
 // Exponential Moving Averages
 showEMA = input(false, title="EMA")
@@ -156,10 +166,6 @@ sma4YData = if (showIndicatorAngelSMAYearly)
 sma7Y  = sma(close, 2555)
 sma7YData = if (showIndicatorAngelSMAYearly)
     sma7Y
-    
-// sma8Y  = sma(close, 2905)
-// sma9Y  = sma(close, 3255)
-// sma10Y  = sma(close, 3605) 
 
 smaBB = sma200 * 2.1
 smaBBData = if (showIndicatorBullBearAverage)
@@ -172,6 +178,7 @@ smaDCAData = if (showSMA)
 ////////////////////////////////////////////////////////////////////////////////
 // PLOTS (SMA)
 ////////////////////////////////////////////////////////////////////////////////
+
 // plot(sma3Data, color=color.blue, linewidth=1, transp=0, title="SMA 3")
 // plot(sma7Data, color=color.blue, linewidth=1, transp=0, title="SMA 7")
 plot(sma10Data, color=color.green, linewidth=1, transp=0, title="SMA 10")
@@ -234,9 +241,6 @@ plot(sma1YData, color=color.white, linewidth=1, transp=0, title="1Y")
 // plot(sma3YData, color=color.blue, linewidth=1, transp=0, title="3Y")
 // plot(sma4YData, color=color.orange, linewidth=1, transp=0, title="4Y")
 // plot(sma7YData, color=color.gray, linewidth=1, transp=0, title="7Y")
-// plot(sma8Y, color=color.gray, linewidth=1, transp=0, title="8Y")
-// plot(sma9Y, color=color.gray, linewidth=1, transp=0, title="9Y")
-// plot(sma10Y, color=color.gray, linewidth=1, transp=0, title="10Y")
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,8 +307,8 @@ plot(emaBB, color=color.green, linewidth=1, transp=0, title="EMA BB")
 
 // plot(emaAngelData, color=color.orange, linewidth=2, transp=0, title="ANGEL EMA")
 
-
 ////////////////////////////////////////////////////////////////////////////////
+//
 // Signal Core Helper Variables
 //
 // Calculate and plot the MM2.4 MM4 MM5 multipliers
@@ -341,7 +345,6 @@ isFiveMinute = if (timeframe.period == "5")
 isMinute = if (timeframe.period == "1")
     1
 
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -365,18 +368,22 @@ plot(mm24Data, color=color.yellow, transp=0, linewidth=1, title="MM 2.4")
 
 signalDeathCross = if(showIndicatorGoldenDeathWithAverages and crossover(sma200, sma50))
     sma200
-plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDaily) and signalDeathCross, style=shape.xcross, color=color.red, size=size.small, location=location.abovebar  , transp=0, textcolor=color.white, text="DEATH")
+plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDaily) and signalDeathCross, style=shape.xcross, color=color.red, size=size.small, location=location.abovebar  , transp=0, textcolor=color.white, text="DEATH", title='DEATH')
 
 signalGoldenCross = if (showIndicatorGoldenDeathWithAverages and crossunder(sma200, sma50))
     sma200
-plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDaily) and signalGoldenCross, style=shape.xcross, color=color.yellow, size=size.small, location=location.abovebar  , transp=0, textcolor=color.white, text="GOLDEN")
+plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDaily) and signalGoldenCross, style=shape.xcross, color=color.yellow, size=size.small, location=location.abovebar  , transp=0, textcolor=color.white, text="GOLDEN", title='GOLDEN')
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
-// SIGNAL - CYCLE RED/GREEN
+// SIGNAL - CYCLE (Green/Red)
+// 
+// 1 - CYCLE (Green)    TV Alert SET (CYCLE GREEN)
+// 2 - CYCLE (Red)      TV Alert SET (CYCLE RED)
 //
 // Detect the TOP and BOTTOM in a market, rendered as a RED or GREEN CYCLE 
+//
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -384,35 +391,77 @@ plotshape((isMinute or isFiveMinute or isFifthteenMinute or isFourHour or isDail
 signalBottom = if (showIndicatorPICycle)
     crossunder(sma1Y, sma2Y)
 plotshape(isDaily and signalBottom, style=shape.labelup, color=color.green, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
+alertcondition(signalBottom, title="1 - CYCLE (Green)", message='{"text": "{{ticker}}({{exchange}} {{interval}}) CYCLE (Green)"}')
 
 // DAILY RED TOP
 topDetected = if (showIndicatorPICycle)
     crossunder(fairValue, smaAngel)
 plotshape(isDaily and topDetected, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
+alertcondition(topDetected, title="2 - CYCLE (Red)", message='{"text": "{{ticker}}({{exchange}} {{interval}}) CYCLE (Red)"}')
 
 ////////////////////////////////////////////////////////////////////////////////
-// SIGNAL - DCA 
 ////////////////////////////////////////////////////////////////////////////////
+//
+// SIGNAL - DCA (Green/Red)
+//
+// 3 - DCA (Green Enjoy)    TV Alert SET (DCA GREEN (Enjoy))
+// 4 - DCA (Green Balance)  TV Alert SET (DCA GREEN (Balance))
+// 5 - DCA (Red)            TV Alert SET (DCA RED)
 //
 // Dollar Cost Average
-// Based on an idea from Thomas for finding a green pre cycle indication.
-// DCA need more studying 
+// Based on an idea from Thomas for finding a green pre cycle indication
 //
 ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
+// DCA GREEN ENJOY
+signalRealityBalanceDailyEnjoy = if (timeframe.isdaily)
+    crossover(smaReality, smaEnjoy)
+plotshape(showIndicatorDCA and signalRealityBalanceDailyEnjoy, style=shape.labelup, size=size.large,  location=location.belowbar, transp=50, color=color.green, textcolor=color.white, text="DCA (ENJOY)")
+alertcondition(signalRealityBalanceDailyEnjoy, title="3 - DCA (Green Enjoy)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) DCA (Green Enjoy)"}')
+
+// DCA GREEN BALANCE
+signalRealityBalanceDailyBalance = if (timeframe.isdaily)
+    crossover(smaReality, smaBalance)
+plotshape(showIndicatorDCA and signalRealityBalanceDailyBalance, style=shape.labelup, size=size.large,  location=location.belowbar, transp=0, color=color.green, textcolor=color.white, text="DCA (BALANCE)")
+alertcondition(signalRealityBalanceDailyBalance, title="4 - DCA (Green Balance)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) DCA (Green Balance)"}')
+
+// DCA RED
 detectedPreCycleOut = crossover(sma21, sma200 * 2.4)
 plotshape(isDaily and showIndicatorDCA and detectedPreCycleOut, style=shape.labeldown, size=size.normal, transp=20, color=color.red, textcolor=color.white, text="DCA")
+alertcondition(detectedPreCycleOut, title="5 - DCA (Red)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) DCA (Red)"}')
 
-// DCA LEVELS LAMBS YEARLY 1-3
-// signalDCALe1Year = crossunder(smaLevel, sma1Y)
-// plotshape(isDaily and showIndicatorDCA and signalDCALe1Year, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.green, textcolor=color.white, text="LAMB\n1Y")
 
-// signalDCALe2Year = crossunder(smaLevel, sma2Y)
-// plotshape(isDaily and showIndicatorDCA and signalDCALe2Year, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.green, textcolor=color.white, text="LAMB\n2Y")
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// SIGNAL - LAMB (Green/Red)
+//
+// 6 - LAMB (Green)
+// 7 - LAMB (Red)
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-// signalDCALe3Year = crossunder(smaLevel, sma3Y)
-// plotshape(isDaily and showIndicatorDCA and signalDCALe3Year, style=shape.labelup, location=location.belowbar, size=size.normal, transp=0, color=color.green, textcolor=color.white, text="LAMB\n3Y")
+// DAILY GREEN/RED LAMB
+signalELAMBDailyGreenLimit = if (ema7 < smaReality and ema7 < smaLevel )
+    1
+signalELAMBDailyGreen = if (isDaily)
+    crossover(ema7, sma7)
+plotshape(showIndicatorDCA and signalELAMBDailyGreen and signalELAMBDailyGreenLimit, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="LAMB", title="LAMB (green)")
+alertcondition(signalELAMBDailyGreen and signalELAMBDailyGreenLimit, title="6 - LAMB (Green)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) LAMB (Green)"}')
 
+// DCA RED LAMB DAILY
+// smaBB = sma200 * 2.1
+signalELAMBDailyRedLimit = if (ema7 > smaBB)
+    1
+signalELAMBDailyRed = if (isDaily)
+    crossover(sma7, ema7)
+plotshape(signalELAMBDailyRedLimit and showIndicatorDCA and signalELAMBDailyRed, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.red, textcolor=color.black, text="LAMB", title="LAMB (red)")
+alertcondition(signalELAMBDailyRedLimit and signalELAMBDailyRed, title="7 - LAMB (Red)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) LAMB (Red)"}')
+
+
+////////////////////////////////////////////////////////////////////////////////
 // WEEKLY GREEN ALPHA ANGEL
 weeklyExpoAngel = crossover(ema7+111, sma7)
 weeklyExpo = if (isWeekly and ema7+111 < sma50 and ema7+111 < smaBB )
@@ -420,8 +469,6 @@ weeklyExpo = if (isWeekly and ema7+111 < sma50 and ema7+111 < smaBB )
 plotshape(showIndicatorDCA and weeklyExpo, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="ALPHA\nANGEL")
 
 
-////////////////////////////////////////////////////////////////////////////////
-// DCA 
 ////////////////////////////////////////////////////////////////////////////////
 signalLevelTrust = if (isMinute and smaLevel > smaTrust)
     1
@@ -437,30 +484,8 @@ signalEnjoyment = if (ema7 < smaEnjoy)
 signalTrustUnderLevel = if (smaEnergy < smaLevel and smaEnjoy < smaBalance and smaGuide < smaChange)
     1
 
-////////////////////////
-// DCA DOT RED/GREEN //
-//////////////////////
-// signalLamb = if (isMinute)
-//     crossover(ema7, sma7)
-// plotshape(showIndicatorDCA and signalLamb and signalBull and signalEnjoyment and signalTrustUnderLevel, style=shape.circle, size=size.small,  location=location.belowbar, transp=0, color=color.green, textcolor=color.white, text="")
-// signalLambBear = if (isMinute)
-//     crossover(sma7, ema7)
-// plotshape(showIndicatorDCA and signalLambBear and signalBear and signalFear, style=shape.circle, size=size.small,  location=location.abovebar, transp=0, color=color.red, textcolor=color.white, text="")
 
-// DCA GREEN LAMB DAILY
-signalELAMBDailyGreenLimit = if (ema7 < smaReality and ema7 < smaLevel )
-    1
-signalELAMBDailyGreen = if (isDaily)
-    crossover(ema7, sma7)
-plotshape(showIndicatorDCA and signalELAMBDailyGreen and signalELAMBDailyGreenLimit, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="LAMB")
 
-// DCA RED LAMB DAILY
-// smaBB = sma200 * 2.1
-signalELAMBDailyRedLimit = if (ema7 > smaBB)
-    1
-signalELAMBDailyRed = if (isDaily)
-    crossover(sma7, ema7)
-plotshape(signalELAMBDailyRedLimit and showIndicatorDCA and signalELAMBDailyRed, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.red, textcolor=color.black, text="LAMB")
 
 ////////////////////////////////////////////////////////////////////////////////
 // TESTING
@@ -579,10 +604,10 @@ detectedAngelDeath = crossunder(smaAngel, sma350)
 plotshape(signalIsMinute and detectedAngelDeath, style=shape.circle,  location=location.abovebar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="ANGEL")
 
 // MINUTE / ANGEL / EMA ANGEL
-signalAngelBeingBorn = crossunder(smaAngel, emaAngel)
-plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL CROSS")
-signalAngelBeingBorn1 = crossunder(emaAngel, smaAngel)
-plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn1, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL HELL")
+// signalAngelBeingBorn = crossunder(smaAngel, emaAngel)
+// plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL CROSS")
+// signalAngelBeingBorn1 = crossunder(emaAngel, smaAngel)
+// plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn1, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL HELL")
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -621,55 +646,10 @@ plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn1, 
 ////////////////////////////////////////////////////////////////////////////////
 
 // CHANGE / LEVEL blue (PIVOT POINT Change Level)
-signalChangeLevel2 = if (timeframe.period == "1")
-    crossover(smaChange, smaLevel)
-plotshape(signalChangeLevel2, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="CHANGE 555\nLEVEL 999")
+// signalChangeLevel2 = if (timeframe.period == "1")
+//     crossover(smaChange, smaLevel)
+// plotshape(signalChangeLevel2, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="CHANGE 555\nLEVEL 999")
 
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - REALITY 666
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Average 666
-//
-////////////////////////////////////////////////////////////////////////////////
-
-// DAILY PRE OUT signal
-signalRealityBalanceDailyEnjoy = if (timeframe.isdaily)
-    crossover(smaReality, smaEnjoy)
-plotshape(showIndicatorDCA and signalRealityBalanceDailyEnjoy, style=shape.labelup, size=size.large,  location=location.belowbar, transp=50, color=color.green, textcolor=color.white, text="DCA")
-
-// DCA BALANCE
-signalRealityBalanceDailyBalance = if (timeframe.isdaily)
-    crossover(smaReality, smaBalance)
-plotshape(showIndicatorDCA and signalRealityBalanceDailyBalance, style=shape.labelup, size=size.large,  location=location.belowbar, transp=0, color=color.green, textcolor=color.white, text="DCA")
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - TRUST 777
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Average 777 
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - ENERGY 888
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Average 888
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - LEVEL 999
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Average 999
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -865,155 +845,7 @@ plot(showIndicatorPICycleInverse ? piAnticipatedCross : na, color=color.fuchsia,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-securityDowJones = security("TVC:DJI", "D", close)
-plot(showIndicatorDowJones ? securityDowJones : na)
+// securityDowJones = security("TVC:DJI", "D", close)
+// plot(showIndicatorDowJones ? securityDowJones : na)
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//
-// Volume Profile
-//
-// Studies requirements
-//      overlay         = true, 
-//      precision       = 4, 
-//      linktoseries    = true, 
-//      max_bars_back   = 1000, 
-//      max_lines_count = 500
-//
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // INPUTS
-// ////////////////////////////////////////////////////////////////////////////////
-// vpLookback   = input(defval = 200, 
-//                      title   = "Volume Lookback Depth [10-1000]", 
-//                      type    = input.integer, 
-//                      minval  = 10, 
-//                      maxval  = 1000)
-
-// vpMaxBars   = input(defval = 400, 
-//                      title   = "Number of Bars [10-400]",
-//                      type    = input.integer, 
-//                      minval  = 10, 
-//                      maxval  = 400)
-
-// vpBarMult   = input(defval = 50, 
-//                      title   = "Bar Length Multiplier [10-100]",
-//                      type    = input.integer, 
-//                      minval  = 10, 
-//                      maxval  = 100)
-
-// vpBarOffset = input(defval = 30, 
-//                      title   = "Bar Horizontal Offset [0-100]", 
-//                      type    = input.integer, 
-//                      minval  = 0, 
-//                      maxval  = 100)
-
-// vpBarWidth  = input(defval = 2, 
-//                      title   = "Bar Width [1-20]", 
-//                      type    = input.integer, 
-//                      minval  = 1, 
-//                      maxval  = 20)
-
-// vpDeltaType = input(defval = "Both",
-//                      title   = "Delta Type",
-//                      type    = input.string,
-//                      options = ['Both', 'Bullish', 'Bearish'])
-
-// vpPocShow   = input(defval = true, 
-//                      title   = "Show POC Line", 
-//                      type    = input.bool)
-
-// vpBarColour  = input(defval = color.new(color.gray, 60) , 
-//                      title   = "Bar Color", 
-//                      type    = input.color)
-
-// vpPocColour  = input(defval = color.new(color.orange, 10), 
-//                      title   = "POC Color", 
-//                      type    = input.color)
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // VARIABLES
-// ////////////////////////////////////////////////////////////////////////////////
-// float vpVmax = 0.0
-// int vpVmaxId = 0
-// int vpNBARS = vpMaxBars
-
-// var int vpFirst = time
-
-// vpAP = array.new_float((vpNBARS + 1), 0.0)
-// vpAV = array.new_float(vpNBARS, 0.0)
-// vpAD = array.new_float(vpNBARS, 0.0)
-// vpAW = array.new_int(vpNBARS, 0)
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // CALCULATIONS
-// ////////////////////////////////////////////////////////////////////////////////
-// float vpHH = highest(high, vpLookback)
-// float vpLL = lowest(low, vpLookback)
-
-// if barstate.islast
-// 	float vpHL = (vpHH - vpLL) / vpNBARS
-//     for j = 1 to (vpNBARS + 1)
-//         array.set(vpAP, (j-1), (vpLL + vpHL * j))
-// 	for i = 0 to (vpLookback - 1)
-// 		int Dc = 0
-// 		array.fill(vpAD, 0.0)
-// 		for j = 0 to (vpNBARS - 1)
-// 			float Pj = array.get(vpAP, j)
-// 			if low[i] < Pj and high[i] > Pj and (vpDeltaType == "Bullish" ? 
-// 			 close[i] >= open[i] : (vpDeltaType == "Bearish" ? close[i] <= open[i] : true))
-// 				float Dj = array.get(vpAD, j)
-// 				float dDj = Dj + nz(volume[i])
-// 				array.set(vpAD, j, dDj)
-// 				Dc := Dc + 1
-// 		for j = 0 to (vpNBARS - 1)
-// 			float Vj = array.get(vpAV, j)
-// 			float Dj = array.get(vpAD, j)
-// 			float dVj = Vj + ((Dc > 0) ? (Dj / Dc) : 0.0)
-// 			array.set(vpAV, j, dVj)
-// 	vpVmax := array.max(vpAV)
-//     vpVmaxId := array.indexof(vpAV, vpVmax)
-//     for j = 0 to (vpNBARS - 1)
-//         float Vj = array.get(vpAV, j)
-//         int Aj = round(vpBarMult * Vj / vpVmax)
-//         array.set(vpAW, j, Aj)
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // PLOTING
-// ////////////////////////////////////////////////////////////////////////////////
-// if barstate.isfirst
-//     vpFirst := time
-
-// vpChange = change(time)
-// vpXLoc = timenow + round(vpChange * vpBarOffset)
-
-// mainBarSetup(n) =>
-//     x1 = ((vpVmaxId == n) and vpPocShow) ? max(time[vpLookback], vpFirst) : 
-// 		 (timenow + round(vpChange * (vpBarOffset - array.get(vpAW, n))))
-// 	ys = array.get(vpAP, n)
-//     line.new(x1     = x1, 
-//              y1     = ys, 
-//              x2     = vpXLoc, 
-//              y2     = ys, 
-//              xloc   = xloc.bar_time, 
-//              extend = extend.none, 
-//              color  = (vpVmaxId == n ? vpPocColour : vpBarColour), 
-//              style  = line.style_solid, 
-//              width  = vpBarWidth)
-
-// // mainBarSetupController(n) =>
-// //     mainBarSetup(n)
-
-// if (showIndicatorVolumeProfileVisibleRange and barstate.islast)
-//     vpBARSCount = (vpNBARS - 1) 
-//     for i = 0 to vpBARSCount by 1
-//         // mainBarSetupController(i)
-//         mainBarSetup(i)
-        
-    
-   
-////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
