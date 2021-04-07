@@ -36,7 +36,7 @@ showIndicatorAngelSMAYearly             = input(false, title="SMA (Yearly)")
 showIndicatorPICycle                    = input(true,  title="PI Cycle")
 showIndicatorPICycleInverse             = input(true, title="PI Cycle Inverse")
 showIndicatorDCA                        = input(true, title="DCA")
-showIndicatorShortLong                  = input(false, title="Short or Long")
+showIndicatorLongShort                  = input(true, title="Long or Short")
 showIndicatorBullBearAverage            = input(true, title="Bull Bear Average")
 showIndicatorMayerMultiplier            = input(true, title="Mayer Multiplier")
 showIndicatorGoldenDeathWithAverages    = input(true, title="Golden/Death Crosses with Averages")
@@ -487,11 +487,52 @@ plotshape(showIndicatorDCA and signalELAMBDailyBear and signalDailyBearEatingRed
 alertcondition(signalELAMBDailyBear, title="8 - POOH", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) POOH (Yellow)"}')
 
 ////////////////////////////////////////////////////////////////////////////////
-// WEEKLY GREEN ALPHA ANGEL
+////////////////////////////////////////////////////////////////////////////////
+//
+// SIGNAL - ALPHA ANGEL (Green)
+//
+// Alertcondition for alert configuration the index allows for natural ordering.
+//
+// 9 - ALPHA ANGEL (Green)    TV Alert SET (ALPHA ANGEL (Green))
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// WEEKLY ALPHA ANGEL GREEN 
 weeklyExpoAngel = crossover(ema7+111, sma7)
 weeklyExpo = if (isWeekly and ema7+111 < sma50 and ema7+111 < smaBB )
     weeklyExpoAngel
 plotshape(showIndicatorDCA and weeklyExpo, style=shape.labelup, location=location.belowbar, size=size.small, transp=0, color=color.green, textcolor=color.white, text="ALPHA\nANGEL")
+alertcondition(signalELAMBDailyBear, title="9 - ALPHA ANGEL (Green)", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) ALPHA ANGEL (Green)"}')
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+// SIGNAL - LONG / SHORT ( Green / Red)
+//
+// Alertcondition for alert configuration the index allows for natural ordering.
+//
+// 10 - LONG (Green)    TV Alert SET (LONG (Green))
+// 11 - SHORT(Red)      TV Alert SET (SHORT (Red))
+//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// Signal Limit 
+signalLimit = if (ema3 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
+    1
+
+// DCA LONG/SHORT
+signalLong = crossover(ema3, sma3)
+signalLongTimeframe = if (isDailyOrWeekly)
+    signalLong
+plotshape(signalLimit and showIndicatorLongShort and signalLongTimeframe, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="L")
+
+signalShort = crossover(sma3, ema3)
+signalShortTimeframe = if (isDailyOrWeekly)
+    signalShort
+plotshape(signalLimit and showIndicatorLongShort and signalShortTimeframe, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="S")
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -511,23 +552,6 @@ signalEnjoyment = if (ema7 < smaEnjoy)
 signalTrustUnderLevel = if (smaEnergy < smaLevel and smaEnjoy < smaBalance and smaGuide < smaChange)
     1
 
-////////////////////////////////////////////////////////////////////////////////
-
-// Signal Limit 
-signalLimit = if (ema3 > smaAngel and smaAngel > smaEnjoy and sma1Y > smaGuide)
-    1
-
-// DCA LONG/SHORT
-signalLong = crossover(ema3, sma3)
-signalLongTimeframe = if (isMinute or isFiveMinute or isThrityMinute or isHour or isFourHour or isDailyOrWeekly)
-    signalLong
-plotshape(signalLimit and showIndicatorShortLong and signalLongTimeframe, style=shape.labelup, location=location.belowbar, size=size.tiny, transp=10, color=color.teal, textcolor=color.white, text="L")
-
-signalShort = crossover(sma3, ema3)
-signalShortTimeframe = if (isMinute or isFiveMinute or isThrityMinute or isHour or isFourHour or isDailyOrWeekly)
-    signalShort
-plotshape(signalLimit and showIndicatorShortLong and signalShortTimeframe, style=shape.labeldown, location=location.abovebar, size=size.tiny, transp=10, color=color.red, textcolor=color.white, text="S")
-
 //////////////////////////
 // DCA SIGNAL - YEARLY //
 ////////////////////////
@@ -541,37 +565,40 @@ signalYearlyThreeOverSevenYear = if (timeframe.period == "1")
     crossover(sma3Y, sma7Y)
 plotshape(showIndicatorDCA and signalYearlyThreeOverSevenYear, style=shape.circle, size=size.tiny,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="3Y/7Y")
 
-// Yearly Reality
-signalRealityAngel = if (timeframe.period == "1")
-    crossunder(sma1Y, smaReality)
-plotshape(showIndicatorDCA and signalRealityAngel, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.aqua, textcolor=color.white, text="YEAR\nREALITY 666")
-signalRealityAngelOver = if (timeframe.period == "1")
-    crossover(sma1Y, smaReality)
-plotshape(showIndicatorDCA and signalRealityAngelOver, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.orange, textcolor=color.white, text="YEAR\nREALITY 666")
+//
+// KEEP (Seperate into Angel Average indicators)
+//
+// // Yearly Reality
+// signalRealityAngel = if (timeframe.period == "1")
+//     crossunder(sma1Y, smaReality)
+// plotshape(showIndicatorDCA and signalRealityAngel, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.aqua, textcolor=color.white, text="YEAR\nREALITY 666")
+// signalRealityAngelOver = if (timeframe.period == "1")
+//     crossover(sma1Y, smaReality)
+// plotshape(showIndicatorDCA and signalRealityAngelOver, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.orange, textcolor=color.white, text="YEAR\nREALITY 666")
 
-// Yearly Trust
-signalTrustAngel = if (timeframe.period == "1" or timeframe.period == "5")
-    crossunder(sma1Y, smaTrust)
-plotshape(showIndicatorDCA and signalTrustAngel, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nTRUST 777")
-signalTrustAngelOver = if (timeframe.period == "1" or timeframe.period == "5")
-    crossover(sma1Y, smaTrust)
-plotshape(showIndicatorDCA and signalTrustAngelOver, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.orange, textcolor=color.white, text="YEAR\nTRUST 777")
+// // Yearly Trust
+// signalTrustAngel = if (timeframe.period == "1" or timeframe.period == "5")
+//     crossunder(sma1Y, smaTrust)
+// plotshape(showIndicatorDCA and signalTrustAngel, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nTRUST 777")
+// signalTrustAngelOver = if (timeframe.period == "1" or timeframe.period == "5")
+//     crossover(sma1Y, smaTrust)
+// plotshape(showIndicatorDCA and signalTrustAngelOver, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.orange, textcolor=color.white, text="YEAR\nTRUST 777")
 
-// Yearly Energy
-signalEnergyAngel = if (timeframe.period == "1" or timeframe.period == "5")
-    crossunder(sma1Y, smaEnergy)
-plotshape(showIndicatorDCA and signalEnergyAngel, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nENERGY 888")
-signalEnergyAngelOver = if (timeframe.period == "1")
-    crossover(sma1Y, smaEnergy)
-plotshape(showIndicatorDCA and signalEnergyAngelOver, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nENERGY 888")
+// // Yearly Energy
+// signalEnergyAngel = if (timeframe.period == "1" or timeframe.period == "5")
+//     crossunder(sma1Y, smaEnergy)
+// plotshape(showIndicatorDCA and signalEnergyAngel, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nENERGY 888")
+// signalEnergyAngelOver = if (timeframe.period == "1")
+//     crossover(sma1Y, smaEnergy)
+// plotshape(showIndicatorDCA and signalEnergyAngelOver, style=shape.circle, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nENERGY 888")
 
-// WARNING Yearly Level diamond
-signalLevelAngel = if (timeframe.period == "1" or timeframe.period == "5")
-    crossunder(sma1Y, smaLevel)
-plotshape(showIndicatorDCA and signalLevelAngel, style=shape.diamond, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nLEVEL 999")
-signalLevelAngelOver = if (timeframe.period == "1")
-    crossover(sma1Y, smaLevel)
-plotshape(showIndicatorDCA and signalLevelAngelOver, style=shape.diamond, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nLEVEL 999")
+// // WARNING Yearly Level diamond
+// signalLevelAngel = if (timeframe.period == "1" or timeframe.period == "5")
+//     crossunder(sma1Y, smaLevel)
+// plotshape(showIndicatorDCA and signalLevelAngel, style=shape.diamond, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="YEAR\nLEVEL 999")
+// signalLevelAngelOver = if (timeframe.period == "1")
+//     crossover(sma1Y, smaLevel)
+// plotshape(showIndicatorDCA and signalLevelAngelOver, style=shape.diamond, location=location.belowbar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="YEAR\nLEVEL 999")
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -616,92 +643,7 @@ plotshape(signalIsMinute and detectedAngelCreation, style=shape.circle, location
 detectedAngelDeath = crossunder(smaAngel, sma350)
 plotshape(signalIsMinute and detectedAngelDeath, style=shape.circle,  location=location.abovebar, size=size.small, transp=0, color=color.red, textcolor=color.white, text="ANGEL")
 
-// MINUTE / ANGEL / EMA ANGEL
-// signalAngelBeingBorn = crossunder(smaAngel, emaAngel)
-// plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL CROSS")
-// signalAngelBeingBorn1 = crossunder(emaAngel, smaAngel)
-// plotshape(signalIsMinute and timeframe.period == "5" and signalAngelBeingBorn1, style=shape.labeldown, location=location.abovebar, size=size.normal, transp=0, color=color.orange, textcolor=color.white, text="ANGEL HELL")
 
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - ENJOY 222
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Enjoy 222
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - BALANCE 333
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Balance 333
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - GUIDE 444
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Average 444
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// DGA SIGNAL - CHANGE 555
-////////////////////////////////////////////////////////////////////////////////
-//
-// Angel Average 555
-//
-////////////////////////////////////////////////////////////////////////////////
-
-// CHANGE / LEVEL blue (PIVOT POINT Change Level)
-// signalChangeLevel2 = if (timeframe.period == "1")
-//     crossover(smaChange, smaLevel)
-// plotshape(signalChangeLevel2, style=shape.circle, location=location.abovebar, size=size.small, transp=0, color=color.blue, textcolor=color.white, text="CHANGE 555\nLEVEL 999")
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// MAIN
-////////////////////////////////////////////////////////////////////////////////
-// plot(smaAngel, color=color.blue, linewidth=1, transp=0, title="ANGEL")
-
-// smaEnjoyData = if (showIndicatorAngelSMA)
-//     smaEnjoy
-// plot(smaEnjoyData, color=color.gray, linewidth=1, transp=0, title="ENJOY")
-
-// smaBalanceData = if (showIndicatorAngelSMA)
-//     smaBalance
-// plot(smaBalanceData, color=color.gray, linewidth=1, transp=0, title="BALANCE")
-
-// smaGuideData = if (showIndicatorAngelSMA)
-//     smaGuide
-// plot(smaGuideData, color=color.gray, linewidth=1, transp=0, title="GUIDE")
-
-// smaChangeData = if (showIndicatorAngelSMA)
-//     smaChange
-// plot(smaChangeData, color=color.blue, linewidth=2, transp=0, title="CHANGE")
-
-// smaRealityData = if (showIndicatorAngelSMA)
-//     smaReality
-// plot(smaRealityData, color=color.gray, linewidth=1, transp=0, title="REALITY")
-
-// smaTrustData = if (showIndicatorAngelSMA)
-//     smaTrust
-// plot(smaTrustData, color=color.aqua, linewidth=1, transp=0, title="TRUST")
-
-// smaEnergyData = if (showIndicatorAngelSMA)
-//     smaEnergy
-// plot(smaEnergyData, color=color.orange, linewidth=1, transp=0, title="ENERGY")
-
-// smaLevelData = if (showIndicatorAngelSMA)
-//     smaLevel
-// plot(smaLevelData, color=color.red, linewidth=1, transp=0, title="LEVEL")
 
 
 ///////////////////////////////////////////////////////////////////////////////
