@@ -236,14 +236,14 @@ plotshape(showSellTDs and sellSignals and BuyOrSell == 9, text="9",color=color.r
 // alertcondition(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 6, title="TD6 Green", message='{"text": "TD6 Green", "view": "dev"}' )
 // alertcondition(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 7, title="TD7 Green", message='{"text": "TD7 Green", "view": "dev"}' )
 // alertcondition(showBuyTDs and show1to8TDs and buySignals and BuyOrSell == 8, title="TD8 Green", message='{"text": "TD8 Green", "view": "dev"}' )
-alertcondition(showBuyTDs and buySignals and BuyOrSell == 9, title="TD9 Green", message='{"text": "{{ticker}}({{exchange}} {{interval}}) TD9 Green"}' )
+alertcondition(showBuyTDs and buySignals and BuyOrSell == 9, title="TD9 Green", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) TD9 Green"}' )
 
 // TD ALERTS (red)
 // alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 3, title="TD3 Red", message='{"text": "TD3 Red", "view": "dev"}' )
 // alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 6, title="TD6 Red", message='{"text": "TD6 Red", "view": "dev"}' )
 // alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 7, title="TD7 Red", message='{"text": "TD7 Red", "view": "dev"}' )
 // alertcondition(showSellTDs and show1to8TDs and sellSignals and BuyOrSell == 8, title="TD8 Red", message='{"text": "TD8 Red", "view": "dev"}' )
-alertcondition(showSellTDs and sellSignals and BuyOrSell == 9, title="TD9 Red", message='{"text": "{{ticker}}({{exchange}} {{interval}}) TD9 Red"}' )
+alertcondition(showSellTDs and sellSignals and BuyOrSell == 9, title="TD9 Red", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) TD9 Red"}' )
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
