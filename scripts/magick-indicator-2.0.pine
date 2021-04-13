@@ -22,8 +22,8 @@ SMA = sma(close, 365)
 
 //Draw Ribbon
 
-p1 = plot(EMA, color=#000000, title="R(EMA)", transp = 45, linewidth = 1)
-p2 = plot(SMA, color=#000000, title="R(SMA)", transp = 45, linewidth = 1)
+p1 = plot(EMA, color=#404040, title="R(EMA)", transp = 45, linewidth = 1)
+p2 = plot(SMA, color=#404040, title="R(SMA)", transp = 45, linewidth = 1)
 fill(p1, p2, transp = 87, color = EMA > SMA ? color.green : #990000)
 
 ///Group C (Trend Channel)
@@ -34,5 +34,5 @@ High = sma(ohlc4, 365)*2
 Low = ema(ohlc4, 111)
 
 //Plot MAs
-plot(High, linewidth=3, color=#000000, title="Trend High")
-plot(Low, linewidth=2, color=#000000, title="Trend Low")
+plot(High, linewidth=3, color=#404040, title="Trend High")
+plot(Low, linewidth=2, color=#404040, title="Trend Low")
