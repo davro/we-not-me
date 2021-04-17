@@ -484,7 +484,7 @@ signalDailyBearEatingRedLambLimit = if (ema7 < sma10 and ema7 < smaBB and sma21 
 signalELAMBDailyBear = if (isDaily)
     crossover(sma7, ema7)
 plotshape(showIndicatorDCA and signalELAMBDailyBear and signalDailyBearEatingRedLambLimit, style=shape.labeldown, location=location.abovebar, size=size.small, transp=0, color=color.yellow, textcolor=color.black, text="POOH")
-alertcondition(signalELAMBDailyBear, title="8 - POOH", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) POOH (Yellow)"}')
+alertcondition(signalELAMBDailyBear and signalDailyBearEatingRedLambLimit, title="8 - POOH", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) POOH (Yellow)"}')
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
