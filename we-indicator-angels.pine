@@ -32,7 +32,6 @@ showEMA = input(false, title="EMA")
 showSMA                                 = input(true, title="SMA")
 showIndicatorAngelSMA                   = input(false, title="SMA (Angel Rainbow)")
 showIndicatorAngelSMAYearly             = input(false, title="SMA (Yearly)")
-
 showIndicatorPICycle                    = input(true,  title="PI Cycle")
 showIndicatorPICycleInverse             = input(true, title="PI Cycle Inverse")
 showIndicatorDCA                        = input(true, title="DCA")
@@ -41,7 +40,7 @@ showIndicatorBullBearAverage            = input(true, title="Bull Bear Average")
 showIndicatorMayerMultiplier            = input(true, title="Mayer Multiplier")
 showIndicatorGoldenDeathWithAverages    = input(true, title="Golden/Death Crosses with Averages")
 // showIndicatorVolumeProfileVisibleRange  = input(false, title="VPVR (Volume Profile Visible Range)")
-showIndicatorDowJones                   = input(false, title="Dow Jones")
+showIndicatorCMEGaps                    = input(true, title="CME Gaps")
 
 // showIndicatorAngelManifestation = input(true,  title="Angel Manifestation (111)")
 // showIndicatorAngelEnjoy         = input(true,  title="Angel Enjoy (222)")
@@ -796,12 +795,40 @@ plot(showIndicatorPICycleInverse ? piAnticipatedCross : na, color=color.fuchsia,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
-// DJI
+// CME Gaps
 //
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 // securityDowJones = security("TVC:DJI", "D", close)
 // plot(showIndicatorDowJones ? securityDowJones : na)
+
+
+//Criteria using Weekly Sessions
+cwo = security('CME:BTC1!', 'W', open)
+pwc = security('CME:BTC1!', 'W', close[1])
+pwh = security('CME:BTC1!', 'W', high[1])
+pwl = security('CME:BTC1!', 'W', low[1])
+
+gapUp = cwo > pwh ? 1 : 0
+gapUpOpen = showIndicatorCMEGaps and gapUp == 1 ? cwo : na
+gapUpClose = showIndicatorCMEGaps and gapUp == 1 ? pwc : na
+
+gapDown = cwo < pwl ? 1 : 0
+gapDownOpen = showIndicatorCMEGaps and gapDown == 1 ? cwo : na
+gapDownClose = showIndicatorCMEGaps and gapDown == 1  ? pwc : na
+
+g = #8cffe5
+r = #ff848a
+gg = #adff75
+rr = #ff80be
+
+p1 = plot(gapUpOpen, title="Gap Up - Open", style=plot.style_circles, linewidth=1, color=g)
+p2 = plot(gapUpClose, title="Gap Up - Close", style=plot.style_circles, linewidth=1, color=g)
+fill(p1, p2, color=g, transp=70, title="Gap Up Fill")
+
+p3 = plot(gapDownOpen, title="Gap Down - Open", style=plot.style_circles, linewidth=1, color=r)
+p4 = plot(gapDownClose, title="Gap Down - Close", style=plot.style_circles, linewidth=1, color=r)
+fill(p3, p4, color=rr, transp=85, title="Gap Down Fill")
 
 ////////////////////////////////////////////////////////////////////////////////
