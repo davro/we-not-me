@@ -400,6 +400,12 @@ topDetected = if (showIndicatorPICycle)
 plotshape(isDaily and topDetected, style=shape.labeldown, color=color.red, size=size.large, location=location.abovebar, transp=0, textcolor=color.white, text="CYCLE")
 alertcondition(topDetected, title="2 - CYCLE (Red)", message='{"text": "{{ticker}}({{exchange}} {{interval}}) CYCLE (Red)"}')
 
+topBottomDetected = if (showIndicatorPICycle)
+    crossunder(smaAngel, fairValue)
+    
+plotshape(isDaily and topBottomDetected, style=shape.labelup, color=color.blue, size=size.large, location=location.belowbar, transp=0, textcolor=color.white, text="CYCLE")
+alertcondition(topBottomDetected, title="2 - CYCLE (Red)", message='{"text": "{{ticker}}({{exchange}} {{interval}}) CYCLE (Blue)"}')
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -561,9 +567,9 @@ plotshape(showIndicatorDCA and signalYearlyTwoOverSevenYear, style=shape.circle,
 signalYearlyThreeOverFourYear = if (timeframe.period == "1")
     crossover(sma3Y, sma4Y)
 plotshape(showIndicatorDCA and signalYearlyThreeOverFourYear, style=shape.circle, size=size.tiny,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="3Y/4Y")
-signalYearlyThreeOverSevenYear = if (timeframe.period == "1")
-    crossover(sma3Y, sma7Y)
-plotshape(showIndicatorDCA and signalYearlyThreeOverSevenYear, style=shape.circle, size=size.tiny,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="3Y/7Y")
+// signalYearlyThreeOverSevenYear = if (timeframe.period == "1")
+//     crossover(sma3Y, sma7Y)
+// plotshape(showIndicatorDCA and signalYearlyThreeOverSevenYear, style=shape.circle, size=size.tiny,  location=location.belowbar, transp=10, color=color.green, textcolor=color.white, text="3Y/7Y")
 
 //
 // KEEP (Seperate into Angel Average indicators)
