@@ -99,7 +99,7 @@ plotshape(signalTest, style=shape.circle, color=color.yellow, size=size.tiny, lo
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-i_ma_l      = input(100, "Histogram MA lemgth")
+i_ma_l      = input(100, "Histogram MA length")
 i_ma_breaks = input(true, "Show MA / Hist MA / Zero crosses")
 i_bc        = input(false, "Colour Bars to Hist MA line ")
 
