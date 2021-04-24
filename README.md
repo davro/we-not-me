@@ -184,3 +184,5 @@ Helpful websites and services for trading and investing.
 - https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
 - https://www.bybt.com/LongShortRatio
 - https://www.quandl.com/
+- https://exocharts.com/
+- https://bookmap.com/ 
