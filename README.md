@@ -186,3 +186,8 @@ Helpful websites and services for trading and investing.
 - https://www.quandl.com/
 - https://exocharts.com/
 - https://bookmap.com/ 
+- https://app.laevitas.ch/ (Data analytics platform)
+- 
+Helpful websites and services for taxes and legal information.
+- https://taxscouts.com/calculator/capital-gains-tax/
+
