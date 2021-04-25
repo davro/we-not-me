@@ -1,289 +1,334 @@
 //@version=4
-
 study(title="My Macro Cycle Indicator", shorttitle="mci", overlay=true)
 var cycleOutCrossed = 0
 var cycleInCrossed = 0
 var currentPreInValue = 0
+var isBtcUsd = syminfo.ticker == "BTCUSD"
+var isDaily = timeframe.isdaily
 
-/////////////////
-// State
-/////////////////
-
-timeInterval = ''
-
-colorBackground = #2A2E39 // light dark
-colorPositive   = #39d348
-colorNegative   = #ed6565
-colorWarning    = #fcac00
-colorWhite      = #fcac00
-colorSma21      = #e5de14
-colorSma111     = #5263e5
-colorSma200     = #000000
-colorSma350By2  = #000000
-colorMM24       = #63ea54
-colorMM5        = #e85376
-
-colorDashed(barIndex, color) => bar_index % 2 == 0 ? color : colorBackground
-
-currentCandleCloseRef = security(syminfo.tickerid, timeInterval, close)
-
-/////////////////
+///////////////////////////////////////////////////////////
 // Input
-/////////////////
+///////////////////////////////////////////////////////////
 
-/////////////////////////////
-// Simple Moving Average
-/////////////////////////////
+showMovingAverage = input(true, title="Show Moving Averages")
+showPiCycle = isBtcUsd and isDaily and input(false, title="Show PI Cycle And Mayers Multiple SMAs")
+showSupportBandAndTrendFilling = input(true, title="Show Support Bands And Trend filling")
+chartBackgroundColor = input(color.black, title="Chart Background Color", type=input.color)
+showDCAIn = isBtcUsd and isDaily and input(false, title="Show DCA IN (BTCUSD only)")
+cmeHistoryBack = input(title="CME history back in days", type=input.integer, defval=93)
+showTooltip = input(false, title="Show Info Tooltip")
+fearAndGreedMarket = input("Crypto", title="Fear And Greed for :", options=['Crypto', 'Traditional'])
+showKeltnerChannel = input(false, title="Show Keltner Channel")
 
-// Def
-sma21  = security(syminfo.tickerid, timeInterval, sma(close, 21))
-sma111 = security(syminfo.tickerid, timeInterval, sma(close, 111))
-sma200 = security(syminfo.tickerid, timeInterval, sma(close, 200))
-sma350By2 = security(syminfo.tickerid, timeInterval, sma(close, 350)*2)
+///////////////////////////////////////////////////////////
+// SMA
+///////////////////////////////////////////////////////////
 
-coloxr = (sma111 < sma21) ? color.green : color.red
-plotEmaRoc = plot(sma111, transp=100)
-plotHoriz  = plot(sma21, transp=100)
-fill(plotEmaRoc, plotHoriz,
-     color=coloxr, transp=90)
+// SMA 21 Days - First dynamic support
+sma_21_D  = security(syminfo.tickerid, '1D', sma(close, 21))
+sma_21_D_color = #e5de14 // Yellow
 
-// Plot
-plot(sma21, color=colorSma21, linewidth=1, title="SMA 21")
-// plot(sma111, color=colorSma111, linewidth=1, title="SMA 111")
-// plot(sma200, color=colorSma200, linewidth=1, transp=80, title="SMA 200")
-// plot(sma350By2, color=colorSma350By2, linewidth=1, transp=80, title="SMA 350*2")
+// SMA 111 Days - Coming in pair with SMA 350 days * 2 for the PI Cycle TOP
+sma_111_D = security(syminfo.tickerid, '1D', sma(close, 111))
+sma_111_D_color = #5263e5 // Blue
 
+// SMA 200 Days - Bull Market Support coming in pair with EMA 21
+sma_200_D = security(syminfo.tickerid, '1D', sma(close, 200))
+sma_200_D_color = #ffffff // White TRANSPARENT
 
-///////////////////////////
-// Mayers Multiple Lines
-//////////////////////////
+sma_4_Y = security(syminfo.tickerid, '1D', sma(close, 1458))
+sma_4_Y_color = #A15E49 // Redwood TRANSPARENT
 
-// Def
-mayersMultiple065 = sma200 * 0.65
-mayersMultiple06 = sma200 * 0.6
-mayersMultiple24 = sma200 * 2.4
-mayersMultiple5 = sma200 * 5
+sma_200_W = security(syminfo.tickerid, '1D', sma(close, 1400))
+sma_200_W_color = #A15E49 // Redwood TRANSPARENT
 
-// Plot
-plot(mayersMultiple24, color=colorDashed(bar_index, colorMM24), linewidth=1, title="MM 2.4")
-plot(mayersMultiple5, color=colorDashed(bar_index, colorMM5), linewidth=1, title="MM 5")
-plot(mayersMultiple065, color=colorDashed(bar_index, colorMM5), linewidth=1, title="MM 065")
+sma_350_D_By_2 = security(syminfo.tickerid, '1D', sma(close, 350)*2)
+sma_350_D_By_2_color = #FF312E // Red RYB
 
+sma_7_W = security(syminfo.tickerid, '1D', sma(close, 49))
+sma_7_W_color = #004F2D // Forest Green Traditional
 
-/////////////////////////////////////////////
-// Cycle Pre In  - In - Pre Out - Cycle Out
-////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// EMA
+///////////////////////////////////////////////////////////
 
-// Global variable to store if we met a cycle out or cycle previously.
-if (cycleOutCrossed == 0 and crossunder(sma350By2, sma111))
+// EMA 21 Weeks - Bull Market Support coming in pair with SMA 200
+ema_21_W  = security(syminfo.tickerid, '1D', ema(close, 147))
+ema_21_W_color = #ffffff // White TRANSPARENT
+
+///////////////////////////////////////////////////////////
+// Mayers Multiple - PI Cycle Top
+///////////////////////////////////////////////////////////
+
+colorDashed(barIndex, color) => bar_index % 2 == 0 ? color : chartBackgroundColor
+
+mayersMultiple06 = sma_200_D * 0.6
+mayersMultiple06Color = colorDashed(bar_index, #ffffff)
+
+mayersMultiple24 = sma_200_D * 2.4
+mayersMultiple24Color = colorDashed(bar_index, #63ea54)
+
+mayersMultiple5 = sma_200_D * 5
+mayersMultiple5Color = colorDashed(bar_index, #e85376)
+
+///////////////////////////////////////////////////////////
+// Moving Averages Plot
+///////////////////////////////////////////////////////////
+
+sma21DaysToPlot = showMovingAverage ? sma_21_D : na
+sma21DaysPlot = plot(sma21DaysToPlot, transp=90, color=sma_21_D_color, linewidth=1, title="SMA 21 D")
+
+sma111DaysToPlot = showMovingAverage ? sma_111_D : na
+sma111DaysPlot = plot(sma111DaysToPlot, transp=25, color=sma_111_D_color, linewidth=1, title="SMA 111 D")
+
+ema21WeeksToPlot = showSupportBandAndTrendFilling ? ema_21_W : na
+ema21WeeksPlot = plot(ema21WeeksToPlot, transp=100, color=ema_21_W_color, linewidth=1, title="EMA 21 W")
+sma200DaysToPlot = showSupportBandAndTrendFilling ? sma_200_D : na
+sma200DaysPlot = plot(sma200DaysToPlot, transp=100, color=sma_200_D_color, linewidth=1, title="SMA 200 D")
+
+sma4YearsToPlot = showSupportBandAndTrendFilling ? sma_4_Y : na
+sma4YearsPlot = plot(sma4YearsToPlot, transp=100, color=sma_4_Y_color, linewidth=1, title="SMA 4 Y")
+sma200WeeksToPlot = showSupportBandAndTrendFilling ? sma_200_W : na
+sma200WeeksPlot = plot(sma200WeeksToPlot, transp=100, color=sma_200_W_color, linewidth=1, title="SMA 200 W")
+
+sma350DaysBy2ToPlot = showPiCycle ? sma_350_D_By_2 : na
+sma350DaysBy2Plot = plot(sma350DaysBy2ToPlot, transp=25, color=sma_350_D_By_2_color, linewidth=1, title="SMA 350 D * 2")
+
+sma7WeeksToPlot = showMovingAverage ? sma_7_W : na
+sma7WeeksPlot = plot(sma7WeeksToPlot, transp=90, color=sma_7_W_color, linewidth=1, title="SMA 7 W")
+
+///////////////////////////////////////////////////////////
+// Mayers Multiple Plot
+///////////////////////////////////////////////////////////
+
+mayersMultiple06ToPlot = showPiCycle ? mayersMultiple06 : na
+mayersMultiple06Plot = plot(mayersMultiple06ToPlot, transp=25, color=mayersMultiple06Color, linewidth=1, title="MM 0.6")
+
+mayersMultiple24ToPlot = showPiCycle ? mayersMultiple24 : na
+mayersMultiple24Plot = plot(mayersMultiple24ToPlot, transp=25, color=mayersMultiple24Color, linewidth=1, title="MM 2.4")
+
+mayersMultiple5ToPlot = showPiCycle ? mayersMultiple5 : na
+mayersMultiple5Plot = plot(mayersMultiple5ToPlot, transp=25, color=mayersMultiple5Color, linewidth=1, title="MM 5")
+
+///////////////////////////////////////////////////////////
+// Support Band Plot
+///////////////////////////////////////////////////////////
+
+// Bull Market Support Band - 21 weeks ema + 200 days sma
+bullMarketSupportBandColor = #805E73 // Mauve Taupe
+fill(ema21WeeksPlot, sma200DaysPlot, color=bullMarketSupportBandColor, transp=75)
+
+// Market Support Band - 4 Years sma + 200 weeks sma
+marketSupportBandColor = #A15E49 // Redwood
+fill(sma4YearsPlot, sma200WeeksPlot, color=marketSupportBandColor, transp=75)
+
+///////////////////////////////////////////////////////////
+// Trend Color Filling
+///////////////////////////////////////////////////////////
+
+bearTrendColor = #941C2F // Crimson UA
+bullTrendColor = #60A561 // Forest Green Crayola
+
+trend1FillingToPlot = showSupportBandAndTrendFilling ? sma_7_W : na
+trend2FillingToPlot = showSupportBandAndTrendFilling ? sma_21_D : na
+trendColor = (sma_7_W < sma_21_D) ? bullTrendColor : bearTrendColor
+trendFilling_1 = plot(trend1FillingToPlot, transp=100)
+trendFilling_2  = plot(trend2FillingToPlot, transp=100)
+fill(trendFilling_1, trendFilling_2, color=trendColor, transp=75)
+
+///////////////////////////////////////////////////////////
+// PI Cycle Pre Out - Out - In
+///////////////////////////////////////////////////////////
+
+dailyClose = security(syminfo.tickerid, '1D', close)
+
+cycleInBackgroundColor = #39d348 // Lime Green
+cycleOutBackgroundColor = #ed6565 // Candy Oink
+cycleQuestionBackgroundColor = #648aea // Blue Pastel
+cycleIPreOutBackgroundColor = #fcac00 // Honey Yellow
+
+cycleIn = showPiCycle and crossover(mayersMultiple06, sma_21_D) ? dailyClose + (dailyClose/100 * 10) : na
+plotshape(cycleIn, style=shape.labelup,size=size.small, text="Cycle In", color=cycleInBackgroundColor, textcolor=chartBackgroundColor, location=location.belowbar)
+
+cyclePreOut = showPiCycle and crossover(sma_21_D, mayersMultiple24) ? dailyClose + (dailyClose/100 * 10) : na
+plotshape(cyclePreOut, style=shape.labeldown,size=size.small, text="Pre Cycle Out", color=cycleIPreOutBackgroundColor, textcolor=chartBackgroundColor, location=location.abovebar)
+
+cycleOut = showPiCycle and crossunder(sma_350_D_By_2, sma_111_D) ? dailyClose + (dailyClose/100 * 10) : na
+plotshape(cycleOut, style=shape.labeldown,size=size.small, text="Cycle Out", color=cycleOutBackgroundColor, textcolor=chartBackgroundColor, location=location.abovebar)
+
+cycleOutBis = showPiCycle and crossunder(sma_111_D, sma_350_D_By_2) ? dailyClose + (dailyClose/100 * 10) : na
+plotshape(cycleOutBis, style=shape.labelup,size=size.small, text="Continuation / Capitulation", color=cycleQuestionBackgroundColor, textcolor=chartBackgroundColor, location=location.belowbar)
+
+// Inverse Pi Cycle
+priorSum ( p, x ) =>
+    sum ( p[1], x - 1 )
+piCycleCross ( P, X, Y ) => 
+    (( priorSum ( P, X ) * Y)*2 - priorSum ( P, Y ) * X ) / ( X - (Y*2) )
+piCross = security ( syminfo.tickerid, "1D", piCycleCross ( dailyClose, 350, 111 ))
+anticipatedCrossFunction(P, X, Y) => ( X * (Y - 1) * sma(P, Y - 1) - Y * (X - 1) * sma(P, X - 1) * 2) / (Y*2 - X)
+piAnticipatedCross = security( syminfo.tickerid, "1D", anticipatedCrossFunction ( dailyClose, 350, 111 ))
+plot(showPiCycle ? piCross : na, color=color.silver)
+plot(showPiCycle ? piAnticipatedCross : na, color=color.silver, offset = 1 )
+
+// Cycle Out to Cycle In percentage
+if (cycleOutCrossed == 0 and crossunder(sma_350_D_By_2, sma_111_D))
     cycleOutCrossed := 1
     cycleInCrossed := 0
-if (cycleInCrossed == 0 and crossover(mayersMultiple06, sma21))
+if (cycleInCrossed == 0 and crossover(mayersMultiple06, sma_21_D))
     cycleOutCrossed := 0
     cycleInCrossed := 1
-    
-currentPreInValue := round(100 + (mayersMultiple06 - sma21) / sma21 * 100)
-var label lbl = na
-label.delete(lbl)
-percColor = if currentPreInValue > 87
-    colorPositive
-else if currentPreInValue > 65
-    colorWarning
-else 
-    colorNegative
-lbl := if barstate.islast and cycleOutCrossed == 1
-    label.new(bar_index[0], close, tostring(currentPreInValue) + "%", yloc = yloc.price, color = percColor, style = label.style_label_upper_right)
+currentPreInValue := round(100 + (mayersMultiple06 - sma_21_D) / sma_21_D * 100)
+
+///////////////////////////////////////////////////////////
+// DCA IN - Feigenbaum constant
+///////////////////////////////////////////////////////////
+
+timeDuration = showDCAIn ? time - time[1] : na
+timeDurationSinceGenesis = showDCAIn ? round((time - 1231502400 * 1000) / timeDuration) : na
+
+// Feigenbaum constant
+lm = showDCAIn ? round(timeDurationSinceGenesis/4.669201609102990671853203820466) : na
+clm = showDCAIn ? close[lm] : na
+plotshape(showDCAIn and crossover(clm[3], close[3]) and clm > close, text='DCA', location=location.belowbar, style=shape.triangleup, color=color.white, size=size.tiny)
+bgcolor(showDCAIn and clm > close ? color.new(color.white, 95) : color.new(color.white, 100))
+
+///////////////////////////////////////////////////////////
+// Puell Multiple
+///////////////////////////////////////////////////////////
+
+mining_revenue_1_D = security("QUANDL:BCHAIN/MIREV", "1D", close[1], barmerge.gaps_off, barmerge.lookahead_on)
+sma_355_D = security("QUANDL:BCHAIN/MIREV", "1D", sma(close, 365)[1], barmerge.gaps_off, barmerge.lookahead_on)
+puellMultiple = mining_revenue_1_D / sma_355_D
+barcolor(puellMultiple < 0.5 ? #039b42 : puellMultiple > 6 ? #d3303e : na)
+
+///////////////////////////////////////////////////////////
+// CME Gap
+///////////////////////////////////////////////////////////
+
+CME_LAST_WEEK_CLOSE = security("BTC1!", "1W", close[1], barmerge.gaps_off, barmerge.lookahead_on)
+
+var isCmeGapFilled = 0
+var cmeGapsFilled = array.new_float()
+if (isBtcUsd and cross(close, CME_LAST_WEEK_CLOSE))
+    array.push(cmeGapsFilled, CME_LAST_WEEK_CLOSE)
+
+validDate = isDaily and isBtcUsd and time >= timestamp(year(timenow), month(timenow), dayofmonth(timenow) - cmeHistoryBack, 0, 0)
+isSunday = dayofweek == dayofweek.sunday
+cmeFilled = array.includes(cmeGapsFilled, CME_LAST_WEEK_CLOSE) == true
+weekNotFilled = isSunday and cmeFilled == false
+plot(validDate and cmeFilled and isSunday == false ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.green, style=plot.style_circles, linewidth=2, transp=0)
+plot(validDate and cmeFilled and isSunday ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.green, style=plot.style_circles, linewidth=6, transp=0)
+plot(validDate and cmeFilled == false ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.red, style=plot.style_circles, linewidth=2, transp=0)
+plot(validDate and weekNotFilled ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.red, style=plot.style_circles, linewidth=6, transp=0)
+
+///////////////////////////////////////////////////////////
+// Fear & Greed
+///////////////////////////////////////////////////////////
+
+pmacd      = security(syminfo.tickerid, "D", (close/ema(close, 89) - 1) * 100, barmerge.gaps_off, barmerge.lookahead_on)
+ror        = security(syminfo.tickerid, "D", (close - close[89])/close[89] * 100, barmerge.gaps_off, barmerge.lookahead_on)
+accDist    = security(syminfo.tickerid, "D", close==high and close==low or high==low ? 0 : ((2 * close - low - high) / (high - low)), barmerge.gaps_off, barmerge.lookahead_on)
+vol        = security(syminfo.tickerid, "D", volume, barmerge.gaps_off, barmerge.lookahead_on)
+moneyFlow  = if nz(vol) != 0
+    sum(accDist * vol, 13) / sum(vol, 13) * 100
+volatility = security("BVOL24H", "D", -(close/ema(close, 89) - 1) * 100)
+btcdom     = security("BTC.D",   "D",  (1 - close[13] / close) * 100)
+vix        = security("VIX" ,    "D", -(close/ema(close, 89) - 1) * 100)
+gold       = security("GOLD",    "D",  (1 - close[13] / close) * 100)
+
+val1 = if fearAndGreedMarket == "Crypto"
+    volatility
 else
-    na
+    vix
 
-// plotshape(cyclePreIn, style=shape.labeldown,size=size.small, text=tx, color=colorWarning, textcolor=colorBackground, location=location.abovebar)
-
-cycleIn = crossover(mayersMultiple06, sma21) ? currentCandleCloseRef + (currentCandleCloseRef/100 * 10) : na
-plotshape(cycleIn, style=shape.labelup,size=size.small, text="Cycle In", color=colorPositive, textcolor=colorBackground, location=location.belowbar)
-
-cyclePreOut = crossover(sma21, mayersMultiple24) ? currentCandleCloseRef + (currentCandleCloseRef/100 * 10) : na
-plotshape(cyclePreOut, style=shape.labeldown,size=size.small, text="Pre Cycle Out", color=colorWarning, textcolor=colorBackground, location=location.abovebar)
-
-cycleOut = crossunder(sma350By2, sma111) ? currentCandleCloseRef + (currentCandleCloseRef/100 * 10) : na
-plotshape(cycleOut, style=shape.labeldown,size=size.small, text="Cycle Out", color=colorNegative, textcolor=colorBackground, location=location.abovebar)
-
-td = time - time[1]
-t = round((time - 1231502400 * 1000) / td) // Current time duration since genesis
-
-//Feigenbaum constant
-lm = round(t/4.669201609102990671853203820466)
-clm = close[lm]
-plotshape(crossover(clm[3], close[3]) and clm > close, text='DCA', location=location.belowbar, style=shape.triangleup, color=color.white, size=size.tiny)
-bgcolor(clm > close ? color.new(color.white, 95) : color.new(color.white, 100))
-
-///////////////////////////////////////
-// RSI + MACD Background Indicator
-///////////////////////////////////////
-showMacdMatchOnly = input(false, title="Show Overbought + MACD match only")
-
-fastMA = ema(high, 12)
-slowMA = ema(high, 26)
-rsi = if (timeframe.isminutes and timeframe.period == '1')
-    rsi(close, 14)
-else if (timeframe.isminutes and timeframe.period == '15')
-    rsi(close, 14)
-else 
-    rsi(close, 30)
-    
-macd = fastMA - slowMA
-macdOverExtended = if (timeframe.isdaily)
-    100 + (high - macd) / high * 100 <= 191.5 ? 100 + (high - macd) / high * 100 : 0
-else if (timeframe.isminutes and timeframe.period == '240')
-    100 + (high - macd) / high * 100 <= 197.4 ? 100 + (high - macd) / high * 100 : 0
-else if (timeframe.isminutes and timeframe.period == '15')
-    if (rsi > 60)
-        100 + (high - macd) / high * 100 <= 199 ? 100 + (high - macd) / high * 100 : 0
-    else
-        100 + (high - macd) / high * 100 >= 201 ? 100 + (high - macd) / high * 100 : 0
-else if (timeframe.isminutes and timeframe.period == '60')
-    100 + (high - macd) / high * 100 <= 198 ? 100 + (high - macd) / high * 100 : 0
-else if (timeframe.isminutes and timeframe.period == '1')
-    if (rsi > 60)
-        100 + (high - macd) / high * 100 <= 199.8 ? 100 + (high - macd) / high * 100 : 0
-    else
-        100 + (high - macd) / high * 100 >= 200.5 ? 100 + (high - macd) / high * 100 : 0
+val2 = if fearAndGreedMarket == "Crypto"
+    btcdom
 else
-    0
+    gold
 
-backgroundColorByRSI = if (timeframe.isminutes)
-
-    rsiValueHigh = if (timeframe.period == '1')
-        70
-    else if (timeframe.period == '5')
-        70
-    else if (timeframe.period == '15')
-        70
-    else if (timeframe.period == '30')
-        72
-    else if (timeframe.period == '60')
-        69
-    else if (timeframe.period == '240')
-        70
-    else
-        na
-    
-    rsiValueHigher = if (timeframe.period == '1')
-        74
-    else if (timeframe.period == '5')
-        72
-    else if (timeframe.period == '15')
-        73
-    else if (timeframe.period == '30')
-        74
-    else if (timeframe.period == '60')
-        72
-    else if (timeframe.period == '240')
-        74  
-    else
-        na
-    
-    rsiValueLow = if (timeframe.period == '1')
-        30
-    else if (timeframe.period == '5')
-        35
-    else if (timeframe.period == '15')
-        32
-    else if (timeframe.period == '30')
-        37
-    else if (timeframe.period == '60')
-        38
-    else if (timeframe.period == '240')
-        42
-    else
-        na
-    
-    rsiValueLower = if (timeframe.period == '1')
-        27
-    else if (timeframe.period == '5')
-        33
-    else if (timeframe.period == '15')
-        30
-    else if (timeframe.period == '30')
-        32
-    else if (timeframe.period == '60')
-        30
-    else if (timeframe.period == '240')
-        40
-    else
-        na
-
-    if (rsi >= rsiValueHigher and macdOverExtended > 0)
-        if (showMacdMatchOnly)
-            color.new(color.red, 40)
-        else
-            color.new(color.orange, 40)
-    else if (rsi >= rsiValueHigh and macdOverExtended > 0)
-        if (showMacdMatchOnly)
-            color.new(color.red, 40)
-        else
-            color.new(color.orange, 40)
-    else if (showMacdMatchOnly == false and rsi >= rsiValueHigher)
-        color.new(color.red, 40)
-    else if (showMacdMatchOnly == false and rsi >= rsiValueHigh)
-        color.new(color.red, 70)
-    else if (rsi <= rsiValueLower and macdOverExtended > 0)
-        if (showMacdMatchOnly)
-            color.new(color.green, 40)
-        else
-            color.new(color.blue, 40)
-    else if (rsi <= rsiValueLow and macdOverExtended > 0)
-        if (showMacdMatchOnly)
-            color.new(color.green, 40)
-        else
-            color.new(color.blue, 40)
-    else if (showMacdMatchOnly == false and rsi <= rsiValueLower)
-        color.new(color.green, 40)
-    else if (showMacdMatchOnly == false and rsi <= rsiValueLow)
-        color.new(color.green, 70)
-else if (timeframe.isdaily)
-    rsiValueHigh = 72
-    
-    rsiValueHigher = 77  
-    
-    rsiValueLow = 30
-    
-    rsiValueLower = 30
-
-    if (rsi >= rsiValueHigher and macdOverExtended > 0)
-        if (showMacdMatchOnly)
-            color.new(color.red, 40)
-        else
-            color.new(color.orange, 40)
-    else if (rsi >= rsiValueHigh and macdOverExtended > 0)
-        if (showMacdMatchOnly)
-            color.new(color.red, 40)
-        else
-            color.new(color.orange, 40)
-    else if (showMacdMatchOnly == false and rsi >= rsiValueHigher)
-        color.new(color.red, 40)
-    else if (showMacdMatchOnly == false and rsi >= rsiValueHigh)
-        color.new(color.red, 70)
-    else if (showMacdMatchOnly == false and rsi <= rsiValueLower)
-        color.new(color.green, 40)
-    else if (showMacdMatchOnly == false and rsi <= rsiValueLow)
-        color.new(color.green, 70)
-else if (timeframe.isweekly)
-    rsiValueHigh = 83
-    
-    rsiValueHigher = 90
-    
-    rsiValueLow = 44
-    
-    rsiValueLower = 42
-
-    if (showMacdMatchOnly == false and rsi >= rsiValueHigher)
-        color.new(color.red, 40)
-    else if (showMacdMatchOnly == false and rsi >= rsiValueHigh)
-        color.new(color.red, 70)
-    else if (showMacdMatchOnly == false and rsi <= rsiValueLower)
-        color.new(color.green, 40)
-    else if (showMacdMatchOnly == false and rsi <= rsiValueLow)
-        color.new(color.green, 70)
+fearAndGreedValue = if nz(vol) == 0
+    rma((pmacd + ror + val1 + val2) / 4, 2)
 else
-    na
-bgcolor(color=backgroundColorByRSI)
+    rma((pmacd + ror + moneyFlow + val1 + val2) / 5, 2)
+
+f_getText(value) =>
+    if value > 50  
+        "Extreame Greed" 
+    else if value > 20
+        "Greed"
+    else if value < -25
+        "Fear" 
+    else if value < -40
+        "Extreame Fear"
+    else
+        "Neutral"
+
+///////////////////////////////////////////////////////////
+// Text Info
+///////////////////////////////////////////////////////////
+
+textEQ () =>
+    tooltip = ''
+    tooltip2 = ''
+    tooltip := tooltip + " F & G: " + tostring(round(fearAndGreedValue, 2)) + "% (" + f_getText(fearAndGreedValue) + ")"
+    if (isBtcUsd)
+        tooltip := tooltip + "\n" + "CME Close : " + tostring(CME_LAST_WEEK_CLOSE)
+        tooltip := tooltip + "\n" + "Puell Multiple Value: " + tostring(puellMultiple, '#.#')
+        if (cycleOutCrossed == 1)
+            tooltip := tooltip + "\n" + "Pi Cycle Out to In (0% > 100%): " + tostring(currentPreInValue) + "%"
+        tooltip := tooltip + "\n\n"
+    else
+        tooltip := tooltip + "\n\n"
+    tooltip := tooltip + "#### First S/R Range ####"
+    tooltip := tooltip + "\n" + "SMA 21 D : " + tostring(sma_21_D, '#.#')
+    tooltip := tooltip + "\n" + "SMA 7 W : " + tostring(sma_7_W, '#.#')
+    
+    tooltip := tooltip + "\n\n" + "#### Intermediate S/R ####"
+    tooltip := tooltip + "\n" + "SMA 111 D : " + tostring(sma_111_D, '#.#')
+    
+    tooltip2 := tooltip2 + "\n\n" + "#### Bull Run S/R Range ####"
+    tooltip2 := tooltip2 + "\n" + "EMA 21 W : " + tostring(ema_21_W, '#.#')
+    tooltip2 := tooltip2 + "\n" + "SMA 200 D : " + tostring(sma_200_D, '#.#')
+    
+    
+    tooltip2 := tooltip2 + "\n\n" + "#### Market S/R Range ####"
+    tooltip2 := tooltip2 + "\n" + "SMA 200 W : " + tostring(sma_200_W, '#.#')
+    tooltip2 := tooltip2 + "\n" + "SMA 200 D : " + tostring(sma_4_Y, '#.#')
+    
+    tooltip + tooltip2
+
+if (showTooltip)
+    labelText = textEQ ()
+    labelXLoc = time_close + (( time_close - time_close[1] ) * 6 ) // Set Label offset
+    label = label.new (labelXLoc, hlc3, labelText , xloc.bar_time, yloc.price, color.black, label.style_label_left, color.white, size=size.normal )
+    label.delete ( label[1] )   // Delete Previous Label
+
+
+///////////////////////////////////////////////////////////
+// Keltner Channels
+///////////////////////////////////////////////////////////
+
+f_kc(_src, _len, _mult, _atrlen) =>
+
+    range = atr(_atrlen) 
+
+    basis = ema(_src, _len)
+    
+    [basis, basis + _mult * range, basis - _mult * range]
+
+
+// [middle, _     , _     ] = f_kc(close, 20, 0, 0)
+// plot(showKeltnerChannel ? middle : na, KC-Mid", color.blue, 3, transp = 73)
+
+// [_     , upper1, lower1] = f_kc(close, 20, 1., 10)
+// plot(showKeltnerChannel ? upper1 : na, KC-1", color.gray, 3, transp = 73)
+// plot(showKeltnerChannel ? lower1 : na, KC-1", color.gray, 3, transp = 73)
+
+[_     , upper2, lower2] = f_kc(close, 20, 2., 10)
+plot(showKeltnerChannel ? upper2 : na, "KC-2", color.orange, 3, transp = 73)
+plot(showKeltnerChannel ? lower2 : na, "KC-2", color.orange, 3, transp = 73)
+
+[_     , upper3, lower3] = f_kc(close, 20, 3., 10)
+plot(showKeltnerChannel ? upper3 : na, "KC-3", color.red, 3, transp = 73)
+plot(showKeltnerChannel ? lower3 : na, "KC-3", color.red, 3, transp = 73)
+
