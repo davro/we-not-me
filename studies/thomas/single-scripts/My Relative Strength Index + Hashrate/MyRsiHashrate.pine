@@ -5,11 +5,17 @@ study(title="My Relative Strength Index", shorttitle="MRSI")
 // Input
 ///////////////////////////////////////////////////////////
 rsiLength = input(30, minval=1, title="RSI Length")
-showHashrateOnLowerTimeFrame = input(false, title="Show Hashrate below Daily")
+forceShowBTCHashrate = input(false, title="Show Hashrate below Daily")
+hashRateVisibility = input("Hidden", title="Bitcoin Hashrate visibility :", options=['Hidden','Any TF', 'Higher TF', 'Lower TF'])
 
-isBtcUsd = syminfo.ticker == "BTCUSD"
-isHigherTimeFrame = timeframe.isdaily or timeframe.isweekly or timeframe.ismonthly
-showHashrate = isBtcUsd and showHashrateOnLowerTimeFrame == true or isHigherTimeFrame
+var isBtcUsd = syminfo.ticker == "BTCUSD"
+var isHigherTimeFrame = timeframe.isdaily or timeframe.isweekly or timeframe.ismonthly
+var showHTFBtcIndicators = isBtcUsd and isHigherTimeFrame
+showHashrate = false
+if (isHigherTimeFrame and (hashRateVisibility == "Any TF" or hashRateVisibility == "Higher TF"))
+    showHashrate := true
+else if (isHigherTimeFrame == false and (hashRateVisibility == "Any TF" or hashRateVisibility == "Lower TF"))
+    showHashrate := true
 
 var scaleAdujster = showHashrate ? 58 : 0
 
@@ -18,25 +24,41 @@ var scaleAdujster = showHashrate ? 58 : 0
 ///////////////////////////////////////////////////////////
 
 // Over bought - Over sold values
-rsiValueTop_top = if (timeframe.isdaily)
+rsiValueTop_top = if (timeframe.ismonthly)
+    92
+else if (timeframe.isweekly)
+    90
+else if (timeframe.isdaily)
     75
 else if (timeframe.period == '240')
     72
 else if (timeframe.period == '15')
     73
-rsiValueTop_bottom = if (timeframe.isdaily)
+rsiValueTop_bottom = if (timeframe.ismonthly)
+    84
+else if (timeframe.isweekly)
+    83
+else if (timeframe.isdaily)
     72
 else if (timeframe.period == '240')
     68
 else if (timeframe.period == '15')
     70
-rsiValueBottom_top = if (timeframe.isdaily)
+rsiValueBottom_top = if (timeframe.ismonthly)
+    52
+else if (timeframe.isweekly)
+    48
+else if (timeframe.isdaily)
     45
 else if (timeframe.period == '240')
     39
 else if (timeframe.period == '15')
     32
-rsiValueBottom_bottom = if (timeframe.isdaily)
+rsiValueBottom_bottom = if (timeframe.ismonthly)
+    49
+else if (timeframe.isweekly)
+    42
+else if (timeframe.isdaily)
     39
 else if (timeframe.period == '240')
     35
@@ -62,7 +84,12 @@ else
     rsi(close, 30)
     
 macd = fastMA - slowMA
-macdOverExtended = if (timeframe.isdaily)
+macdOverExtended = if (timeframe.isweekly)
+    if (rsiForColor > 60)
+        100 + (high - macd) / high * 100 <= 187.5 ? 100 + (high - macd) / high * 100 : 0
+    else
+        100 + (high - macd) / high * 100 >= 220 ? 100 + (high - macd) / high * 100 : 0
+else if (timeframe.isdaily)
     if (rsiForColor > 60)
         100 + (high - macd) / high * 100 <= 191.5 ? 100 + (high - macd) / high * 100 : 0
     else
@@ -189,23 +216,27 @@ else if (timeframe.isdaily)
     else if (rsiForColor <= rsiValueLow and macdOverExtended > 0)
         rsiLineColor := rsiLineReversalColor
         rsiLineWidth := 4
-// else if (timeframe.isweekly)
-//     rsiValueHigh = 83
+else if (timeframe.isweekly)
+    rsiValueHigh = 83
     
-//     rsiValueHigher = 90
+    rsiValueHigher = 90 
     
-//     rsiValueLow = 44
+    rsiValueLow = 48
     
-//     rsiValueLower = 42
+    rsiValueLower = 42
 
-//     if (showMacdMatchOnly == false and rsiForColor >= rsiValueHigher)
-//         color.new(color.red, 40)
-//     else if (showMacdMatchOnly == false and rsiForColor >= rsiValueHigh)
-//         color.new(color.red, 70)
-//     else if (showMacdMatchOnly == false and rsiForColor <= rsiValueLower)
-//         color.new(color.green, 40)
-//     else if (showMacdMatchOnly == false and rsiForColor <= rsiValueLow)
-//         color.new(color.green, 70)
+    if (rsiForColor >= rsiValueHigher and macdOverExtended > 0)
+        rsiLineColor := rsiLineReversalColor
+        rsiLineWidth := 4
+    else if (rsiForColor >= rsiValueHigh and macdOverExtended > 0)
+        rsiLineColor := rsiLineReversalColor
+        rsiLineWidth := 4
+    else if (rsiForColor <= rsiValueLower and macdOverExtended > 0)
+        rsiLineColor := rsiLineReversalColor
+        rsiLineWidth := 4
+    else if (rsiForColor <= rsiValueLow and macdOverExtended > 0)
+        rsiLineColor := rsiLineReversalColor
+        rsiLineWidth := 4
 else
     na
 

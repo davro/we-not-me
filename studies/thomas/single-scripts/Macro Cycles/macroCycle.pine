@@ -5,20 +5,23 @@ var cycleInCrossed = 0
 var currentPreInValue = 0
 var isBtcUsd = syminfo.ticker == "BTCUSD"
 var isDaily = timeframe.isdaily
+var isHigherTimeFrame = timeframe.isdaily or timeframe.isweekly or timeframe.ismonthly
+var showHTFBtcIndicators = isBtcUsd and isHigherTimeFrame
 
 ///////////////////////////////////////////////////////////
 // Input
 ///////////////////////////////////////////////////////////
 
-showMovingAverage = input(true, title="Show Moving Averages")
-showPiCycle = isBtcUsd and isDaily and input(false, title="Show PI Cycle And Mayers Multiple SMAs")
-showSupportBandAndTrendFilling = input(true, title="Show Support Bands And Trend filling")
+showMovingAverage = input(false, title="Show Moving Averages")
+showPiCycle = showHTFBtcIndicators and input(false, title="Show PI Cycle And Mayers Multiple SMAs")
+showSupportBandAndTrendFilling = input(false, title="Show Support Bands And Trend filling")
 chartBackgroundColor = input(color.black, title="Chart Background Color", type=input.color)
-showDCAIn = isBtcUsd and isDaily and input(false, title="Show DCA IN (BTCUSD only)")
-cmeHistoryBack = input(title="CME history back in days", type=input.integer, defval=93)
+showDCAIn = showHTFBtcIndicators and input(false, title="Show DCA IN (BTCUSD only)")
+cmeHistoryBack = input(title="CME history back in days", type=input.integer, defval=20)
 showTooltip = input(false, title="Show Info Tooltip")
 fearAndGreedMarket = input("Crypto", title="Fear And Greed for :", options=['Crypto', 'Traditional'])
 showKeltnerChannel = input(false, title="Show Keltner Channel")
+showCmeGap = input(false, title="Show Future CME Gap")
 
 ///////////////////////////////////////////////////////////
 // SMA
@@ -209,17 +212,30 @@ CME_LAST_WEEK_CLOSE = security("BTC1!", "1W", close[1], barmerge.gaps_off, barme
 
 var isCmeGapFilled = 0
 var cmeGapsFilled = array.new_float()
-if (isBtcUsd and cross(close, CME_LAST_WEEK_CLOSE))
+if (isDaily and showCmeGap and cross(close, CME_LAST_WEEK_CLOSE))
     array.push(cmeGapsFilled, CME_LAST_WEEK_CLOSE)
 
-validDate = isDaily and isBtcUsd and time >= timestamp(year(timenow), month(timenow), dayofmonth(timenow) - cmeHistoryBack, 0, 0)
-isSunday = dayofweek == dayofweek.sunday
+validDate = isDaily and showCmeGap and time >= timestamp(year(timenow), month(timenow), dayofmonth(timenow) - cmeHistoryBack, 0, 0)
+isFriday = dayofweek == dayofweek.friday
 cmeFilled = array.includes(cmeGapsFilled, CME_LAST_WEEK_CLOSE) == true
-weekNotFilled = isSunday and cmeFilled == false
-plot(validDate and cmeFilled and isSunday == false ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.green, style=plot.style_circles, linewidth=2, transp=0)
-plot(validDate and cmeFilled and isSunday ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.green, style=plot.style_circles, linewidth=6, transp=0)
-plot(validDate and cmeFilled == false ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.red, style=plot.style_circles, linewidth=2, transp=0)
-plot(validDate and weekNotFilled ? CME_LAST_WEEK_CLOSE : na, title="CME Gap", color=color.red, style=plot.style_circles, linewidth=6, transp=0)
+weekNotFilled = isFriday and cmeFilled == false
+
+position = if (dayofweek == dayofweek.monday)
+    3
+else if (dayofweek == dayofweek.tuesday)
+    4
+else if (dayofweek == dayofweek.wednesday)
+    5
+else if (dayofweek == dayofweek.thursday)
+    6
+else if (dayofweek == dayofweek.friday)
+    7
+else if (dayofweek == dayofweek.saturday)
+    8
+else if (dayofweek == dayofweek.sunday)
+    9
+plotshape(validDate and cmeFilled ? close[position] : na, style=shape.circle, size=size.tiny, color=color.green, location=location.absolute)
+plotshape(validDate and cmeFilled == false ? close[position] : na, style=shape.circle, size=size.tiny, color=color.red, location=location.absolute)
 
 ///////////////////////////////////////////////////////////
 // Fear & Greed
@@ -247,9 +263,9 @@ else
     gold
 
 fearAndGreedValue = if nz(vol) == 0
-    rma((pmacd + ror + val1 + val2) / 4, 2)
+    rma((pmacd + ror + val1 + val2) / 4, 1)
 else
-    rma((pmacd + ror + moneyFlow + val1 + val2) / 5, 2)
+    rma((pmacd + ror + moneyFlow + val1 + val2) / 5, 1)
 
 f_getText(value) =>
     if value > 50  
@@ -270,9 +286,9 @@ f_getText(value) =>
 textEQ () =>
     tooltip = ''
     tooltip2 = ''
-    tooltip := tooltip + " F & G: " + tostring(round(fearAndGreedValue, 2)) + "% (" + f_getText(fearAndGreedValue) + ")"
-    if (isBtcUsd)
-        tooltip := tooltip + "\n" + "CME Close : " + tostring(CME_LAST_WEEK_CLOSE)
+    tooltip := tooltip + " Fear & Greed : " + tostring(round(fearAndGreedValue, 2)) + "% (" + f_getText(fearAndGreedValue) + ")"
+    if (showHTFBtcIndicators)
+        tooltip := tooltip + "\n" + "CME Close : " + tostring(CME_LAST_WEEK_CLOSE) + (cmeFilled ? "(f)" : "")
         tooltip := tooltip + "\n" + "Puell Multiple Value: " + tostring(puellMultiple, '#.#')
         if (cycleOutCrossed == 1)
             tooltip := tooltip + "\n" + "Pi Cycle Out to In (0% > 100%): " + tostring(currentPreInValue) + "%"
@@ -309,26 +325,94 @@ if (showTooltip)
 ///////////////////////////////////////////////////////////
 
 f_kc(_src, _len, _mult, _atrlen) =>
-
     range = atr(_atrlen) 
-
     basis = ema(_src, _len)
-    
-    [basis, basis + _mult * range, basis - _mult * range]
+    [basis + _mult * range, basis - _mult * range]
 
-
-// [middle, _     , _     ] = f_kc(close, 20, 0, 0)
-// plot(showKeltnerChannel ? middle : na, KC-Mid", color.blue, 3, transp = 73)
-
-// [_     , upper1, lower1] = f_kc(close, 20, 1., 10)
-// plot(showKeltnerChannel ? upper1 : na, KC-1", color.gray, 3, transp = 73)
-// plot(showKeltnerChannel ? lower1 : na, KC-1", color.gray, 3, transp = 73)
-
-[_     , upper2, lower2] = f_kc(close, 20, 2., 10)
+[upper2, lower2] = f_kc(close, 20, 2., 10)
 plot(showKeltnerChannel ? upper2 : na, "KC-2", color.orange, 3, transp = 73)
 plot(showKeltnerChannel ? lower2 : na, "KC-2", color.orange, 3, transp = 73)
 
-[_     , upper3, lower3] = f_kc(close, 20, 3., 10)
+[upper3, lower3] = f_kc(close, 20, 3., 10)
 plot(showKeltnerChannel ? upper3 : na, "KC-3", color.red, 3, transp = 73)
 plot(showKeltnerChannel ? lower3 : na, "KC-3", color.red, 3, transp = 73)
 
+///////////////////////////////////////////////////////////
+// End of Month background color
+///////////////////////////////////////////////////////////
+
+fromDay = -2
+toDay = 2
+var int[] TradingDays = array.new_int(na)
+
+f_isLeapYear(_year) =>
+    // Any year that is evenly divisible by 4 is a leap year
+    // A year that is evenly divisible by 100 (for example, 1900) is a leap year only if it is also evenly divisible by 400.
+    (_year % 100 == 0) and (_year % 400 != 0) ? true : (_year % 4 == 0)
+
+f_daysInMonth(_year, _month) =>
+    int dpm = na
+    if _month == 2
+        dpm := 28 + (f_isLeapYear(_year) ? 1 : 0)
+    else 
+        evenMonth = _month % 2 == 0
+        beforeAug = _month < 8
+        dpm := 30 + (((not evenMonth and beforeAug) or (evenMonth and not beforeAug)) ? 1 : 0)
+
+f_initTradingDays(_arr, _month) =>
+    array.clear(_arr)
+    for dom = 1 to f_daysInMonth(year, _month)
+        array.push(_arr, dom)
+
+if showHTFBtcIndicators and (change(time("M")) or barstate.isfirst)
+    f_initTradingDays(TradingDays, month)
+
+startDay = showHTFBtcIndicators ? array.min(array.slice(TradingDays, array.size(TradingDays) - abs(fromDay))) : 0
+stopDay = showHTFBtcIndicators ? array.max(array.slice(TradingDays, 0, abs(toDay))) : 0
+
+showStartDay    = showHTFBtcIndicators and timeframe.isdaily and dayofmonth >= startDay
+showStopDay     = showHTFBtcIndicators and timeframe.isdaily and dayofmonth <= stopDay
+
+bgcolor(showStartDay ? color.red   : na, transp=85)
+bgcolor(showStopDay  ? color.green : na, transp=85)
+
+//Future
+stopDaysShort   = max(0, stopDay - dayofmonth)
+
+arrStop = array.new_int(na)
+for i=1 to stopDaysShort
+    array.push(arrStop, i)
+
+colorFutureDays = showHTFBtcIndicators and barstate.islast
+bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 1) ? color.green : na, offset=1)
+bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 2) ? color.green : na, offset=2)
+bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 3) ? color.green : na, offset=3)
+bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 4) ? color.green : na, offset=4)
+
+///////////////////////////////////////////////////////////
+// Logarithmic
+///////////////////////////////////////////////////////////
+
+timeIndex = time < 1279670400000 ? 3.0 : (time - 1279670400000) / 86400000
+weight    = (log10(timeIndex + 10) * timeIndex * timeIndex - timeIndex) / 30000
+
+highIntercept = 1.06930947
+highSlope = 0.00076
+highSlopeCum  = highSlope * timeIndex
+lowIntercept = -3.0269716
+lowSlope = 0.001329
+lowSlopeCum = lowSlope * timeIndex
+
+highLogDev    = timeIndex > 2 ? log(weight) + highIntercept + highSlopeCum : na
+lowLogDev   = timeIndex > 2 ? log(weight) + lowIntercept + lowSlopeCum : na
+
+highDev = pow(2.718281828459, highLogDev)
+logHigher = plot(isHigherTimeFrame ? highDev : na, color=color.red, transp=0, title="RISK 100%")
+
+logRange = highLogDev - lowLogDev
+fib9098Calc = (logRange * 0.9098) + lowLogDev
+
+fib9098Dev = pow(2.718281828459, fib9098Calc)
+logHigh = plot(isHigherTimeFrame ? fib9098Dev : na, color=color.red, transp=10, title="RISK  90.98%")
+
+fill(logHigher, logHigh, color=color.red, transp=75)
