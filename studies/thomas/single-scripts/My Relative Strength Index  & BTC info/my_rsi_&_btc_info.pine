@@ -4,18 +4,16 @@ study(title="My Relative Strength Index", shorttitle="MRSI")
 ///////////////////////////////////////////////////////////
 // Input
 ///////////////////////////////////////////////////////////
-rsiLength = input(30, minval=1, title="RSI Length")
-forceShowBTCHashrate = input(false, title="Show Hashrate below Daily")
-hashRateVisibility = input("Hidden", title="Bitcoin Hashrate visibility :", options=['Hidden','Any TF', 'Higher TF', 'Lower TF'])
-
 var isBtcUsd = syminfo.ticker == "BTCUSD"
-var isHigherTimeFrame = timeframe.isdaily or timeframe.isweekly or timeframe.ismonthly
-var showHTFBtcIndicators = isBtcUsd and isHigherTimeFrame
-showHashrate = false
-if (isHigherTimeFrame and (hashRateVisibility == "Any TF" or hashRateVisibility == "Higher TF"))
-    showHashrate := true
-else if (isHigherTimeFrame == false and (hashRateVisibility == "Any TF" or hashRateVisibility == "Lower TF"))
-    showHashrate := true
+var showHTFBtcIndicators = isBtcUsd and timeframe.isdaily
+
+rsiLength = input(30, minval=1, title="RSI Length")
+mode = input("RSI", title="Configuration mode :", options=['RSI', 'Bitcoin Hashrate (daily)', 'Bitcoin NVT (daily)', 'Overflow (All)'])
+
+hideRSI = (mode != "RSI" and mode != 'Overflow (All)')
+showNvt = showHTFBtcIndicators and (mode == 'Bitcoin NVT (daily)' or mode == 'Overflow (All)')
+showHashrate = showHTFBtcIndicators and (mode == 'Bitcoin Hashrate (daily)' or mode == 'Overflow (All)')
+isOverlow = mode == 'Overflow (All)'
 
 var scaleAdujster = showHashrate ? 58 : 0
 
@@ -70,12 +68,9 @@ up = rma(max(change(close), 0), rsiLength)
 down = rma(-min(change(close), 0), rsiLength)
 rsi = (down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down))) - scaleAdujster
 
-//
-//
-//
-
 fastMA = ema(high, 12)
 slowMA = ema(high, 26)
+
 rsiForColor = if (timeframe.isminutes and timeframe.period == '1')
     rsi(close, 14)
 else if (timeframe.isminutes and timeframe.period == '15')
@@ -117,43 +112,41 @@ else if (timeframe.isminutes and timeframe.period == '1') // DONE
 else
     0
 
-rsiLineColor = color.new(color.gray, 40)
+rsiLineColor = color.new(#ff9900, 40)
 rsiLineReversalColor = color.new(#be4fea, 0)
-rsiLineWidth = 2
 
-if (timeframe.isminutes)
-
-    rsiValueHigh = if (timeframe.period == '1')
-        70
-    else if (timeframe.period == '5')
-        70
-    else if (timeframe.period == '15')
-        70
-    else if (timeframe.period == '30')
+rsiValueHigh = if (timeframe.isminutes)
+    if (timeframe.period == '30')
         72
     else if (timeframe.period == '60')
         69
-    else if (timeframe.period == '240')
-        70
     else
-        na
-    
-    rsiValueHigher = if (timeframe.period == '1')
+        70
+else if (timeframe.isdaily)
+    72
+else if (timeframe.isweekly)
+    83
+else
+    na
+
+rsiValueHigher = if (timeframe.isminutes)
+    if (timeframe.period == '1' or timeframe.period == '30' or timeframe.period == '240')
         74
-    else if (timeframe.period == '5')
+    else if (timeframe.period == '5' or timeframe.period == '60')
         72
     else if (timeframe.period == '15')
         73
-    else if (timeframe.period == '30')
-        74
-    else if (timeframe.period == '60')
-        72
-    else if (timeframe.period == '240')
-        74  
     else
-        na
-    
-    rsiValueLow = if (timeframe.period == '1')
+        70
+else if (timeframe.isdaily)
+    77
+else if (timeframe.isweekly)
+    90
+else
+    na
+
+rsiValueLow = if (timeframe.isminutes)
+    if (timeframe.period == '1')
         30
     else if (timeframe.period == '5')
         35
@@ -166,90 +159,50 @@ if (timeframe.isminutes)
     else if (timeframe.period == '240')
         42
     else
-        na
-    
-    rsiValueLower = if (timeframe.period == '1')
+        30
+else if (timeframe.isdaily)
+    45
+else if (timeframe.isweekly)
+    48
+else
+    na
+
+rsiValueLower = if (timeframe.isminutes)
+    if (timeframe.period == '1')
         27
     else if (timeframe.period == '5')
         33
     else if (timeframe.period == '15')
         30
-    else if (timeframe.period == '30')
-        32
-    else if (timeframe.period == '60')
+    else if (timeframe.period == '30' or timeframe.period == '60')
         32
     else if (timeframe.period == '240')
         40
     else
-        na
-
-    if (rsiForColor >= rsiValueHigher and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor >= rsiValueHigh and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor <= rsiValueLower and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor <= rsiValueLow and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
+        30
 else if (timeframe.isdaily)
-    rsiValueHigh = 72
-    
-    rsiValueHigher = 77  
-    
-    rsiValueLow = 45
-    
-    rsiValueLower = 39
-
-    if (rsiForColor >= rsiValueHigher and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor >= rsiValueHigh and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor <= rsiValueLower and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor <= rsiValueLow and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
+    39
 else if (timeframe.isweekly)
-    rsiValueHigh = 83
-    
-    rsiValueHigher = 90 
-    
-    rsiValueLow = 48
-    
-    rsiValueLower = 42
-
-    if (rsiForColor >= rsiValueHigher and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor >= rsiValueHigh and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor <= rsiValueLower and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
-    else if (rsiForColor <= rsiValueLow and macdOverExtended > 0)
-        rsiLineColor := rsiLineReversalColor
-        rsiLineWidth := 4
+    42
 else
     na
 
-//
-//
-//
 
-plot(rsi, "RSI", color=rsiLineColor, linewidth=2)
+if (rsiForColor >= rsiValueHigher and macdOverExtended > 0)
+    rsiLineColor := rsiLineReversalColor
+else if (rsiForColor >= rsiValueHigh and macdOverExtended > 0)
+    rsiLineColor := rsiLineReversalColor
+else if (rsiForColor <= rsiValueLower and macdOverExtended > 0)
+    rsiLineColor := rsiLineReversalColor
+else if (rsiForColor <= rsiValueLow and macdOverExtended > 0)
+    rsiLineColor := rsiLineReversalColor
 
-top_top = plot(rsiValueTop_top - scaleAdujster, style=plot.style_line, color=color.red)
-top_bottom = plot(rsiValueTop_bottom - scaleAdujster, style=plot.style_line, color=color.red)
-bottom_top = plot(rsiValueBottom_top - scaleAdujster, style=plot.style_line, color=color.lime)
-bottom_bottom = plot(rsiValueBottom_bottom - scaleAdujster, style=plot.style_line, color=color.lime)
+plot(hideRSI == false ? rsi : na, "RSI", color=rsiLineColor, linewidth=2)
+
+top_top = plot(hideRSI == false ? rsiValueTop_top - scaleAdujster : na, style=plot.style_line, color=color.red)
+top_bottom = plot(hideRSI == false ? rsiValueTop_bottom - scaleAdujster : na, style=plot.style_line, color=color.red)
+bottom_top = plot(hideRSI == false ? rsiValueBottom_top - scaleAdujster : na, style=plot.style_line, color=color.lime)
+bottom_bottom = plot(hideRSI == false ? rsiValueBottom_bottom - scaleAdujster : na, style=plot.style_line, color=color.lime)
 
 fill(bottom_bottom, bottom_top, color=color.lime, transp=75)
 fill(top_top, top_bottom, color=color.red, transp=75)
@@ -271,3 +224,25 @@ diff = (delta/HR_short)*100
 
 plot(showHashrate ? diff : na, style=plot.style_line, color=(diff < 0 ? color.red : color.blue), title='BTC Hashrate', linewidth=2)
 plot(showHashrate ? 0 : na, "Mid", color=color.olive, style=plot.style_line)
+
+///////////////////////////////////////////////////////////
+// NVT Ratio
+///////////////////////////////////////////////////////////
+
+etrvu = security("QUANDL:BCHAIN/ETRVU", "D", close)
+mktcp = security("QUANDL:BCHAIN/MKTCP", "D", close)
+nvt_not_medianed = mktcp / etrvu / 2.5 - scaleAdujster
+nvtratio = percentile_nearest_rank(nvt_not_medianed, 14, 50)
+plot(showNvt ? nvtratio : na, "NVT Ratio", color=#333333, linewidth=2)
+
+ma90 = sma(close, 90)
+etrvu_ma90 = security("QUANDL:BCHAIN/ETRVU", "D", ma90)
+nvtsRaw = mktcp/etrvu_ma90
+nvts = nvtsRaw / 2.5 - scaleAdujster
+nvts_rma = rma(nvtsRaw, 90)
+nvts_ma_deviation = abs((nvtsRaw - nvts_rma) / nvts_rma)
+c_deviation = nvts_ma_deviation > 0.35
+plot(showNvt ? nvts : na, "NVT Signal", color=c_deviation ? color.white : color.gray, linewidth=1)
+
+plot(showNvt and isOverlow == false ? 150 / 2.5 : na, "Mid", color=color.olive, style=plot.style_line)
+plot(showNvt and isOverlow == false ? 45 / 2.5 : na, "Mid", color=color.olive, style=plot.style_line)
