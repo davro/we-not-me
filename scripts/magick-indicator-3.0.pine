@@ -1,0 +1,199 @@
+//@magicksean
+//@version=4
+study(title="Magicks (e)mas Indicator", shorttitle="Magick 3", overlay=true)
+
+//// This indicator is a mashup of different indicators /// Each indicator has a fixed resolution /// This indicator serves as a lense, ideal for Top-Down Analysis//// 
+// Components: 
+// 1. An array of moving averages. (ex 21w EMA, 50 4hr MA,)
+// 2. Logarithmic Curves (tuned for BTC)
+// 3. ..
+
+// COLOR SCHEME
+DarkOrLight =   input("Light", title="Dark mode or Light mode?", options=["Dark", "Light"])
+ColorScheme =   DarkOrLight == "Dark" ? color(color.white) : color(color.black)
+
+/////////////////////////////////////////////////////// Moving Averages /////////////////////////////////////////////////////////////////////////////
+
+// Groups:
+// A. 2 Magick MA's 
+// B. BTC 1W Support Band 
+// C. Magick BTC Trend Channel
+
+///////////////////// Group A //////////////////////////////////////////////////
+// (21ema + 50ema)610m //
+
+// INPUT (A)
+
+Mema1l = input(21, title= "-Fast MMA Length-")
+Mema1type = input(title="SMA?", type= input.bool, defval = false)
+Mema2l = input(50, title= "-Slow MMA Length-")
+Mema2type = input(title="SMA?", type= input.bool, defval = false)
+MaRes= input("610", title= "-Magick MA's Resolution-", type = input.resolution)
+
+// FUNCTION (A)
+
+Mema1 = ema(ohlc4, Mema1l)
+Mema11 = security(syminfo.tickerid, MaRes, Mema1, barmerge.gaps_off, barmerge.lookahead_off)
+Msma1 = sma(ohlc4, Mema1l)
+Msma11 = security(syminfo.tickerid, MaRes, Msma1, barmerge.gaps_off, barmerge.lookahead_off)
+
+Mema2 = ema(ohlc4, Mema2l)
+Mema22 = security(syminfo.tickerid, MaRes, Mema2, barmerge.gaps_off, barmerge.lookahead_off)
+Msma2 = sma(ohlc4, Mema2l)
+Msma22 = security(syminfo.tickerid, MaRes, Msma2, barmerge.gaps_off, barmerge.lookahead_off)
+
+// OUTPUT (A)
+
+plot(Mema1type ? Mema11 : Msma11, linewidth=1, color=ColorScheme, title= "MMA Fast")
+plot(Mema2type ? Mema22 : Msma22, linewidth=1, color=ColorScheme, title= "MMA Slow")
+
+
+///////////////////////////////////// Group B //////////////////////////////////
+// (e)ma Ribbon //
+
+// INPUT (B)
+
+Ribbonl = input(21, title= "--Ribbon Length--")
+RibbonRes= input("1W", title= "--Ribbon Resolution--", type = input.resolution)
+
+// FUNCTION (B)
+
+Rema = ema(close, Ribbonl)
+Rema1 = security(syminfo.tickerid, RibbonRes, Rema, barmerge.gaps_off, barmerge.lookahead_off)
+Rsma = sma(close, Ribbonl)
+Rsma1 = security(syminfo.tickerid, RibbonRes, Rsma, barmerge.gaps_off, barmerge.lookahead_off)
+
+// OUTPUT (B)
+p1 = plot(Rema1, color=#000000, title="(R)ema", transp = 45, linewidth = 1)
+p2 = plot(Rsma1, color=#000000, title="(R)sma", transp = 45, linewidth = 1)
+fill(p1, p2, transp = 87, color = Rema1 > Rsma1 ? color.green : #990000)
+
+///////////////////////////////////////// Group C //////////////////////////////
+// MA Trend Channel //
+
+// INPUT (C)
+
+TrendHighl = input(365, title= "---TrendHigh Length---")
+TrendLowl = input(111, title= "---TrendLow Length---")
+TrendChannelRes= input("610", title= "---Ribbon Resolution---", type = input.resolution)
+
+// FUNCTION (C)
+
+TrendHigh = sma(ohlc4,TrendHighl)*2
+TrendHigh1 = security(syminfo.tickerid, TrendChannelRes, TrendHigh, barmerge.gaps_off, barmerge.lookahead_off)
+TrendLow= ema(ohlc4,TrendLowl)
+TrendLow1 = security(syminfo.tickerid, TrendChannelRes, TrendLow, barmerge.gaps_off, barmerge.lookahead_off)
+
+// OUTPUT (C)
+
+plot(TrendHigh1, linewidth=3, color=ColorScheme, title="Trend High")
+plot(TrendLow1, linewidth=2, color=ColorScheme, title="Trend Low")
+
+
+/////////////////////////////////////////////////////// End Of Moving Averages /////////////////////////////////////////////////////////////////////////////
+
+// /////////////////////////////////////////////////////// BTC Log Curves by Quantadelic /////////////////////////////////////////////////////////////////////////////
+
+// //
+// // An indicator by @Quantadelic aka Pinescript Pleb aka Stealer of Alpha & Destroyer of Discords
+// //
+// // "I drink your milkshake! I drink it up."
+// //
+// // No rights reserved, copy, paste, do what you want.
+
+// // INPUTS
+// ShowFibs =      input("Y", title="Show Fibonacci Levels?", options=["Y","N"])
+// ShowExtensions= input("Y", title="Show Curve Projections?", options=["Y","N"])
+// HighIntercept = input(1.06930947, title="Top Curve Intercept", step=0.001)
+// HighSlope =     input(0.000775, title="Top Curve Slope", step=0.00001)
+// LowIntercept =  input(-2.1469716, title="Bottom Curve Intercept", step=0.01)
+// LowSlope =      input(0.001039, title="Bottom Curve Slope", step=0.00001)
+
+// // TIME CALCS
+// TimeIndex =     time < 1279670400000 ? 3.0 : (time - 1279670400000) / 86400000
+// Weight =        (log10(TimeIndex + 10) * TimeIndex * TimeIndex - TimeIndex) / 30000
+// TimeDelta =     time - time[1]
+
+// // TOP OF CHANNEL INTERCEPT & SLOPE CALCS
+// HighSlopeCum =  HighSlope * TimeIndex
+// HighLogDev =    TimeIndex > 2 ? log(Weight) + HighIntercept + HighSlopeCum : na
+
+// // BOTTOM OF CHANNEL INTERCEPT & SLOPE CALCS
+// LowSlopeCum =   LowSlope * TimeIndex
+// LowLogDev =     TimeIndex > 2 ? log(Weight) + LowIntercept + LowSlopeCum : na
+
+// // TOTAL CHANNEL LOG RANGE
+// LogRange =      HighLogDev - LowLogDev
+
+// // FIBONACCI LEVELS
+// Fib9098Calc =   (LogRange * 1) + LowLogDev
+// Fib8541Calc =   (LogRange * 0.886) + LowLogDev
+// Fib7639Calc =   (LogRange * 0.786) + LowLogDev
+// Fib618Calc =    (LogRange * 0.618) + LowLogDev
+// MidCalc =       (LogRange * 0.5) + LowLogDev
+// Fib382Calc =    (LogRange * 0.382) + LowLogDev
+// Fib2361Calc =   (LogRange * 0.2361) + LowLogDev
+// Fib1459Calc =   (LogRange * -0.236) + LowLogDev
+// Fib0902Calc =   (LogRange * 0.001) + LowLogDev
+
+// // SCALE LOG VARIABLES TO LINEAR
+// HighDev =       pow(2.718281828459, HighLogDev)
+// Fib9098Dev =    ShowFibs == "Y" ? pow(2.718281828459, Fib9098Calc) : na
+// Fib8541Dev =    ShowFibs == "Y" ? pow(2.718281828459, Fib8541Calc) : na
+// Fib7639Dev =    ShowFibs == "Y" ? pow(2.718281828459, Fib7639Calc) : na
+// Fib618Dev =     ShowFibs == "Y" ? pow(2.718281828459, Fib618Calc) : na
+// MidDev =        pow(2.718281828459, MidCalc)
+// Fib382Dev =     ShowFibs == "Y" ? pow(2.718281828459, Fib382Calc) : na
+// Fib2361Dev =    ShowFibs == "Y" ? pow(2.718281828459, Fib2361Calc) : na
+// Fib1459Dev =    ShowFibs == "Y" ? pow(2.718281828459, Fib1459Calc) : na
+// Fib0902Dev =    ShowFibs == "Y" ? pow(2.718281828459, Fib0902Calc) : na
+// LowDev =        pow(2.718281828459, LowLogDev)
+
+
+// // PLOTS
+// plot(HighDev, color=ColorScheme, transp=0, title="100% - Top of Channel")
+// plot(Fib8541Dev, color=ColorScheme, transp=50, title="88.6% - Fibonacci Level")
+// plot(Fib7639Dev, color=ColorScheme, transp=50, title="78.6% - Fibonacci Level")
+// plot(Fib618Dev, color=ColorScheme, transp=50, title="61.80% - Fibonacci Level")
+// plot(MidDev, color=ColorScheme, transp=0, title="50% - Middle of Channel")
+// plot(Fib382Dev, color=ColorScheme, transp=50, title="38.20% - Fibonacci Level")
+// plot(Fib2361Dev, color=ColorScheme, transp=50, title="23.61% - Fibonacci Level")
+// plot(Fib1459Dev, color=ColorScheme, transp=50, title="-23.61% - Fibonacci Level")
+// plot(LowDev, color=ColorScheme, transp=0, title="0% - Bottom of Channel")
+
+
+
+// //////////////////////////////////////////////////////////
+// //                                                      //
+// // CURVE EXTENSION DRAWING FUNCTION & HELPER VARIABLES  //
+// //                                                      //
+// //////////////////////////////////////////////////////////
+
+// // CURVE EXTENSION FUNCTION
+// ExtenZe(_i, _slope, _intercept) =>
+//     TI = ((time + TimeDelta *_i) -1279670400000) / 86400000
+//     W = (log10(TI + 10) * TI * TI - TI) / 30000
+//     HSC = _slope * TI
+//     HLD = log(W) + _intercept + HSC
+//     HD = pow(2.718281828459, HLD)
+//     HD
+
+// // VARIABLES FOR ADJUSTING LENGTH OF CURVE EXTENSIONS RELATIVE TO CHART TIME-FRAME
+// ForLoopStep = timeframe.ismonthly == 1 ? ceil( 12 / timeframe.multiplier) : 
+//               timeframe.isweekly == 1 ? ceil(26 / timeframe.multiplier) : 
+//               timeframe.isdaily == 1 ? ceil(91 / timeframe.multiplier) : 
+//               (timeframe.isminutes == 1) and (timeframe.multiplier > 59) ? ceil(10080 / timeframe.multiplier) : na
+// ForLoopMax =    na(ForLoopStep) ? na : ForLoopStep * 13
+
+// // MID CURVE SLOPE & INTERCEPT
+// MidSlope =      (HighSlope + LowSlope) * 0.5
+// MidIntercept =  (HighIntercept + LowIntercept) * 0.5
+
+// // CHECK IF LAST BAR & "Show Curve Projections" IS CHECKED, THEN DRAW CURVE EXTENZES
+// if barstate.islast and ShowExtensions == "Y"
+//     for i = 0 to ForLoopMax-1 by ForLoopStep
+//         line.new(time + TimeDelta * i, ExtenZe(i, HighSlope, HighIntercept), time + TimeDelta * (i + ForLoopStep), ExtenZe(i + ForLoopStep, HighSlope, HighIntercept), xloc=xloc.bar_time, color=ColorScheme)
+//         line.new(time + TimeDelta * i, ExtenZe(i, LowSlope, LowIntercept), time + TimeDelta * (i + ForLoopStep), ExtenZe(i + ForLoopStep, LowSlope, LowIntercept), xloc=xloc.bar_time, color=ColorScheme)
+//         line.new(time + TimeDelta * i, ExtenZe(i, MidSlope, MidIntercept), time + TimeDelta * (i + ForLoopStep), ExtenZe(i + ForLoopStep, MidSlope, MidIntercept), xloc=xloc.bar_time, color=ColorScheme)
+
+// /////////////////////////////////////////////////////// End of BTC Log Curves by Quantadelic /////////////////////////////////////////////////////////////////////////////
