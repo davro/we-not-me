@@ -215,27 +215,11 @@ var cmeGapsFilled = array.new_float()
 if (isDaily and showCmeGap and cross(close, CME_LAST_WEEK_CLOSE))
     array.push(cmeGapsFilled, CME_LAST_WEEK_CLOSE)
 
-validDate = isDaily and showCmeGap and time >= timestamp(year(timenow), month(timenow), dayofmonth(timenow) - cmeHistoryBack, 0, 0)
-isFriday = dayofweek == dayofweek.friday
+validDate = isBtcUsd and isDaily and showCmeGap and time >= timestamp(year(timenow), month(timenow), dayofmonth(timenow) - cmeHistoryBack, 0, 0)
 cmeFilled = array.includes(cmeGapsFilled, CME_LAST_WEEK_CLOSE) == true
-weekNotFilled = isFriday and cmeFilled == false
 
-position = if (dayofweek == dayofweek.monday)
-    3
-else if (dayofweek == dayofweek.tuesday)
-    4
-else if (dayofweek == dayofweek.wednesday)
-    5
-else if (dayofweek == dayofweek.thursday)
-    6
-else if (dayofweek == dayofweek.friday)
-    7
-else if (dayofweek == dayofweek.saturday)
-    8
-else if (dayofweek == dayofweek.sunday)
-    9
-plotshape(validDate and cmeFilled ? close[position] : na, style=shape.circle, size=size.tiny, color=color.green, location=location.absolute)
-plotshape(validDate and cmeFilled == false ? close[position] : na, style=shape.circle, size=size.tiny, color=color.red, location=location.absolute)
+plotshape(validDate and cmeFilled ? CME_LAST_WEEK_CLOSE : na, style=shape.circle, size=size.tiny, color=color.green, location=location.absolute)
+plotshape(validDate and cmeFilled == false ? CME_LAST_WEEK_CLOSE : na, style=shape.circle, size=size.tiny, color=color.red, location=location.absolute)
 
 ///////////////////////////////////////////////////////////
 // Fear & Greed
@@ -376,19 +360,6 @@ showStopDay     = showHTFBtcIndicators and timeframe.isdaily and dayofmonth <= s
 bgcolor(showStartDay ? color.red   : na, transp=85)
 bgcolor(showStopDay  ? color.green : na, transp=85)
 
-//Future
-stopDaysShort   = max(0, stopDay - dayofmonth)
-
-arrStop = array.new_int(na)
-for i=1 to stopDaysShort
-    array.push(arrStop, i)
-
-colorFutureDays = showHTFBtcIndicators and barstate.islast
-bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 1) ? color.green : na, offset=1)
-bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 2) ? color.green : na, offset=2)
-bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 3) ? color.green : na, offset=3)
-bgcolor(colorFutureDays and timeframe.isdaily and array.includes(arrStop, 4) ? color.green : na, offset=4)
-
 ///////////////////////////////////////////////////////////
 // Logarithmic
 ///////////////////////////////////////////////////////////
@@ -416,3 +387,7 @@ fib9098Dev = pow(2.718281828459, fib9098Calc)
 logHigh = plot(isHigherTimeFrame ? fib9098Dev : na, color=color.red, transp=10, title="RISK  90.98%")
 
 fill(logHigher, logHigh, color=color.red, transp=75)
+
+// var line lbl = na
+// line.delete(lbl)
+// lbl := line.new(x1=bar_index[1], y1=ema(close[1], 21), x2=bar_index, y2=ema(close, 21), extend=extend.right, color=color.red)

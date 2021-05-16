@@ -20,6 +20,7 @@ This means that hash rate is a good indicator of the Bitcoin network’s health.
 Generally speaking, as hash rate increase, so does Bitcoin’s mining difficulty, the more difficult it is to mine, the less rewards miners get, the
 less interesting it is to keep machines connected to the network.
 ![img3](images/Hashrate.JPG)
+* Typo here, the red line is when it becomes beneficial again to mine.
 
 ### Bitcoin Network Valuation by Transaction Value (NVT)
 In traditional stock markets, price-earnings ratio (PE Ratio) has been a long standing tool for valuing companies. It’s simply the ratio of a company’s share price to its equivalent earnings per share. A high ratio describes either over valuation or a company in high growth.

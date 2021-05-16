@@ -7,6 +7,7 @@ study(title="My Relative Strength Index", shorttitle="MRSI")
 var isBtcUsd = syminfo.ticker == "BTCUSD"
 var showHTFBtcIndicators = isBtcUsd and timeframe.isdaily
 
+userRsi = input(false, title="Use below RSI")
 rsiLength = input(30, minval=1, title="RSI Length")
 mode = input("RSI", title="Configuration mode :", options=['RSI', 'Bitcoin Hashrate (daily)', 'Bitcoin NVT (daily)', 'Overflow (All)'])
 
@@ -20,6 +21,13 @@ var scaleAdujster = showHashrate ? 58 : 0
 ///////////////////////////////////////////////////////////
 // RSI Calculation
 ///////////////////////////////////////////////////////////
+
+rsiValue = if (userRsi)
+    rsiLength
+else if (timeframe.ismonthly or timeframe.isweekly)
+    14
+else
+    30
 
 // Over bought - Over sold values
 rsiValueTop_top = if (timeframe.ismonthly)
@@ -64,13 +72,16 @@ else if (timeframe.period == '15')
     30
 
 
-up = rma(max(change(close), 0), rsiLength)
-down = rma(-min(change(close), 0), rsiLength)
+up = rma(max(change(close), 0), rsiValue)
+down = rma(-min(change(close), 0), rsiValue)
 rsi = (down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down))) - scaleAdujster
+
+//
+//
+//
 
 fastMA = ema(high, 12)
 slowMA = ema(high, 26)
-
 rsiForColor = if (timeframe.isminutes and timeframe.period == '1')
     rsi(close, 14)
 else if (timeframe.isminutes and timeframe.period == '15')
@@ -227,6 +238,9 @@ plot(showHashrate ? 0 : na, "Mid", color=color.olive, style=plot.style_line)
 
 ///////////////////////////////////////////////////////////
 // NVT Ratio
+// Network Value to Transactions Ratio (NVT Ratio) is
+// defined as the ratio of market capitalization divided
+// by transacted volume in the specified window.
 ///////////////////////////////////////////////////////////
 
 etrvu = security("QUANDL:BCHAIN/ETRVU", "D", close)
