@@ -222,7 +222,7 @@ if (timeframe.isweekly)
     if (plotWeeklySupportAndResistance)
         rsiLineColor := color.new(color.white, 0)
 
-if (showVerticalHeatmap)
+if (showVerticalHeatmap == false)
     rsiLineColor := na
 
 bgcolor(color=rsiLineColor)
