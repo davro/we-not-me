@@ -33,6 +33,28 @@ This is the fundamental starting point of this rapidly growing project, this pro
 - RISK Curves, Curve Projection 
 - [RSI Background](#rsi-background)
 
+# Tom Demark
+The WE indicator has an implementation of the TD Sequential with the we-indicator, but eventually WE plan on implementing more studies relating to the Tom DeMark 
+
+Tom DeMark, is used by many of the top money managers of all time, the DeMARK Indicators on heavily used on Bloomberg  it's an approach to those seeking a deeper, more comprehensive understanding of the market, these are not 'technical' indicators in the conventional sense rather market timing tools that are compatible with fundamental analysis.
+
+- **[TD Sequential](https://hackernoon.com/how-to-buy-sell-cryptocurrency-with-number-indicator-td-sequential-5af46f0ebce1)**
+- TD Combo 
+- TD Alignment
+- TD DeMarker
+- TD Pressure
+- TD REI
+- TD ROC
+- TD Channel
+- TD Differential
+- TD D-Wave
+- TD Lines
+- TD Propulsion
+- TD Range
+
+https://demark.com/bookshelf/
+
+
 ## WE Indicator Angels
 
 **Features** of the WE Angels indicator.
@@ -142,27 +164,6 @@ https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
 # PI Cycle Inverse
 Documentation **coming soon**.
 ![img5](readme-images/pi-cycle-inverse.png)
-
-# Tom Demark
-The WE indicator has an implementation of the TD Sequential with the we-indicator, but eventually WE plan on implementing more studies relating to the Tom DeMark 
-
-Tom DeMark, is used by many of the top money managers of all time, the DeMARK Indicators on heavily used on Bloomberg  it's an approach to those seeking a deeper, more comprehensive understanding of the market, these are not 'technical' indicators in the conventional sense rather market timing tools that are compatible with fundamental analysis.
-
-- **[TD Sequential](https://hackernoon.com/how-to-buy-sell-cryptocurrency-with-number-indicator-td-sequential-5af46f0ebce1)**
-- TD Combo 
-- TD Alignment
-- TD DeMarker
-- TD Pressure
-- TD REI
-- TD ROC
-- TD Channel
-- TD Differential
-- TD D-Wave
-- TD Lines
-- TD Propulsion
-- TD Range
-
-https://demark.com/bookshelf/
 
 # Bull Bear Average
 Documentation **coming soon**.
