@@ -1,0 +1,60 @@
+//@version=4
+study("My Aggregated Volume BTC")
+
+getVolumeSym(symbolPair) => security(symbolPair, '', volume)
+getVolumeSymNz(symbolPair) => nz(getVolumeSym(symbolPair))
+addVal(sum, tickerName, cond) => iff(cond, sum + getVolumeSymNz(tickerName), sum)
+
+showSpot = input(true, title="Spot: BINANCE, COINBASE, KRAKEN, BITFINEX, HUOBI, OKEX, FTX, GEMINI, PHEMEX, BITTREX", group = "Exchanges Volume")
+showDerivative = input(true, title="Derivative: OKEX, FTX, BTSE, KRAKEN, BITMEX, HUOBI, DERIBIT, BINANCE, PHEMEX, BITGET", group = "Exchanges Volume")
+
+currencies = input("All", title="Included Currencies (Spot) :", options=['All', 'USD', 'USDT', 'EUR'])
+
+ShowUSD = currencies == "All" or currencies == "USD"
+ShowUSDT = currencies == "All" or currencies == "USDT"
+ShowEUR = currencies == "All" or currencies == "EUR"
+
+showAll = showDerivative and showSpot
+
+spotExchange = 0*volume
+spotExchange := addVal(spotExchange, "BINANCE:BTCUSD", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "BINANCE:BTCUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "BINANCE:BTCEUR", showSpot and ShowEUR)
+spotExchange := addVal(spotExchange, "COINBASE:BTCUSD", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "COINBASE:BTCUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "COINBASE:BTCEUR", showSpot and ShowEUR)
+spotExchange := addVal(spotExchange, "KRAKEN:XBTUSD", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "KRAKEN:XBTEUR", showSpot and ShowEUR)
+spotExchange := addVal(spotExchange, "KRAKEN:XBTUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "BITFINEX:BTCUSD", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "BITFINEX:BTCEUR", showSpot and ShowEUR)
+spotExchange := addVal(spotExchange, "HUOBI:BTCUSDC", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "HUOBI:BTCUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "OKEX:BTCUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "FTX:BTCUSD", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "FTX:BTCUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "GEMINI:BTCUSD", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "GEMINI:BTCEUR", showSpot and ShowEUR)
+spotExchange := addVal(spotExchange, "PHEMEX:BTCUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "BITTREX:BTCUSD", showSpot and ShowUSD)
+spotExchange := addVal(spotExchange, "BITTREX:BTCUSDT", showSpot and ShowUSDT)
+spotExchange := addVal(spotExchange, "BITTREX:BTCEUR", showSpot and ShowEUR)
+
+derivatingExchange = 0*volume
+derivatingExchange := addVal(derivatingExchange, "OKEX:BTCUSDPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "OKEX:BTCUSDTPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "FTX:BTCPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "BTSE:BTCPFC", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "KRAKEN:XBTUSDPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "BITMEX:XBTUSD", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "HUOBI:BTCPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "DERIBIT:BTCPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "BINANCE:BTCPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "BINANCE:BTCUSDTPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "PHEMEX:BTCUSD", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "BITGET:BTCUSDPERP", showDerivative)
+derivatingExchange := addVal(derivatingExchange, "BITGET:BTCUSDTPERP", showDerivative)
+greenRedColor = open > close ? color.new(color.red, 85) : color.new(color.green, 85)
+plot(showDerivative ? derivatingExchange : na, "Derivative", style=plot.style_columns, color=greenRedColor)
+plot(showDerivative and showSpot ? spotExchange + derivatingExchange * 1.5 : na, "Spot*1.5", style=plot.style_columns, color=color.new(color.purple, 85))
+plot(showSpot and showDerivative == false ? spotExchange : na, "Spot", style=plot.style_columns, color=greenRedColor)
