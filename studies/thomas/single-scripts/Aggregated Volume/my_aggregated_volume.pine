@@ -1,60 +1,416 @@
+////////////////////////////////////////////////////////////////////////////////////
+//
+// spot / margin
+// BINANCE:BTCUSD
+// BINANCE:BTCUSDT
+// BINANCE:BTCEUR
+// COINBASE:BTCUSD
+// COINBASE:BTCUSDT
+// COINBASE:BTCEUR
+// KRAKEN:XBTUSD
+// KRAKEN:XBTUSDT
+// KRAKEN:XBTEUR
+// BITFINEX:BTCUSD
+// BITFINEX:BTCEUR
+// HUOBI:BTCUSDT
+// HUOBI:BTCUSDC
+// OKEX:BTCUSDT
+// FTX:BTCUSD
+// FTX:BTCUSDT
+// GEMINI:BTCUSD
+// GEMINI:BTCEUR
+// PHEMEX:BTCUSDT
+// BITTREX:BTCUSD
+// BITTREX:BTCUSDT
+// BITTREX:BTCEUR
+//
+// derivative
+// OKEX:BTCUSDPERP
+// OKEX:BTCUSDTPERP
+// FTX:BTCPERP
+// BTSE:BTCPFC
+// KRAKEN:XBTUSDPERP
+// BITMEX:XBTUSD
+// HUOBI:BTCPERP
+// DERIBIT:BTCPERP
+// BINANCE:BTCPERP
+// BINANCE:BTCUSDTPERP
+// PHEMEX:BTCUSD
+// BITGET:BTCUSDPERP
+// BITGET:BTCUSDTPERP
+//
+////////////////////////////////////////////////////////////////////////////////////
+
 //@version=4
 study("My Aggregated Volume BTC")
 
 getVolumeSym(symbolPair) => security(symbolPair, '', volume)
 getVolumeSymNz(symbolPair) => nz(getVolumeSym(symbolPair))
-addVal(sum, tickerName, cond) => iff(cond, sum + getVolumeSymNz(tickerName), sum)
+getOrZero(val, cond) => cond ? val : 0
+getOrNA(v, c) => c ? v : na
 
-showSpot = input(true, title="Spot: BINANCE, COINBASE, KRAKEN, BITFINEX, HUOBI, OKEX, FTX, GEMINI, PHEMEX, BITTREX", group = "Exchanges Volume")
-showDerivative = input(true, title="Derivative: OKEX, FTX, BTSE, KRAKEN, BITMEX, HUOBI, DERIBIT, BINANCE, PHEMEX, BITGET", group = "Exchanges Volume")
+//
+// Color Palette
+//
+color_1 = #ffffff // White --
+color_2 = #5cff95 // Light green --
+color_3 = #1532d7 // Blue --
+color_4 = #7eb300 // Kaki Green --
+color_5 = #b62fe4 // Light purple --
+color_6 = #006e16 // Dark green --
+color_7 = #79008f // Purple --
+color_8 = #f89200 // Orange --
+color_9 = #72e9ff // Light blue --
+color_10 = #ff3f3c // Light red --
+color_11 = #005743 // Blue / Green --
+color_12 = #ff66d0 // Pink
+color_13 = #b78d00 // Light Brown --
+color_14 = #e7b8ff // Pink / Purple
+color_15 = #3e2a00 // Dark brown
+color_16 = #e2ffc8 // Very Light green
+color_17 = #cc0037 // Red
+color_18 = #ffddbe // Beige
+color_19 = #5c1b00 // Very Dark brown
+color_20 = #ff976c // Dark beige
 
-currencies = input("All", title="Included Currencies (Spot) :", options=['All', 'USD', 'USDT', 'EUR'])
+//
+// Exchanges Color
+//
+binance_color = color_8
+binance_us_color = color_13
+coinbase_color = color_3
+kraken_color = color_5
+bitfinex_color = color_1
+huobi_color = color_2
+ftx_color = color_4
+gemini_color = color_6
+phemex_color = color_7
+bittrex_color = color_9
+okex_color = color_10
+deribit_color = color_11
 
-ShowUSD = currencies == "All" or currencies == "USD"
-ShowUSDT = currencies == "All" or currencies == "USDT"
-ShowEUR = currencies == "All" or currencies == "EUR"
+currencies = input("All", title="Included Currencies (Spot) :", options=['All', 'USD', 'USDT', 'USDC', 'EUR'])
+includeUSD = currencies == "All" or currencies == "USD"
+includeUSDT = currencies == "All" or currencies == "USDT"
+includeUSDC = currencies == "All" or currencies == "USDC"
+includeEUR = currencies == "All" or currencies == "EUR"
 
-showAll = showDerivative and showSpot
+mode = input("Aggregated", title="Display Mode :", options=['Aggregated', 'Difference'])
+isAggregatedMode = mode == "Aggregated"
+isDifferenceMode = mode == "Difference"
 
-spotExchange = 0*volume
-spotExchange := addVal(spotExchange, "BINANCE:BTCUSD", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "BINANCE:BTCUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "BINANCE:BTCEUR", showSpot and ShowEUR)
-spotExchange := addVal(spotExchange, "COINBASE:BTCUSD", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "COINBASE:BTCUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "COINBASE:BTCEUR", showSpot and ShowEUR)
-spotExchange := addVal(spotExchange, "KRAKEN:XBTUSD", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "KRAKEN:XBTEUR", showSpot and ShowEUR)
-spotExchange := addVal(spotExchange, "KRAKEN:XBTUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "BITFINEX:BTCUSD", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "BITFINEX:BTCEUR", showSpot and ShowEUR)
-spotExchange := addVal(spotExchange, "HUOBI:BTCUSDC", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "HUOBI:BTCUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "OKEX:BTCUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "FTX:BTCUSD", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "FTX:BTCUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "GEMINI:BTCUSD", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "GEMINI:BTCEUR", showSpot and ShowEUR)
-spotExchange := addVal(spotExchange, "PHEMEX:BTCUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "BITTREX:BTCUSD", showSpot and ShowUSD)
-spotExchange := addVal(spotExchange, "BITTREX:BTCUSDT", showSpot and ShowUSDT)
-spotExchange := addVal(spotExchange, "BITTREX:BTCEUR", showSpot and ShowEUR)
+differenceChartType = input("Stacked", title="Display Mode :", options=['Stacked', 'Line'], group = "Difference Mode Config")
+isStacked = isDifferenceMode and differenceChartType == "Stacked"
+isLine = isDifferenceMode and differenceChartType == "Line"
 
-derivatingExchange = 0*volume
-derivatingExchange := addVal(derivatingExchange, "OKEX:BTCUSDPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "OKEX:BTCUSDTPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "FTX:BTCPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "BTSE:BTCPFC", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "KRAKEN:XBTUSDPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "BITMEX:XBTUSD", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "HUOBI:BTCPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "DERIBIT:BTCPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "BINANCE:BTCPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "BINANCE:BTCUSDTPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "PHEMEX:BTCUSD", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "BITGET:BTCUSDPERP", showDerivative)
-derivatingExchange := addVal(derivatingExchange, "BITGET:BTCUSDTPERP", showDerivative)
-greenRedColor = open > close ? color.new(color.red, 85) : color.new(color.green, 85)
-plot(showDerivative ? derivatingExchange : na, "Derivative", style=plot.style_columns, color=greenRedColor)
-plot(showDerivative and showSpot ? spotExchange + derivatingExchange * 1.5 : na, "Spot*1.5", style=plot.style_columns, color=color.new(color.purple, 85))
-plot(showSpot and showDerivative == false ? spotExchange : na, "Spot", style=plot.style_columns, color=greenRedColor)
+//
+// Legend config
+//
+legendPosition = 0
+legendItemGapInput = input(0, title="Legend Items Gap (0 = Auto)", type=input.integer, group = "Difference Mode Config")
+legendItemGap = if (legendItemGapInput == 0)
+    if (timeframe.isminutes)
+        if (timeframe.period == '1')
+            50
+        else if (timeframe.period == '3')
+            75
+        else if (timeframe.period == '5')
+            300
+        else if (timeframe.period == '15')
+            1000
+        else if (timeframe.period == '30')
+            3000
+        else if (timeframe.period == '45')
+            3000
+        else if (timeframe.period == '60')
+            6000
+        else if (timeframe.period == '120')
+            10000
+        else if (timeframe.period == '180')
+            10000
+        else if (timeframe.period == '240')
+            15000
+        else
+            6000
+    else if (timeframe.isdaily)
+        50000
+    else if (timeframe.isweekly)
+        300000
+    else if (timeframe.ismonthly)
+        800000
+    else
+        0
+else
+    legendItemGapInput
+
+leftGapInput = input(0, title="Legend X Gap (0 = Auto)", type=input.integer, group = "Difference Mode Config")
+leftGap = if (leftGapInput == 0)
+    if (timeframe.isminutes)
+        if (timeframe.period == '1')
+            2
+        else if (timeframe.period == '3')
+            2
+        else if (timeframe.period == '5')
+            2
+        else if (timeframe.period == '15')
+            2
+        else if (timeframe.period == '30')
+            2
+        else if (timeframe.period == '45')
+            2
+        else if (timeframe.period == '60')
+            3
+        else if (timeframe.period == '120')
+            3
+        else if (timeframe.period == '180')
+            4
+        else if (timeframe.period == '240')
+            4
+        else
+            2
+    else if (timeframe.isdaily)
+        6
+    else if (timeframe.isweekly)
+        6
+    else if (timeframe.ismonthly)
+        6
+    else
+        0
+else
+    leftGapInput
+
+//
+// Spot Exchange Volume
+//
+binanceUSD = getOrZero(getVolumeSymNz("BINANCE:BTCUSD"), includeUSD)
+binanceUSDT = getOrZero(getVolumeSymNz("BINANCE:BTCUSDT"), includeUSDT)
+binanceUSDC = getOrZero(getVolumeSymNz("BINANCE:BTCUSDC"), includeUSDC)
+binanceEUR = getOrZero(getVolumeSymNz("BINANCE:BTCEUR"), includeEUR)
+totalBinance = round(binanceUSD + binanceUSDT + binanceUSDC + binanceEUR)
+binanceVolumeDiffToPlot = totalBinance
+
+binance_usUSD = getOrZero(getVolumeSymNz("BINANCEUS:BTCUSD"), includeUSD)
+binance_usUSDT = getOrZero(getVolumeSymNz("BINANCEUS:BTCUSDT"), includeUSDT)
+binance_usUSDC = getOrZero(getVolumeSymNz("BINANCEUS:BTCUSDC"), includeUSDC)
+totalBinance_us = round(binance_usUSD + binance_usUSDT + binance_usUSDC)
+binance_usVolumeDiffToPlot = totalBinance_us + binanceVolumeDiffToPlot
+
+coinbaseUSD = getOrZero(getVolumeSymNz("COINBASE:BTCUSD"), includeUSD)
+coinbaseUSDT = getOrZero(getVolumeSymNz("COINBASE:BTCUSDT"), includeUSDT)
+coinbaseUSDC = getOrZero(getVolumeSymNz("COINBASE:BTCUSDC"), includeUSDC)
+coinbaseEUR = getOrZero(getVolumeSymNz("COINBASE:BTCEUR"), includeEUR)
+totalCoinbase = round(coinbaseUSD + coinbaseUSDT + coinbaseUSDC + coinbaseEUR)
+coinbaseVolumeDiffToPlot = totalCoinbase + binance_usVolumeDiffToPlot
+
+krakenUSD = getOrZero(getVolumeSymNz("KRAKEN:XBTUSD"), includeUSD)
+krakenUSDT = getOrZero(getVolumeSymNz("KRAKEN:XBTUSDT"), includeUSDT)
+krakenEUR = getOrZero(getVolumeSymNz("KRAKEN:XBTEUR"), includeEUR)
+totalKraken = round(krakenUSD + krakenUSDT + krakenEUR)
+krakenVolumeDiffToPlot = totalKraken + coinbaseVolumeDiffToPlot
+
+bitfinexUSD = getOrZero(getVolumeSymNz("BITFINEX:BTCUSD"), includeUSD)
+bitfinexEUR = getOrZero(getVolumeSymNz("BITFINEX:BTCEUR"), includeEUR)
+totalBitfinex = round(bitfinexUSD + bitfinexEUR)
+bitfinexVolumeDiffToPlot = totalBitfinex + krakenVolumeDiffToPlot
+
+huobiUSDT = getOrZero(getVolumeSymNz("HUOBI:BTCUSDC"), includeUSDT)
+huobiUSDC = getOrZero(getVolumeSymNz("OKEX:BTCUSDC"), includeUSDC)
+totalHuobi = round(huobiUSDT + huobiUSDC)
+huobiVolumeDiffToPlot = totalHuobi + bitfinexVolumeDiffToPlot
+
+okexUSDT = getOrZero(getVolumeSymNz("OKEX:BTCUSDT"), includeUSDT)
+okexUSDC = getOrZero(getVolumeSymNz("OKEX:BTCUSDC"), includeUSDC)
+totalOkex = round(okexUSDT + okexUSDC)
+okexVolumeDiffToPlot = totalOkex + huobiVolumeDiffToPlot
+
+ftxUSD = getOrZero(getVolumeSymNz("FTX:BTCUSD"), false) // DISABLED FOR NOW, TO MUCH VOLUME
+ftxUSDT = getOrZero(getVolumeSymNz("FTX:BTCUSDT"), false) // DISABLED FOR NOW, TO MUCH VOLUME
+totalFtx = round(ftxUSD + ftxUSDT)
+ftxVolumeDiffToPlot = totalFtx + okexVolumeDiffToPlot
+
+geminiUSD = getOrZero(getVolumeSymNz("GEMINI:BTCUSD"), includeUSD)
+geminiEUR = getOrZero(getVolumeSymNz("GEMINI:BTCEUR"), includeUSDT)
+totalGemini = round(geminiUSD + geminiEUR)
+geminiVolumeDiffToPlot = totalGemini + ftxVolumeDiffToPlot
+
+phemexUSDT = getOrZero(getVolumeSymNz("PHEMEX:BTCUSDT"), includeUSDT)
+totalPhemex = round(phemexUSDT)
+phemexVolumeDiffToPlot = totalPhemex + geminiVolumeDiffToPlot
+
+bittrexUSD = getOrZero(getVolumeSymNz("BITTREX:BTCUSD"), includeUSD)
+bittrexUSDT = getOrZero(getVolumeSymNz("BITTREX:BTCUSDT"), includeUSDT)
+bittrexEUR = getOrZero(getVolumeSymNz("BITTREX:BTCEUR"), includeEUR)
+totalBittrex = round(bittrexUSD + bittrexUSDT + bittrexEUR)
+bittrexVolumeDiffToPlot = totalBittrex + phemexVolumeDiffToPlot
+
+//
+// Spot Exchange Plot
+//
+candleStart = getOrNA(0*volume, isStacked)
+candleEnd = getOrNA(binanceVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(binance_color, 0), editable=false)
+
+candleStart := getOrNA(binanceVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(binance_usVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(binance_us_color, 0), editable=false)
+
+candleStart := getOrNA(binance_usVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(coinbaseVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(coinbase_color, 0), editable=false)
+
+candleStart := getOrNA(coinbaseVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(krakenVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(kraken_color, 0), editable=false)
+
+candleStart := getOrNA(krakenVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(bitfinexVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(bitfinex_color, 0), editable=false)
+
+candleStart := getOrNA(bitfinexVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(huobiVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(huobi_color, 0), editable=false)
+
+candleStart := getOrNA(huobiVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(okexVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(okex_color, 0), editable=false)
+
+candleStart := getOrNA(okexVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(ftxVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(ftx_color, 0), editable=false)
+
+candleStart := getOrNA(ftxVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(geminiVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(gemini_color, 0), editable=false)
+
+candleStart := getOrNA(geminiVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(phemexVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(phemex_color, 0), editable=false)
+
+candleStart := getOrNA(phemexVolumeDiffToPlot, isStacked)
+candleEnd := getOrNA(bittrexVolumeDiffToPlot, isStacked)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(bittrex_color, 0), editable=false)
+
+if (isStacked)
+    var float minBarTime = 999999999999
+    var label l = label.new(bar_index, close, "Binance", xloc=xloc.bar_time)
+    label.set_style(l, label.style_none)
+    currentTime = time(timeframe.period)
+    timeOfCurrentBar = change(currentTime, 1)
+    minBarTime := not na(minBarTime) ? min(timeOfCurrentBar, minBarTime) : timeOfCurrentBar
+    label.set_x(l, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(l, legendPosition)
+    label.set_textcolor(l, binance_color)
+
+    legendPosition := legendPosition + legendItemGap
+    var label binance_us_legend = label.new(bar_index, close, "Binance US", xloc=xloc.bar_time)
+    label.set_style(binance_us_legend, label.style_none)
+    label.set_x(binance_us_legend, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(binance_us_legend, legendPosition)
+    label.set_textcolor(binance_us_legend, binance_us_color)
+    
+    legendPosition := legendPosition + legendItemGap
+    var label ll = label.new(bar_index, close, "Coinbase", xloc=xloc.bar_time)
+    label.set_style(ll, label.style_none)
+    label.set_x(ll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(ll, legendPosition)
+    label.set_textcolor(ll, coinbase_color)
+    
+    legendPosition := legendPosition + legendItemGap
+    var label lll = label.new(bar_index, close, "Kraken", xloc=xloc.bar_time)
+    label.set_style(lll, label.style_none)
+    label.set_x(lll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(lll, legendPosition)
+    label.set_textcolor(lll, kraken_color)
+    
+    legendPosition := legendPosition + legendItemGap
+    var label llll = label.new(bar_index, close, "BitFinex", xloc=xloc.bar_time)
+    label.set_style(llll, label.style_none)
+    label.set_x(llll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(llll, legendPosition)
+    label.set_textcolor(llll, bitfinex_color)
+    
+    legendPosition := legendPosition + legendItemGap
+    var label lllll = label.new(bar_index, close, "Huobi", xloc=xloc.bar_time)
+    label.set_style(lllll, label.style_none)
+    label.set_x(lllll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(lllll, legendPosition)
+    label.set_textcolor(lllll, huobi_color)
+
+    legendPosition := legendPosition + legendItemGap
+    var label llllll = label.new(bar_index, close, "OKEX", xloc=xloc.bar_time)
+    label.set_style(llllll, label.style_none)
+    label.set_x(llllll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(llllll, legendPosition)
+    label.set_textcolor(llllll, okex_color)
+
+    legendPosition := legendPosition + legendItemGap
+    var label lllllll = label.new(bar_index, close, "(FTX)", xloc=xloc.bar_time)
+    label.set_style(lllllll, label.style_none)
+    label.set_x(lllllll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(lllllll, legendPosition)
+    label.set_textcolor(lllllll, ftx_color)
+
+    legendPosition := legendPosition + legendItemGap
+    var label llllllll = label.new(bar_index, close, "Gemini", xloc=xloc.bar_time)
+    label.set_style(llllllll, label.style_none)
+    label.set_x(llllllll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(llllllll, legendPosition)
+    label.set_textcolor(llllllll, gemini_color)
+    
+    legendPosition := legendPosition + legendItemGap
+    var label lllllllll = label.new(bar_index, close, "Phemex", xloc=xloc.bar_time)
+    label.set_style(lllllllll, label.style_none)
+    label.set_x(lllllllll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(lllllllll, legendPosition)
+    label.set_textcolor(lllllllll, phemex_color)
+    
+    legendPosition := legendPosition + legendItemGap
+    var label llllllllll = label.new(bar_index, close, "Bittrex", xloc=xloc.bar_time)
+    label.set_style(llllllllll, label.style_none)
+    label.set_x(llllllllll, int(currentTime+(leftGap*minBarTime)))
+    label.set_y(llllllllll, legendPosition)
+    label.set_textcolor(llllllllll, bittrex_color)
+
+
+// spotExchange = 0*volume
+// // spotExchange := addVal(spotExchange, "BINANCE:BTCUSD", showSpot and ShowUSD)
+// // spotExchange := addVal(spotExchange, "BINANCE:BTCUSDT", showSpot and ShowUSDT)
+// // spotExchange := addVal(spotExchange, "BINANCE:BTCEUR", showSpot and ShowEUR)
+// // spotExchange := addVal(spotExchange, "COINBASE:BTCUSD", showSpot and ShowUSD)
+// // spotExchange := addVal(spotExchange, "COINBASE:BTCUSDT", showSpot and ShowUSDT)
+// // spotExchange := addVal(spotExchange, "COINBASE:BTCEUR", showSpot and ShowEUR)
+// // spotExchange := addVal(spotExchange, "KRAKEN:XBTUSD", showSpot and ShowUSD)
+// // spotExchange := addVal(spotExchange, "KRAKEN:XBTEUR", showSpot and ShowEUR)
+// // spotExchange := addVal(spotExchange, "KRAKEN:XBTUSDT", showSpot and ShowUSDT)
+// spotExchange := addVal(spotExchange, "BITFINEX:BTCUSD", showSpot and ShowUSD)
+// spotExchange := addVal(spotExchange, "BITFINEX:BTCEUR", showSpot and ShowEUR)
+// spotExchange := addVal(spotExchange, "HUOBI:BTCUSDC", showSpot and ShowUSD)
+// spotExchange := addVal(spotExchange, "HUOBI:BTCUSDT", showSpot and ShowUSDT)
+// spotExchange := addVal(spotExchange, "OKEX:BTCUSDT", showSpot and ShowUSDT)
+// spotExchange := addVal(spotExchange, "FTX:BTCUSD", showSpot and ShowUSD)
+// spotExchange := addVal(spotExchange, "FTX:BTCUSDT", showSpot and ShowUSDT)
+// spotExchange := addVal(spotExchange, "GEMINI:BTCUSD", showSpot and ShowUSD)
+// spotExchange := addVal(spotExchange, "GEMINI:BTCEUR", showSpot and ShowEUR)
+// spotExchange := addVal(spotExchange, "PHEMEX:BTCUSDT", showSpot and ShowUSDT)
+// spotExchange := addVal(spotExchange, "BITTREX:BTCUSD", showSpot and ShowUSD)
+// spotExchange := addVal(spotExchange, "BITTREX:BTCUSDT", showSpot and ShowUSDT)
+// spotExchange := addVal(spotExchange, "BITTREX:BTCEUR", showSpot and ShowEUR)
+
+// derivatingExchange = 0*volume
+// derivatingExchange := addVal(derivatingExchange, "OKEX:BTCUSDPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "OKEX:BTCUSDTPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "FTX:BTCPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "BTSE:BTCPFC", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "KRAKEN:XBTUSDPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "BITMEX:XBTUSD", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "HUOBI:BTCPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "DERIBIT:BTCPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "BINANCE:BTCPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "BINANCE:BTCUSDTPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "PHEMEX:BTCUSD", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "BITGET:BTCUSDPERP", showDerivative)
+// derivatingExchange := addVal(derivatingExchange, "BITGET:BTCUSDTPERP", showDerivative)
+// greenRedColor = open > close ? color.new(color.red, 85) : color.new(color.green, 85)
+// plot(showDerivative ? derivatingExchange : na, "Derivative", style=plot.style_columns, color=greenRedColor)
+// plot(showDerivative and showSpot ? spotExchange + derivatingExchange * 1.5 : na, "Spot*1.5", style=plot.style_columns, color=color.new(color.purple, 85))
+// plot(showSpot and showDerivative == false ? spotExchange : na, "Spot", style=plot.style_columns, color=greenRedColor)
