@@ -5,7 +5,7 @@ study(title="My Relative Strength Index", shorttitle="MRSI")
 // Input
 ///////////////////////////////////////////////////////////
 var isBtcUsd = syminfo.ticker == "BTCUSD"
-var showHTFBtcIndicators = isBtcUsd and timeframe.isdaily
+var showHTFBtcIndicators = isBtcUsd and timeframe.isdaily or timeframe.isweekly or timeframe.ismonthly
 
 userRsi = input(false, title="Use below RSI")
 rsiLength = input(30, minval=1, title="RSI Length")
@@ -13,7 +13,7 @@ mode = input("RSI", title="Configuration mode :", options=['RSI', 'Bitcoin Hashr
 
 hideRSI = (mode != "RSI" and mode != 'Overflow (All)')
 showNvt = showHTFBtcIndicators and (mode == 'Bitcoin NVT (daily)' or mode == 'Overflow (All)')
-showHashrate = showHTFBtcIndicators and (mode == 'Bitcoin Hashrate (daily)' or mode == 'Overflow (All)')
+showHashrate = showHTFBtcIndicators and (mode == 'Bitcoin Hashrate (daily)')
 isOverlow = mode == 'Overflow (All)'
 
 var scaleAdujster = showHashrate ? 58 : 0
@@ -222,19 +222,17 @@ fill(top_top, top_bottom, color=color.red, transp=75)
 // Hashrate Calculation
 ///////////////////////////////////////////////////////////
 
-live_HR_short = security("QUANDL:BCHAIN/HRATE", "D", sma(close, 21),gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
-live_HR_long = security("QUANDL:BCHAIN/HRATE", "D", sma(close, 105),gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on) 
-hist_HR_short = security("QUANDL:BCHAIN/HRATE", "D", sma(close, 21),gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_off) 
-hist_HR_long = security("QUANDL:BCHAIN/HRATE", "D", sma(close, 105),gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_off) 
+hashrate = security("QUANDL:BCHAIN/HRATE", "D", close, gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on) / 10000000
+hashrate_mean_7 = security("QUANDL:BCHAIN/HRATE", "D", sma(close, 7), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on) / 10000000
+hashrate_mean_21 = security("QUANDL:BCHAIN/HRATE", "D", sma(close, 21),gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on) / 10000000
+difficulty = security("QUANDL:BCHAIN/DIFF","D", close, gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on) / 1010000000000
 
-HR_short = barstate.isrealtime ? live_HR_short : hist_HR_short
-HR_long = barstate.isrealtime ? live_HR_long : hist_HR_long
+hashrate_plot = plot(showHashrate ? hashrate : na, "Hashrate", style=plot.style_line, color=color.teal)
+hashrate_mean_7_plot = plot(showHashrate ? hashrate_mean_7 : na, "Hashrate Mean 7", transp=100, style=plot.style_line)
+hashrate_mean_21_plot = plot(showHashrate ? hashrate_mean_21 : na, style=plot.style_line, transp=100, title='Hashrate Mean 21')
+difficulty_plot = plot(showHashrate ? difficulty : na, "Difficulty", color=#EAEAEA, style=plot.style_line, linewidth=3)
 
-delta = HR_short-HR_long
-diff = (delta/HR_short)*100
-
-plot(showHashrate ? diff : na, style=plot.style_line, color=(diff < 0 ? color.red : color.blue), title='BTC Hashrate', linewidth=2)
-plot(showHashrate ? 0 : na, "Mid", color=color.olive, style=plot.style_line)
+fill(hashrate_mean_21_plot, hashrate_mean_7_plot, color=hashrate_mean_21 < hashrate_mean_7 ? color.green : color.red, transp=85)
 
 ///////////////////////////////////////////////////////////
 // NVT Ratio
@@ -260,3 +258,5 @@ plot(showNvt ? nvts : na, "NVT Signal", color=c_deviation ? color.white : color.
 
 plot(showNvt and isOverlow == false ? 150 / 2.5 : na, "Mid", color=color.olive, style=plot.style_line)
 plot(showNvt and isOverlow == false ? 45 / 2.5 : na, "Mid", color=color.olive, style=plot.style_line)
+
+ratio(t1, t2, source) => security(t1, timeframe.period, source) / security(t2, timeframe.period, source)

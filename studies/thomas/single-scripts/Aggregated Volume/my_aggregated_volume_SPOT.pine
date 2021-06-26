@@ -1,0 +1,437 @@
+////////////////////////////////////////////////////////////////////////////////////
+//
+// spot / margin
+// BINANCE:BTCUSD
+// BINANCE:BTCUSDT
+// BINANCE:BTCEUR
+// COINBASE:BTCUSD
+// COINBASE:BTCUSDT
+// COINBASE:BTCEUR
+// KRAKEN:XBTUSD
+// KRAKEN:XBTUSDT
+// KRAKEN:XBTEUR
+// BITFINEX:BTCUSD
+// BITFINEX:BTCEUR
+// HUOBI:BTCUSDT
+// HUOBI:BTCUSDC
+// OKEX:BTCUSDT
+// FTX:BTCUSD
+// FTX:BTCUSDT
+// GEMINI:BTCUSD
+// GEMINI:BTCEUR
+// PHEMEX:BTCUSDT
+// BITTREX:BTCUSD
+// BITTREX:BTCUSDT
+// BITTREX:BTCEUR
+//
+// derivative
+// OKEX:BTCUSDPERP
+// OKEX:BTCUSDTPERP
+// FTX:BTCPERP
+// BTSE:BTCPFC
+// KRAKEN:XBTUSDPERP
+// BITMEX:XBTUSD
+// HUOBI:BTCPERP
+// DERIBIT:BTCPERP
+// BINANCE:BTCPERP
+// BINANCE:BTCUSDTPERP
+// PHEMEX:BTCUSD
+// BITGET:BTCUSDPERP
+// BITGET:BTCUSDTPERP
+//
+////////////////////////////////////////////////////////////////////////////////////
+
+//@version=4
+study("WE:Aggregated Volume BTC:SPOT")
+
+getVolumeSym(symbolPair) => security(symbolPair, '', volume)
+getVolumeSymNz(symbolPair) => nz(getVolumeSym(symbolPair))
+getOrZero(val, cond) => cond ? val : 0
+getOrNA(v, c) => c ? v : na
+
+//
+// Color Palette
+//
+color_1 = #ffffff // White --
+color_2 = #5cff95 // Light green --
+color_3 = #1532d7 // Blue --
+color_4 = #7eb300 // Kaki Green --
+color_5 = #b62fe4 // Light purple --
+color_6 = #006e16 // Dark green --
+color_7 = #79008f // Purple --
+color_8 = #f89200 // Orange --
+color_9 = #72e9ff // Light blue --
+color_10 = #ff3f3c // Light red --
+color_11 = #005743 // Blue / Green --
+color_12 = #ff66d0 // Pink --
+color_13 = #b78d00 // Light Brown --
+color_14 = #e7b8ff // Pink / Purple
+color_15 = #3e2a00 // Dark brown --
+color_16 = #e2ffc8 // Very Light green
+color_17 = #cc0037 // Red
+color_18 = #ffddbe // Beige --
+color_19 = #5c1b00 // Very Dark brown --
+color_20 = #ff976c // Dark beige --
+
+//
+// Exchanges Color
+//
+binance_color = color_8
+binance_us_color = color_13
+coinbase_color = color_3
+kraken_color = color_5
+bitfinex_color = color_1
+huobi_color = color_2
+ftx_color = color_4
+gemini_color = color_6
+phemex_color = color_7
+bittrex_color = color_9
+okex_color = color_10
+deribit_color = color_11
+kucoin_color = color_12
+poloniex_color = color_15
+bitget_color = color_20
+bitmex_color = color_19
+btse_color = color_18
+
+currencies = input("All", title="Included Currencies (Spot) :", options=['All', 'USD', 'USDT', 'USDC', 'EUR'])
+includeUSD = currencies == "All" or currencies == "USD"
+includeUSDT = currencies == "All" or currencies == "USDT"
+includeUSDC = currencies == "All" or currencies == "USDC"
+includeEUR = currencies == "All" or currencies == "EUR"
+
+mode = input("Aggregated", title="Display Mode :", options=['Aggregated', 'Difference'])
+isAggregatedMode = mode == "Aggregated"
+isDifferenceMode = mode == "Difference"
+
+//
+// Legend config
+//
+legendPosition = 0
+legendItemGapInput = input(0, title="Legend Items Gap (0 = Auto)", type=input.integer, group = "Difference Mode Config")
+legendItemGap = if (legendItemGapInput == 0)
+    if (timeframe.isminutes)
+        if (timeframe.period == '1')
+            50
+        else if (timeframe.period == '3')
+            75
+        else if (timeframe.period == '5')
+            300
+        else if (timeframe.period == '15')
+            1000
+        else if (timeframe.period == '30')
+            3000
+        else if (timeframe.period == '45')
+            3000
+        else if (timeframe.period == '60')
+            6000
+        else if (timeframe.period == '120')
+            10000
+        else if (timeframe.period == '180')
+            10000
+        else if (timeframe.period == '240')
+            15000
+        else
+            6000
+    else if (timeframe.isdaily)
+        50000
+    else if (timeframe.isweekly)
+        300000
+    else if (timeframe.ismonthly)
+        800000
+    else
+        0
+else
+    legendItemGapInput
+
+leftGapInput = input(0, title="Legend X Gap (0 = Auto)", type=input.integer, group = "Difference Mode Config")
+leftGap = if (leftGapInput == 0)
+    if (timeframe.isminutes)
+        if (timeframe.period == '1')
+            2
+        else if (timeframe.period == '3')
+            2
+        else if (timeframe.period == '5')
+            2
+        else if (timeframe.period == '15')
+            2
+        else if (timeframe.period == '30')
+            2
+        else if (timeframe.period == '45')
+            2
+        else if (timeframe.period == '60')
+            3
+        else if (timeframe.period == '120')
+            3
+        else if (timeframe.period == '180')
+            4
+        else if (timeframe.period == '240')
+            4
+        else
+            2
+    else if (timeframe.isdaily)
+        6
+    else if (timeframe.isweekly)
+        6
+    else if (timeframe.ismonthly)
+        6
+    else
+        0
+else
+    leftGapInput
+
+//
+// Spot Exchange Volume
+//
+totalExchanges = 0
+binanceUSD = getOrZero(getVolumeSymNz("BINANCE:BTCUSD"), includeUSD)
+binanceUSDT = getOrZero(getVolumeSymNz("BINANCE:BTCUSDT"), includeUSDT)
+binanceUSDC = getOrZero(getVolumeSymNz("BINANCE:BTCUSDC"), includeUSDC)
+binanceEUR = getOrZero(getVolumeSymNz("BINANCE:BTCEUR"), includeEUR)
+totalBinance = round(binanceUSD + binanceUSDT + binanceUSDC + binanceEUR)
+totalExchanges := totalExchanges + totalBinance
+binanceVolumeDiffToPlot = totalBinance
+
+binance_usUSD = getOrZero(getVolumeSymNz("BINANCEUS:BTCUSD"), includeUSD)
+binance_usUSDT = getOrZero(getVolumeSymNz("BINANCEUS:BTCUSDT"), includeUSDT)
+binance_usUSDC = getOrZero(getVolumeSymNz("BINANCEUS:BTCUSDC"), includeUSDC)
+totalBinance_us = round(binance_usUSD + binance_usUSDT + binance_usUSDC)
+totalExchanges := totalExchanges + totalBinance_us
+binance_usVolumeDiffToPlot = totalBinance_us + binanceVolumeDiffToPlot
+
+coinbaseUSD = getOrZero(getVolumeSymNz("COINBASE:BTCUSD"), includeUSD)
+coinbaseUSDT = getOrZero(getVolumeSymNz("COINBASE:BTCUSDT"), includeUSDT)
+coinbaseUSDC = getOrZero(getVolumeSymNz("COINBASE:BTCUSDC"), includeUSDC)
+coinbaseEUR = getOrZero(getVolumeSymNz("COINBASE:BTCEUR"), includeEUR)
+totalCoinbase = round(coinbaseUSD + coinbaseUSDT + coinbaseUSDC + coinbaseEUR)
+totalExchanges := totalExchanges + totalCoinbase
+coinbaseVolumeDiffToPlot = totalCoinbase + binance_usVolumeDiffToPlot
+
+krakenUSD = getOrZero(getVolumeSymNz("KRAKEN:XBTUSD"), includeUSD)
+krakenUSDT = getOrZero(getVolumeSymNz("KRAKEN:XBTUSDT"), includeUSDT)
+krakenEUR = getOrZero(getVolumeSymNz("KRAKEN:XBTEUR"), includeEUR)
+totalKraken = round(krakenUSD + krakenUSDT + krakenEUR)
+totalExchanges := totalExchanges + totalKraken
+krakenVolumeDiffToPlot = totalKraken + coinbaseVolumeDiffToPlot
+
+bitfinexUSD = getOrZero(getVolumeSymNz("BITFINEX:BTCUSD"), includeUSD)
+bitfinexEUR = getOrZero(getVolumeSymNz("BITFINEX:BTCEUR"), includeEUR)
+totalBitfinex = round(bitfinexUSD + bitfinexEUR)
+totalExchanges := totalExchanges + totalBitfinex
+bitfinexVolumeDiffToPlot = totalBitfinex + krakenVolumeDiffToPlot
+
+huobiUSDT = getOrZero(getVolumeSymNz("HUOBI:BTCUSDC"), includeUSDT)
+huobiUSDC = getOrZero(getVolumeSymNz("OKEX:BTCUSDC"), includeUSDC)
+totalHuobi = round(huobiUSDT + huobiUSDC)
+totalExchanges := totalExchanges + totalHuobi
+huobiVolumeDiffToPlot = totalHuobi + bitfinexVolumeDiffToPlot
+
+okexUSDT = getOrZero(getVolumeSymNz("OKEX:BTCUSDT"), includeUSDT)
+okexUSDC = getOrZero(getVolumeSymNz("OKEX:BTCUSDC"), includeUSDC)
+totalOkex = round(okexUSDT + okexUSDC)
+totalExchanges := totalExchanges + totalOkex
+okexVolumeDiffToPlot = totalOkex + huobiVolumeDiffToPlot
+
+ftxUSD = getOrZero(getVolumeSymNz("FTX:BTCUSD"), false) // DISABLED FOR NOW, TO MUCH VOLUME
+ftxUSDT = getOrZero(getVolumeSymNz("FTX:BTCUSDT"), false) // DISABLED FOR NOW, TO MUCH VOLUME
+totalFtx = round(ftxUSD + ftxUSDT)
+totalExchanges := totalExchanges + totalFtx
+ftxVolumeDiffToPlot = totalFtx + okexVolumeDiffToPlot
+
+geminiUSD = getOrZero(getVolumeSymNz("GEMINI:BTCUSD"), includeUSD)
+geminiEUR = getOrZero(getVolumeSymNz("GEMINI:BTCEUR"), includeUSDT)
+totalGemini = round(geminiUSD + geminiEUR)
+totalExchanges := totalExchanges + totalGemini
+geminiVolumeDiffToPlot = totalGemini + ftxVolumeDiffToPlot
+
+phemexUSDT = getOrZero(getVolumeSymNz("PHEMEX:BTCUSDT"), includeUSDT)
+totalPhemex = round(phemexUSDT)
+totalExchanges := totalExchanges + totalPhemex
+phemexVolumeDiffToPlot = totalPhemex + geminiVolumeDiffToPlot
+
+bittrexUSD = getOrZero(getVolumeSymNz("BITTREX:BTCUSD"), includeUSD)
+bittrexUSDT = getOrZero(getVolumeSymNz("BITTREX:BTCUSDT"), includeUSDT)
+bittrexEUR = getOrZero(getVolumeSymNz("BITTREX:BTCEUR"), includeEUR)
+totalBittrex = round(bittrexUSD + bittrexUSDT + bittrexEUR)
+totalExchanges := totalExchanges + totalBittrex
+bittrexVolumeDiffToPlot = totalBittrex + phemexVolumeDiffToPlot
+
+kucoinUSDT = getOrZero(getVolumeSymNz("KUCOIN:BTCUSDT"), false) // DISABLED FOR NOW, TO MUCH VOLUME
+kucoinUSDC = getOrZero(getVolumeSymNz("KUCOIN:BTCUSDC"), false) // DISABLED FOR NOW, TO MUCH VOLUME
+totalKucoin = round(kucoinUSDT + kucoinUSDC)
+totalExchanges := totalExchanges + totalKucoin
+kucoinVolumeDiffToPlot = totalKucoin + bittrexVolumeDiffToPlot
+
+poloniexUSDT = getOrZero(getVolumeSymNz("POLONIEX:BTCUSDT"), includeUSDT)
+poloniexUSDC = getOrZero(getVolumeSymNz("POLONIEX:BTCUSDC"), includeUSDC)
+totalPoloniex = round(poloniexUSDT + poloniexUSDC)
+totalExchanges := totalExchanges + totalPoloniex
+poloniexVolumeDiffToPlot = totalPoloniex + kucoinVolumeDiffToPlot
+
+//
+// Spot Exchange Plot
+//
+candleStart = getOrNA(0*volume, isDifferenceMode)
+candleEnd = getOrNA(binanceVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(binance_color, 0), editable=false)
+
+candleStart := getOrNA(binanceVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(binance_usVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(binance_us_color, 0), editable=false)
+
+candleStart := getOrNA(binance_usVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(coinbaseVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(coinbase_color, 0), editable=false)
+
+candleStart := getOrNA(coinbaseVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(krakenVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(kraken_color, 0), editable=false)
+
+candleStart := getOrNA(krakenVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(bitfinexVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(bitfinex_color, 0), editable=false)
+
+candleStart := getOrNA(bitfinexVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(huobiVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(huobi_color, 0), editable=false)
+
+candleStart := getOrNA(huobiVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(okexVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(okex_color, 0), editable=false)
+
+candleStart := getOrNA(okexVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(ftxVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(ftx_color, 0), editable=false)
+
+candleStart := getOrNA(ftxVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(geminiVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(gemini_color, 0), editable=false)
+
+candleStart := getOrNA(geminiVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(phemexVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(phemex_color, 0), editable=false)
+
+candleStart := getOrNA(phemexVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(bittrexVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(bittrex_color, 0), editable=false)
+
+candleStart := getOrNA(bittrexVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(kucoinVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(kucoin_color, 0), editable=false)
+
+candleStart := getOrNA(kucoinVolumeDiffToPlot, isDifferenceMode)
+candleEnd := getOrNA(poloniexVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStart, candleEnd, candleStart, candleEnd, color=color.new(poloniex_color, 0), editable=false)
+
+if (isDifferenceMode)
+    var float minBarTime = 999999999999
+    currentTime = time(timeframe.period)
+    timeOfCurrentBar = change(currentTime, 1)
+
+    if (totalBinance > 0)
+        var label binance_legend = label.new(bar_index, close, "Binance", xloc=xloc.bar_time)
+        label.set_style(binance_legend, label.style_none)
+        minBarTime := not na(minBarTime) ? min(timeOfCurrentBar, minBarTime) : timeOfCurrentBar
+        label.set_x(binance_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(binance_legend, legendPosition)
+        label.set_textcolor(binance_legend, binance_color)
+
+    if (totalBinance_us > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label binance_us_legend = label.new(bar_index, close, "Binance US", xloc=xloc.bar_time)
+        label.set_style(binance_us_legend, label.style_none)
+        label.set_x(binance_us_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(binance_us_legend, legendPosition)
+        label.set_textcolor(binance_us_legend, binance_us_color)
+    
+    if (totalCoinbase > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label coinbase_legend = label.new(bar_index, close, "Coinbase", xloc=xloc.bar_time)
+        label.set_style(coinbase_legend, label.style_none)
+        label.set_x(coinbase_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(coinbase_legend, legendPosition)
+        label.set_textcolor(coinbase_legend, coinbase_color)
+
+    if (totalKraken > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label kraken_legend = label.new(bar_index, close, "Kraken", xloc=xloc.bar_time)
+        label.set_style(kraken_legend, label.style_none)
+        label.set_x(kraken_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(kraken_legend, legendPosition)
+        label.set_textcolor(kraken_legend, kraken_color)
+    
+    if (totalBitfinex > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label bitfinex_legend = label.new(bar_index, close, "BitFinex", xloc=xloc.bar_time)
+        label.set_style(bitfinex_legend, label.style_none)
+        label.set_x(bitfinex_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(bitfinex_legend, legendPosition)
+        label.set_textcolor(bitfinex_legend, bitfinex_color)
+    
+    if (totalHuobi > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label huobi_legend = label.new(bar_index, close, "Huobi", xloc=xloc.bar_time)
+        label.set_style(huobi_legend, label.style_none)
+        label.set_x(huobi_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(huobi_legend, legendPosition)
+        label.set_textcolor(huobi_legend, huobi_color)
+
+    if (totalOkex > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label okex_legend = label.new(bar_index, close, "OKEX", xloc=xloc.bar_time)
+        label.set_style(okex_legend, label.style_none)
+        label.set_x(okex_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(okex_legend, legendPosition)
+        label.set_textcolor(okex_legend, okex_color)
+
+    if (totalFtx > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label ftx_legend = label.new(bar_index, close, "FTX", xloc=xloc.bar_time)
+        label.set_style(ftx_legend, label.style_none)
+        label.set_x(ftx_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(ftx_legend, legendPosition)
+        label.set_textcolor(ftx_legend, ftx_color)
+
+    if (totalGemini > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label gemini_legend = label.new(bar_index, close, "Gemini", xloc=xloc.bar_time)
+        label.set_style(gemini_legend, label.style_none)
+        label.set_x(gemini_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(gemini_legend, legendPosition)
+        label.set_textcolor(gemini_legend, gemini_color)
+    
+    if (totalPhemex > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label phemex_legend = label.new(bar_index, close, "Phemex", xloc=xloc.bar_time)
+        label.set_style(phemex_legend, label.style_none)
+        label.set_x(phemex_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(phemex_legend, legendPosition)
+        label.set_textcolor(phemex_legend, phemex_color)
+    
+    if (totalBittrex > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label bittrex_legend = label.new(bar_index, close, "Bittrex", xloc=xloc.bar_time)
+        label.set_style(bittrex_legend, label.style_none)
+        label.set_x(bittrex_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(bittrex_legend, legendPosition)
+        label.set_textcolor(bittrex_legend, bittrex_color)
+
+    if (totalKucoin > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label kucoin_legend = label.new(bar_index, close, "Kucoin", xloc=xloc.bar_time)
+        label.set_style(kucoin_legend, label.style_none)
+        label.set_x(kucoin_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(kucoin_legend, legendPosition)
+        label.set_textcolor(kucoin_legend, kucoin_color)
+
+    if (totalPoloniex > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label poloniex_legend = label.new(bar_index, close, "Poloniex", xloc=xloc.bar_time)
+        label.set_style(poloniex_legend, label.style_none)
+        label.set_x(poloniex_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(poloniex_legend, legendPosition)
+        label.set_textcolor(poloniex_legend, poloniex_color)
+
+total = isAggregatedMode ? totalExchanges : na
+plot(total, "Aggregated BTC SPOT", color=close > close[1] ? color_13 : color_15, style=plot.style_columns)
+

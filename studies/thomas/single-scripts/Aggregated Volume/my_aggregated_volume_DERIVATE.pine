@@ -1,0 +1,331 @@
+////////////////////////////////////////////////////////////////////////////////////
+//
+// DERIVATES
+//
+// OKEX:BTCUSDPERP
+// OKEX:BTCUSDTPERP
+// FTX:BTCPERP
+// BTSE:BTCPFC
+// KRAKEN:XBTUSDPERP
+// BITMEX:XBTUSD
+// HUOBI:BTCPERP
+// DERIBIT:BTCPERP
+// BINANCE:BTCPERP
+// BINANCE:BTCUSDTPERP
+// PHEMEX:BTCUSD
+// BITGET:BTCUSDPERP
+// BITGET:BTCUSDTPERP
+//
+////////////////////////////////////////////////////////////////////////////////////
+
+//@version=4
+study("WE:Aggregated Volume BTC:DERIVATES")
+
+getVolumeSym(symbolPair) => security(symbolPair, '', volume)
+getVolumeSymNz(symbolPair) => nz(getVolumeSym(symbolPair))
+getOrZero(val, cond) => cond ? val : 0
+getOrNA(v, c) => c ? v : na
+
+//
+// Color Palette
+//
+color_1 = #ffffff // White --
+color_2 = #5cff95 // Light green --
+color_3 = #1532d7 // Blue --
+color_4 = #7eb300 // Kaki Green --
+color_5 = #b62fe4 // Light purple --
+color_6 = #006e16 // Dark green --
+color_7 = #79008f // Purple --
+color_8 = #f89200 // Orange --
+color_9 = #72e9ff // Light blue --
+color_10 = #ff3f3c // Light red --
+color_11 = #005743 // Blue / Green --
+color_12 = #ff66d0 // Pink --
+color_13 = #b78d00 // Light Brown --
+color_14 = #e7b8ff // Pink / Purple
+color_15 = #3e2a00 // Dark brown --
+color_16 = #e2ffc8 // Very Light green
+color_17 = #cc0037 // Red
+color_18 = #ffddbe // Beige --
+color_19 = #5c1b00 // Very Dark brown --
+color_20 = #ff976c // Dark beige --
+
+//
+// Exchanges Color
+//
+binance_color = color_8
+binance_us_color = color_13
+coinbase_color = color_3
+kraken_color = color_5
+bitfinex_color = color_1
+huobi_color = color_2
+ftx_color = color_4
+gemini_color = color_6
+phemex_color = color_7
+bittrex_color = color_9
+okex_color = color_10
+deribit_color = color_11
+kucoin_color = color_12
+poloniex_color = color_15
+bitget_color = color_20
+bitmex_color = color_19
+btse_color = color_18
+
+currencies = input("All", title="Included Currencies (Spot) :", options=['All', 'USD', 'USDT'])
+includeUSD = currencies == "All" or currencies == "USD"
+includeUSDT = currencies == "All" or currencies == "USDT"
+
+mode = input("Aggregated", title="Display Mode :", options=['Aggregated', 'Difference'])
+isAggregatedMode = mode == "Aggregated"
+isDifferenceMode = mode == "Difference"
+
+
+okexUSD_PERP = getOrZero(getVolumeSymNz("OKEX:BTCUSDPERP"), includeUSD)
+okexUSDT_PERP = getOrZero(getVolumeSymNz("OKEX:BTCUSDTPERP"), includeUSDT)
+totalOkexPerp = round(okexUSD_PERP + okexUSDT_PERP)
+okexPerpVolumeDiffToPlot = totalOkexPerp
+
+ftxBTC_PERP = getOrZero(getVolumeSymNz("FTX:BTCPERP"), includeUSD)
+totalFtxPerp = round(ftxBTC_PERP)
+ftxBtcPerpVolumeDiffToPlot = totalFtxPerp + okexPerpVolumeDiffToPlot
+
+btseBTC_PERP = getOrZero(getVolumeSymNz("BTSE:BTCPFC"), includeUSD)
+totalBtsePerp = round(btseBTC_PERP)
+btseBtcPerpVolumeDiffToPlot = totalBtsePerp + ftxBtcPerpVolumeDiffToPlot
+
+krakenBTC_PERP = getOrZero(getVolumeSymNz("KRAKEN:XBTUSDPERP"), includeUSD)
+totalKrakenPerp = round(krakenBTC_PERP)
+krakenBtcPerpVolumeDiffToPlot = totalKrakenPerp + btseBtcPerpVolumeDiffToPlot
+
+bitmexBTC_PERP = getOrZero(getVolumeSymNz("BITMEX:XBTUSD"), includeUSD)
+totalBitmexPerp = round(bitmexBTC_PERP)
+bitmexBtcPerpVolumeDiffToPlot = totalBitmexPerp + krakenBtcPerpVolumeDiffToPlot
+
+huobiBTC_PERP = getOrZero(getVolumeSymNz("HUOBI:BTCPERP"), includeUSD)
+totalHuobiPerp = round(huobiBTC_PERP)
+huobiBtcPerpVolumeDiffToPlot = totalHuobiPerp + bitmexBtcPerpVolumeDiffToPlot
+
+deribitBTC_PERP = getOrZero(getVolumeSymNz("DERIBIT:BTCPERP"), includeUSD)
+totalDeribitPerp = round(deribitBTC_PERP)
+deribitBtcPerpVolumeDiffToPlot = totalDeribitPerp + huobiBtcPerpVolumeDiffToPlot
+
+binanceBTC_PERP = getOrZero(getVolumeSymNz("BINANCE:BTCPERP"), includeUSD)
+binanceUSDT_PERP = getOrZero(getVolumeSymNz("BINANCE:BTCUSDTPERP"), includeUSDT)
+totalBinancePerp = round(binanceBTC_PERP + binanceUSDT_PERP)
+binanceBtcPerpVolumeDiffToPlot = totalBinancePerp + deribitBtcPerpVolumeDiffToPlot
+
+phemexBTC_PERP = getOrZero(getVolumeSymNz("PHEMEX:BTCUSD"), includeUSD)
+totalPhemexPerp = round(phemexBTC_PERP)
+phemexBtcPerpVolumeDiffToPlot = totalPhemexPerp + binanceBtcPerpVolumeDiffToPlot
+
+bitgetBTC_PERP = getOrZero(getVolumeSymNz("BITGET:BTCUSDPERP"), includeUSD)
+bitgetUSDT_PERP = getOrZero(getVolumeSymNz("BITGET:BTCUSDTPERP"), includeUSDT)
+totalBitgetPerp = round(bitgetBTC_PERP + bitgetUSDT_PERP)
+bitgetBtcPerpVolumeDiffToPlot = totalBitgetPerp + phemexBtcPerpVolumeDiffToPlot
+
+//
+// Derivate Exchange Plot
+//
+candleStartF = getOrNA(0*volume, isDifferenceMode)
+candleEndF = getOrNA(okexPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(okex_color, 0), editable=false)
+
+candleStartF := getOrNA(okexPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(ftxBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(ftx_color, 0), editable=false)
+
+candleStartF := getOrNA(ftxBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(btseBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(btse_color, 0), editable=false)
+
+candleStartF := getOrNA(btseBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(krakenBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(kraken_color, 0), editable=false)
+
+candleStartF := getOrNA(krakenBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(bitmexBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(bitmex_color, 0), editable=false)
+
+candleStartF := getOrNA(bitmexBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(huobiBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(huobi_color, 0), editable=false)
+
+candleStartF := getOrNA(huobiBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(deribitBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(deribit_color, 0), editable=false)
+
+candleStartF := getOrNA(deribitBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(binanceBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(binance_color, 0), editable=false)
+
+candleStartF := getOrNA(binanceBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(phemexBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(phemex_color, 0), editable=false)
+
+candleStartF := getOrNA(phemexBtcPerpVolumeDiffToPlot, isDifferenceMode)
+candleEndF := getOrNA(bitgetBtcPerpVolumeDiffToPlot, isDifferenceMode)
+plotcandle(candleStartF, candleEndF, candleStartF, candleEndF, color=color.new(bitget_color, 0), editable=false)
+
+//
+// Legend config
+//
+legendPosition = 0
+legendItemGapInput = input(0, title="Legend Items Gap (0 = Auto)", type=input.integer, group = "Difference Mode Config")
+legendItemGap = if (legendItemGapInput == 0)
+    if (timeframe.isminutes)
+        if (timeframe.period == '1')
+            900000
+        else if (timeframe.period == '3')
+            1500000
+        else if (timeframe.period == '5')
+            3500000
+        else if (timeframe.period == '15')
+            6500000
+        else if (timeframe.period == '30')
+            30000000
+        else if (timeframe.period == '45')
+            40000000
+        else if (timeframe.period == '60')
+            60000000
+        else if (timeframe.period == '120')
+            80000000
+        else if (timeframe.period == '180')
+            120000000
+        else if (timeframe.period == '240')
+            350000000
+        else
+            0
+    else if (timeframe.isdaily)
+        1000000000
+    else if (timeframe.isweekly)
+        9000000000
+    else if (timeframe.ismonthly)
+        30000000000
+    else
+        0
+else
+    legendItemGapInput
+
+leftGapInput = input(0, title="Legend X Gap (0 = Auto)", type=input.integer, group = "Difference Mode Config")
+leftGap = if (leftGapInput == 0)
+    if (timeframe.isminutes)
+        if (timeframe.period == '1')
+            2
+        else if (timeframe.period == '3')
+            2
+        else if (timeframe.period == '5')
+            2
+        else if (timeframe.period == '15')
+            2
+        else if (timeframe.period == '30')
+            2
+        else if (timeframe.period == '45')
+            2
+        else if (timeframe.period == '60')
+            3
+        else if (timeframe.period == '120')
+            3
+        else if (timeframe.period == '180')
+            4
+        else if (timeframe.period == '240')
+            4
+        else
+            2
+    else if (timeframe.isdaily)
+        6
+    else if (timeframe.isweekly)
+        6
+    else if (timeframe.ismonthly)
+        6
+    else
+        0
+else
+    leftGapInput
+
+if (isDifferenceMode)
+    var float minBarTime = 999999999999
+    currentTime = time(timeframe.period)
+    timeOfCurrentBar = change(currentTime, 1)
+
+    if (totalOkexPerp > 0)
+        var label okexPerp_legend = label.new(bar_index, close, "Okex", xloc=xloc.bar_time)
+        label.set_style(okexPerp_legend, label.style_none)
+        minBarTime := not na(minBarTime) ? min(timeOfCurrentBar, minBarTime) : timeOfCurrentBar
+        label.set_x(okexPerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(okexPerp_legend, legendPosition)
+        label.set_textcolor(okexPerp_legend, okex_color)
+
+    if (totalFtxPerp > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label ftxPerp_legend = label.new(bar_index, close, "FTX", xloc=xloc.bar_time)
+        label.set_style(ftxPerp_legend, label.style_none)
+        label.set_x(ftxPerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(ftxPerp_legend, legendPosition)
+        label.set_textcolor(ftxPerp_legend, ftx_color)
+    
+    if (totalBtsePerp > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label btsePerp_legend = label.new(bar_index, close, "BTSE", xloc=xloc.bar_time)
+        label.set_style(btsePerp_legend, label.style_none)
+        label.set_x(btsePerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(btsePerp_legend, legendPosition)
+        label.set_textcolor(btsePerp_legend, btse_color)
+
+    if (totalKrakenPerp > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label krakenPerp_legend = label.new(bar_index, close, "Kraken", xloc=xloc.bar_time)
+        label.set_style(krakenPerp_legend, label.style_none)
+        label.set_x(krakenPerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(krakenPerp_legend, legendPosition)
+        label.set_textcolor(krakenPerp_legend, kraken_color)
+    
+    if (totalBitmexPerp > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label bitmexPer_legend = label.new(bar_index, close, "Bitmex", xloc=xloc.bar_time)
+        label.set_style(bitmexPer_legend, label.style_none)
+        label.set_x(bitmexPer_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(bitmexPer_legend, legendPosition)
+        label.set_textcolor(bitmexPer_legend, bitmex_color)
+    
+    if (totalHuobiPerp > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label huobiPerp_legend = label.new(bar_index, close, "Huobi", xloc=xloc.bar_time)
+        label.set_style(huobiPerp_legend, label.style_none)
+        label.set_x(huobiPerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(huobiPerp_legend, legendPosition)
+        label.set_textcolor(huobiPerp_legend, huobi_color)
+
+    if (totalDeribitPerp > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label deribitPerp_legend = label.new(bar_index, close, "Deribit", xloc=xloc.bar_time)
+        label.set_style(deribitPerp_legend, label.style_none)
+        label.set_x(deribitPerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(deribitPerp_legend, legendPosition)
+        label.set_textcolor(deribitPerp_legend, deribit_color)
+
+    if (totalBinancePerp > 0) 
+        legendPosition := legendPosition + legendItemGap
+        var label binancePerp_legend = label.new(bar_index, close, "Binance", xloc=xloc.bar_time)
+        label.set_style(binancePerp_legend, label.style_none)
+        label.set_x(binancePerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(binancePerp_legend, legendPosition)
+        label.set_textcolor(binancePerp_legend, binance_color)
+
+    if (totalPhemexPerp > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label phemexPerp_legend = label.new(bar_index, close, "Phemex", xloc=xloc.bar_time)
+        label.set_style(phemexPerp_legend, label.style_none)
+        label.set_x(phemexPerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(phemexPerp_legend, legendPosition)
+        label.set_textcolor(phemexPerp_legend, phemex_color)
+    
+    if (totalBitgetPerp > 0)
+        legendPosition := legendPosition + legendItemGap
+        var label bitgetPerp_legend = label.new(bar_index, close, "Bitget", xloc=xloc.bar_time)
+        label.set_style(bitgetPerp_legend, label.style_none)
+        label.set_x(bitgetPerp_legend, int(currentTime+(leftGap*minBarTime)))
+        label.set_y(bitgetPerp_legend, legendPosition)
+        label.set_textcolor(bitgetPerp_legend, bitget_color)
+
+total = isAggregatedMode ? totalOkexPerp+totalFtxPerp+totalBtsePerp+totalKrakenPerp+totalBitmexPerp+totalHuobiPerp+totalDeribitPerp+totalBinancePerp+totalPhemexPerp+totalBitgetPerp : na
+plot(total, "Aggregated BTC PERP", color=close > close[1] ? color_13 : color_15, style=plot.style_columns)
