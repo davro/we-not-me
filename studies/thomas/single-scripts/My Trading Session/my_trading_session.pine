@@ -1,0 +1,655 @@
+//@version = 4
+study(title="My Trading Sessions", overlay=false)
+
+var isTraditional = syminfo.type == "forex" or syminfo.type == "cfd"
+var isCrypto = syminfo.type == "crypto"
+
+tokyoOC = array.new_int()
+array.push(tokyoOC, isTraditional ? 19 : isCrypto ? 23 : 0)
+array.push(tokyoOC, isTraditional ? 03 : isCrypto ? 07 : 0)
+tokyoSession   = isTraditional ? "1900-0300" : isCrypto ? "2300-0700" : na
+
+berlinOC = array.new_int()
+array.push(berlinOC, isTraditional ? 02 : isCrypto ? 06 : 0)
+array.push(berlinOC, isTraditional ? 10 : isCrypto ? 14 : 0)
+berlinSession  = isTraditional ? "0200-1000" : isCrypto ? "0600-1400" : na
+
+londonOC = array.new_int()
+array.push(londonOC, isTraditional ? 03 : isCrypto ? 07 : 0)
+array.push(londonOC, isTraditional ? 11 : isCrypto ? 15 : 0)
+londonSession  = isTraditional ? "0300-1100" : isCrypto ? "0700-1500" : na
+
+sydneyOC = array.new_int()
+array.push(sydneyOC, isTraditional ? 18 : isCrypto ? 22 : 0)
+array.push(sydneyOC, isTraditional ? 02 : isCrypto ? 06 : 0)
+sydneySession  = isTraditional ? "1800-0200" : isCrypto ? "2200-0600" : na
+
+newYorkOC = array.new_int()
+array.push(newYorkOC, isTraditional ? 08 : isCrypto ? 12 : 0)
+array.push(newYorkOC, isTraditional ? 16 : isCrypto ? 20 : 0)
+newYorkSession = isTraditional ? "0800-1600" : isCrypto ? "1200-2000" : na
+
+newYorkColour   = color.red
+berlinColour    = color.blue
+londonColour    = color.green
+tokyoColour     = color.orange
+sydneyColour    = color.purple
+noSessionColour = color.gray
+
+isSessionOpen(sess) => na(time(timeframe.period, sess)) == false
+
+newYorkOpen = isSessionOpen(newYorkSession)
+berlinOpen = isSessionOpen(berlinSession)
+londonOpen = isSessionOpen(londonSession)
+tokyoOpen = isSessionOpen(tokyoSession)
+sydneyOpen = isSessionOpen(sydneySession)
+noSession = newYorkOpen == false and berlinOpen == false and londonOpen == false and tokyoOpen == false and sydneyOpen == false
+
+isDailyorAbove = timeframe.isdaily or timeframe.isweekly or timeframe.ismonthly
+plotshape((newYorkOpen or isDailyorAbove) and (isTraditional or (isCrypto and noSession == false)) ? 20 : na, style=shape.circle, size=size.tiny, color=newYorkColour, location=location.absolute)
+plotshape((londonOpen or isDailyorAbove) and (isTraditional or (isCrypto and noSession == false)) ? 15 : na, style=shape.circle, size=size.tiny, color=londonColour, location=location.absolute)
+plotshape((berlinOpen or isDailyorAbove) and (isTraditional or (isCrypto and noSession == false)) ? 10 : na, style=shape.circle, size=size.tiny, color=berlinColour, location=location.absolute)
+plotshape((tokyoOpen or isDailyorAbove) and (isTraditional or (isCrypto and noSession == false)) ? 5 : na, style=shape.circle, size=size.tiny, color=tokyoColour, location=location.absolute)
+plotshape((sydneyOpen or isDailyorAbove) and (isTraditional or (isCrypto and noSession == false)) ? 0 : na, style=shape.circle, size=size.tiny, color=sydneyColour, location=location.absolute)
+plotshape(noSession ? -5 : na, style=shape.circle, size=size.tiny, color=noSessionColour, location=location.absolute)
+
+var float minBarTime = 999999999999
+adaptedDayOfMonth = isTraditional and hour < 24 ? dayofmonth + 1 : dayofmonth
+adaptedDayOfMonth := dayofweek == dayofweek.saturday ? adaptedDayOfMonth + 2 : adaptedDayOfMonth
+adaptedDayOfMonth := dayofweek == dayofweek.sunday ? adaptedDayOfMonth + 1 : adaptedDayOfMonth
+currentTime = time(timeframe.period)
+timeOfCurrentBar = change(currentTime, 1)
+legendPosition = -4
+legendItemGap = 5
+leftGap = if (timeframe.ismonthly)
+    2
+else if (timeframe.isweekly)
+    2
+else if (timeframe.isdaily)
+    2
+else
+    25
+
+var label no_session_legend = label.new(bar_index, close, xloc=xloc.bar_time)
+label.set_style(no_session_legend, label.style_none)
+minBarTime := not na(minBarTime) ? min(timeOfCurrentBar, minBarTime) : timeOfCurrentBar
+label.set_x(no_session_legend, int(currentTime+(leftGap*minBarTime)))
+label.set_y(no_session_legend, legendPosition)
+label.set_textcolor(no_session_legend, noSessionColour)
+label.set_text(no_session_legend, "No Session")
+
+legendPosition := legendPosition + legendItemGap
+var label syd_legend = label.new(bar_index, close, xloc=xloc.bar_time)
+label.set_style(syd_legend, label.style_none)
+minBarTime := not na(minBarTime) ? min(timeOfCurrentBar, minBarTime) : timeOfCurrentBar
+label.set_x(syd_legend, int(currentTime+(leftGap*minBarTime)))
+label.set_y(syd_legend, legendPosition)
+label.set_textcolor(syd_legend, sydneyColour)
+sydneyOpenCloseinSeconds = ((sydneyOpen ? timestamp(year, month, adaptedDayOfMonth, array.get(sydneyOC, 1), 00) :  timestamp(year, month, adaptedDayOfMonth, array.get(sydneyOC, 0), 00))  - timenow) / 1000
+sydneySeconds = floor(sydneyOpenCloseinSeconds % 60)
+sydneyMinutes = floor((sydneyOpenCloseinSeconds / 60) % 60)
+sydneyHours = floor((sydneyOpenCloseinSeconds / 3600))
+
+sydneyLabel = if(sydneyOpen)
+    ">> Sydney Close in : " + tostring(sydneyHours) + "h:" + tostring(sydneyMinutes) + "m:" + tostring(sydneySeconds) + "s <<"
+else
+    "Sydney Open in : " + tostring(sydneyHours) + "h:" + tostring(sydneyMinutes) + "m:" + tostring(sydneySeconds) + "s"
+label.set_text(syd_legend, sydneyLabel)
+
+legendPosition := legendPosition + legendItemGap
+var label tok_legend = label.new(bar_index, close, xloc=xloc.bar_time)
+label.set_style(tok_legend, label.style_none)
+label.set_x(tok_legend, int(currentTime+(leftGap*minBarTime)))
+label.set_y(tok_legend, legendPosition)
+label.set_textcolor(tok_legend, tokyoColour)
+tokyoOpenCloseinSeconds = ((tokyoOpen ? timestamp(year, month, adaptedDayOfMonth, array.get(tokyoOC, 1), 00) :  timestamp(year, month, adaptedDayOfMonth, array.get(tokyoOC, 0), 00))  - timenow) / 1000
+tokyoSeconds = floor(tokyoOpenCloseinSeconds % 60)
+tokyoMinutes = floor((tokyoOpenCloseinSeconds / 60) % 60)
+tokyoHours = floor((tokyoOpenCloseinSeconds / 3600))
+
+tokyoLabel = if(tokyoOpen)
+    ">> Tokyo Close in : " + tostring(tokyoHours) + "h:" + tostring(tokyoMinutes) + "m:" + tostring(tokyoSeconds) + "s <<"
+else
+    "Tokyo Open in : " + tostring(tokyoHours) + "h:" + tostring(tokyoMinutes) + "m:" + tostring(tokyoSeconds) + "s"
+label.set_text(tok_legend, tokyoLabel)
+
+legendPosition := legendPosition + legendItemGap
+var label bl_legend = label.new(bar_index, close, xloc=xloc.bar_time)
+label.set_style(bl_legend, label.style_none)
+label.set_x(bl_legend, int(currentTime+(leftGap*minBarTime)))
+label.set_y(bl_legend, legendPosition)
+label.set_textcolor(bl_legend, berlinColour)
+berlinOpenCloseinSeconds = ((berlinOpen ? timestamp(year, month, adaptedDayOfMonth, array.get(berlinOC, 1), 00) :  timestamp(year, month, adaptedDayOfMonth, array.get(berlinOC, 0), 00))  - timenow) / 1000
+berlinSeconds = floor(berlinOpenCloseinSeconds % 60)
+berlinMinutes = floor((berlinOpenCloseinSeconds / 60) % 60)
+berlinHours = floor((berlinOpenCloseinSeconds / 3600))
+
+berlinLabel = if(berlinOpen)
+    ">> Berlin Close in : " + tostring(berlinHours) + "h:" + tostring(berlinMinutes) + "m:" + tostring(berlinSeconds) + "s <<"
+else
+    "Berlin Open in : " + tostring(berlinHours) + "h:" + tostring(berlinMinutes) + "m:" + tostring(berlinSeconds) + "s"
+label.set_text(bl_legend, berlinLabel)
+
+legendPosition := legendPosition + legendItemGap
+var label lon_legend = label.new(bar_index, close, xloc=xloc.bar_time)
+label.set_style(lon_legend, label.style_none)
+label.set_x(lon_legend, int(currentTime+(leftGap*minBarTime)))
+label.set_y(lon_legend, legendPosition)
+label.set_textcolor(lon_legend, londonColour)
+londonOpenCloseinSeconds = ((londonOpen ? timestamp(year, month, adaptedDayOfMonth, array.get(londonOC, 1), 00) :  timestamp(year, month, adaptedDayOfMonth, array.get(londonOC, 0), 00))  - timenow) / 1000
+londonSeconds = floor(londonOpenCloseinSeconds % 60)
+londonMinutes = floor((londonOpenCloseinSeconds / 60) % 60)
+londonHours = floor((londonOpenCloseinSeconds / 3600))
+
+londonLabel = if(londonOpen)
+    ">> London Close in : " + tostring(londonHours) + "h:" + tostring(londonMinutes) + "m:" + tostring(londonSeconds) + "s <<"
+else
+    "London Open in : " + tostring(londonHours) + "h:" + tostring(londonMinutes) + "m:" + tostring(londonSeconds) + "s"
+label.set_text(lon_legend, londonLabel)
+
+legendPosition := legendPosition + legendItemGap
+var label ny_legend = label.new(bar_index, close, xloc=xloc.bar_time)
+label.set_style(ny_legend, label.style_none)
+label.set_x(ny_legend, int(currentTime+(leftGap*minBarTime)))
+label.set_y(ny_legend, legendPosition)
+label.set_textcolor(ny_legend, newYorkColour)
+newYorkOpenCloseinSeconds = ((newYorkOpen ? timestamp(year, month, adaptedDayOfMonth, array.get(newYorkOC, 1), 00) :  timestamp(year, month, adaptedDayOfMonth, array.get(newYorkOC, 0), 00))  - timenow) / 1000
+newYorkSeconds = floor(newYorkOpenCloseinSeconds % 60)
+newYorkMinutes = floor((newYorkOpenCloseinSeconds / 60) % 60)
+newYorkHours = floor((newYorkOpenCloseinSeconds / 3600))
+
+newYorkLabel = if(newYorkOpen)
+    ">> New York Close in : " + tostring(newYorkHours) + "h:" + tostring(newYorkMinutes) + "m:" + tostring(newYorkSeconds) + "s <<"
+else
+    "New York Open in : " + tostring(newYorkHours) + "h:" + tostring(newYorkMinutes) + "m:" + tostring(newYorkSeconds) + "s"
+label.set_text(ny_legend, newYorkLabel)
+
+// // This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// // © dgtrd
+
+// //@version=4
+// study("Analog/Digital World Clock by DGT", shorttitle="CLOCK by DGT", max_lines_count=56)
+
+// i_UTC = input( "(UTC+03:00) ISTANBUL"   , 
+//            options=[
+//                "(UTC-12:00) IDLW"       , 
+//                "(UTC-10:00) HONOLULU"   , 
+//                "(UTC-09:00) ANCHORAGE"  , 
+//                "(UTC-08:00) LOS ANGELES", "(UTC-08:00) VANCOUVER"       , "(UTC-08:00) TIJUANA"       , 
+//                "(UTC-07:00) DENVER"     , "(UTC-07:00) EDMONTON"        , "(UTC-07:00) CIUDAD JUAREZ" , 
+//                "(UTC-06:00) MEXICO CITY", "(UTC-06:00) CHICAGO"         , "(UTC-06:00) GUATEMALA CITY", "(UTC-06:00) TEGUCIGALPA", "(UTC-06:00) WINNIPEG"   , "(UTC-06:00) SAN JOSE", "(UTC-06:00) SAN SALVADOR", 
+//                "(UTC-05:00) NEW YORK"   , "(UTC-05:00) TORONTO"         , "(UTC-05:00) HAVANA"        , "(UTC-05:00) LIMA"       , "(UTC-05:00) BOGOTA"     , "(UTC-05:00) KINGSTON", 
+//                "(UTC-04:00) SANTIAGO"   , "(UTC-04:00) SANTO DOMINGO"   , "(UTC-04:00) MANAUS"        , "(UTC-04:00) CARACAS"    , "(UTC-04:00) LA PAZ"     , "(UTC-04:00) HALIFAX" , 
+//                "(UTC-03:30) ST. JOHN’S" , 
+//                "(UTC-03:00) SAO PAULO"  , "(UTC-03:00) BUENOS AIRES"    , "(UTC-03:00) MONTEVIDEO"    , 
+//                "(UTC+00:00) LONDON"     , "(UTC+00:00) DUBLIN"          , "(UTC+00:00) LISBON"        , "(UTC+00:00) ABIDJAN"    , "(UTC+00:00) ACCRA"      , "(UTC+00:00) DAKAR"   , 
+//                "(UTC+01:00) BERLIN"     , "(UTC+01:00) ROME"            , "(UTC+01:00) PARIS"         , "(UTC+01:00) MADRID"     , "(UTC+01:00) WARSAW"     , "(UTC+01:00) LAGOS"   , "(UTC+01:00) KINSHASA"    , "(UTC+01:00) ALGIERS", "(UTC+01:00) CASABLANCA", 
+//                "(UTC+02:00) CAIRO"      , "(UTC+02:00) JOHANNESBURG"    , "(UTC+02:00) KHARTOUM"      , "(UTC+02:00) KYIV"       , "(UTC+02:00) BUCHAREST"  , "(UTC+02:00) ATHENS"  , "(UTC+02:00) JERUSALEM"   , "(UTC+02:00) SOFIA"  , 
+//                "(UTC+03:00) MOSCOW"     , "(UTC+03:00) ISTANBUL"        , "(UTC+03:00) RIYADH"        , "(UTC+03:00) BAGHDAD"    , "(UTC+03:00) ADDIS ABABA", "(UTC+03:00) DOHA"    , 
+//                "(UTC+03:30) TEHRAN"     , 
+//                "(UTC+04:00) DUBAI"      , "(UTC+04:00) BAKU"            , "(UTC+04:00) TBILISI"       , "(UTC+04:00) YEREVAN"    , "(UTC+04:00) SAMARA"     , 
+//                "(UTC+04:30) KABUL"      , 
+//                "(UTC+05:00) KARACHI"    , "(UTC+05:00) TASHKENT"        , "(UTC+05:00) YEKATERINBURG" , 
+//                "(UTC+05:30) MUMBAI"     , "(UTC+05:30) COLOMBO"         , 
+//                "(UTC+05:45) KATHMANDU"  , 
+//                "(UTC+06:00) DHAKA"      , "(UTC+06:00) ALMATY"          , "(UTC+06:00) OMSK"          , 
+//                "(UTC+06:30) YANGON"     , 
+//                "(UTC+07:00) JAKARTA"    , "(UTC+07:00) HO CHI MINH CITY", "(UTC+07:00) BANGKOK"       , "(UTC+07:00) KRASNOYARSK", 
+//                "(UTC+08:00) SHANGHAI"   , "(UTC+08:00) TAIPEI"          , "(UTC+08:00) KUALA LUMPUR"  , "(UTC+08:00) SINGAPORE"  , "(UTC+08:00) PERTH"      , "(UTC+08:00) MANILA"  , "(UTC+08:00) MAKASSAR"    , "(UTC+08:00) IRKUTSK", 
+//                "(UTC+09:00) TOKYO"      , "(UTC+09:00) SEOUL"           , 
+//                "(UTC+09:00) PYONGYANG"  , "(UTC+09:00) AMBON"           , "(UTC+09:00) YAKUTSK"       , 
+//                "(UTC+09:30) ADELAIDE"   , 
+//                "(UTC+10:00) SYDNEY"     , "(UTC+10:00) PORT MORESBY"    , "(UTC+10:00) VLADIVOSTOK"   , 
+//                "(UTC+11:00) NOUMEA"     , "(UTC+11:00) MAGADAN"         , 
+//                "(UTC+12:00) AUCKLAND"   , "(UTC+12:00) SUVA"            , "(UTC+12:00) PETROPAVLOVSK" , 
+//                "(UTC+14:00) KIRIBATI"
+//            ])
+
+// i_xSummerTime       = input(false, "Summer Time (DST) for Selected City")
+// i_sydneySummerTime  = input(true , "Summer Time (DST) for Sydney"       )
+// i_londonSummerTime  = input(false, "Summer Time (DST) for London"       )
+// i_newyorkSummerTime = input(false, "Summer Time (DST) for New York"     )
+
+// var a_linePointY    = array.new_float ()
+// var a_linePointY2   = array.new_float ()
+// var a_majorCity     = array.new_string()
+// var a_utcTimeOffset = array.new_float ()
+// var a_utcCity       = array.new_string()
+// var a_forexMarket   = array.new_string()
+// var a_forexOpenH    = array.new_float ()
+// var a_forexCloseH   = array.new_float ()
+// var a_analogClock   = array.new_line  ()
+
+// clockDiameter       = 15
+// barTime             = time
+
+// if barstate.isfirst
+//     array.push(a_majorCity, "International Date Line West"), array.push(a_utcTimeOffset, -12  ), array.push(a_utcCity, "(UTC-12:00) IDLW"            )
+//     array.push(a_majorCity, "HONOLULU"                    ), array.push(a_utcTimeOffset, -10  ), array.push(a_utcCity, "(UTC-10:00) HONOLULU"        )
+//     array.push(a_majorCity, "ANCHORAGE"                   ), array.push(a_utcTimeOffset, -9   ), array.push(a_utcCity, "(UTC-09:00) ANCHORAGE"       )
+//     array.push(a_majorCity, "LOS ANGELES"                 ), array.push(a_utcTimeOffset, -8   ), array.push(a_utcCity, "(UTC-08:00) LOS ANGELES"     )
+//     array.push(a_majorCity, "VANCOUVER"                   ), array.push(a_utcTimeOffset, -8   ), array.push(a_utcCity, "(UTC-08:00) VANCOUVER"       )
+//     array.push(a_majorCity, "TIJUANA"                     ), array.push(a_utcTimeOffset, -8   ), array.push(a_utcCity, "(UTC-08:00) TIJUANA"         )
+//     array.push(a_majorCity, "DENVER"                      ), array.push(a_utcTimeOffset, -7   ), array.push(a_utcCity, "(UTC-07:00) DENVER"          )
+//     array.push(a_majorCity, "EDMONTON"                    ), array.push(a_utcTimeOffset, -7   ), array.push(a_utcCity, "(UTC-07:00) EDMONTON"        )
+//     array.push(a_majorCity, "CIUDAD JUAREZ"               ), array.push(a_utcTimeOffset, -7   ), array.push(a_utcCity, "(UTC-07:00) CIUDAD JUAREZ"   )
+//     array.push(a_majorCity, "MEXICO CITY"                 ), array.push(a_utcTimeOffset, -6   ), array.push(a_utcCity, "(UTC-06:00) MEXICO CITY"     )
+//     array.push(a_majorCity, "CHICAGO"                     ), array.push(a_utcTimeOffset, -6   ), array.push(a_utcCity, "(UTC-06:00) CHICAGO"         )
+//     array.push(a_majorCity, "GUATEMALA CITY"              ), array.push(a_utcTimeOffset, -6   ), array.push(a_utcCity, "(UTC-06:00) GUATEMALA CITY"  )
+//     array.push(a_majorCity, "TEGUCIGALPA"                 ), array.push(a_utcTimeOffset, -6   ), array.push(a_utcCity, "(UTC-06:00) TEGUCIGALPA"     )
+//     array.push(a_majorCity, "WINNIPEG"                    ), array.push(a_utcTimeOffset, -6   ), array.push(a_utcCity, "(UTC-06:00) WINNIPEG"        )
+//     array.push(a_majorCity, "SAN JOSE"                    ), array.push(a_utcTimeOffset, -6   ), array.push(a_utcCity, "(UTC-06:00) SAN JOSE"        )
+//     array.push(a_majorCity, "SAN SALVADOR"                ), array.push(a_utcTimeOffset, -6   ), array.push(a_utcCity, "(UTC-06:00) SAN SALVADOR"    )
+//     array.push(a_majorCity, "NEW YORK"                    ), array.push(a_utcTimeOffset, -5   ), array.push(a_utcCity, "(UTC-05:00) NEW YORK"        )
+//     array.push(a_majorCity, "TORONTO"                     ), array.push(a_utcTimeOffset, -5   ), array.push(a_utcCity, "(UTC-05:00) TORONTO"         )
+//     array.push(a_majorCity, "HAVANA"                      ), array.push(a_utcTimeOffset, -5   ), array.push(a_utcCity, "(UTC-05:00) HAVANA"          )
+//     array.push(a_majorCity, "LIMA"                        ), array.push(a_utcTimeOffset, -5   ), array.push(a_utcCity, "(UTC-05:00) LIMA"            )
+//     array.push(a_majorCity, "BOGOTA"                      ), array.push(a_utcTimeOffset, -5   ), array.push(a_utcCity, "(UTC-05:00) BOGOTA"          )
+//     array.push(a_majorCity, "KINGSTON"                    ), array.push(a_utcTimeOffset, -5   ), array.push(a_utcCity, "(UTC-05:00) KINGSTON"        )
+//     array.push(a_majorCity, "SANTIAGO"                    ), array.push(a_utcTimeOffset, -4   ), array.push(a_utcCity, "(UTC-04:00) SANTIAGO"        )
+//     array.push(a_majorCity, "SANTO DOMINGO"               ), array.push(a_utcTimeOffset, -4   ), array.push(a_utcCity, "(UTC-04:00) SANTO DOMINGO"   )
+//     array.push(a_majorCity, "MANAUS"                      ), array.push(a_utcTimeOffset, -4   ), array.push(a_utcCity, "(UTC-04:00) MANAUS"          )
+//     array.push(a_majorCity, "CARACAS"                     ), array.push(a_utcTimeOffset, -4   ), array.push(a_utcCity, "(UTC-04:00) CARACAS"         )
+//     array.push(a_majorCity, "LA PAZ"                      ), array.push(a_utcTimeOffset, -4   ), array.push(a_utcCity, "(UTC-04:00) LA PAZ"          )
+//     array.push(a_majorCity, "HALIFAX"                     ), array.push(a_utcTimeOffset, -4   ), array.push(a_utcCity, "(UTC-04:00) HALIFAX"         )
+//     array.push(a_majorCity, "ST. JOHN’S"                  ), array.push(a_utcTimeOffset, -3.5 ), array.push(a_utcCity, "(UTC-03:30) ST. JOHN’S"      )
+//     array.push(a_majorCity, "SAO PAULO"                   ), array.push(a_utcTimeOffset, -3   ), array.push(a_utcCity, "(UTC-03:00) SAO PAULO"       )
+//     array.push(a_majorCity, "BUENOS AIRES"                ), array.push(a_utcTimeOffset, -3   ), array.push(a_utcCity, "(UTC-03:00) BUENOS AIRES"    )
+//     array.push(a_majorCity, "MONTEVIDEO"                  ), array.push(a_utcTimeOffset, -3   ), array.push(a_utcCity, "(UTC-03:00) MONTEVIDEO"      )
+//     array.push(a_majorCity, "LONDON"                      ), array.push(a_utcTimeOffset,  0   ), array.push(a_utcCity, "(UTC+00:00) LONDON"          )
+//     array.push(a_majorCity, "DUBLIN"                      ), array.push(a_utcTimeOffset,  0   ), array.push(a_utcCity, "(UTC+00:00) DUBLIN"          )
+//     array.push(a_majorCity, "LISBON"                      ), array.push(a_utcTimeOffset,  0   ), array.push(a_utcCity, "(UTC+00:00) LISBON"          )
+//     array.push(a_majorCity, "ABIDJAN"                     ), array.push(a_utcTimeOffset,  0   ), array.push(a_utcCity, "(UTC+00:00) ABIDJAN"         )
+//     array.push(a_majorCity, "ACCRA"                       ), array.push(a_utcTimeOffset,  0   ), array.push(a_utcCity, "(UTC+00:00) ACCRA"           )
+//     array.push(a_majorCity, "DAKAR"                       ), array.push(a_utcTimeOffset,  0   ), array.push(a_utcCity, "(UTC+00:00) DAKAR"           )
+//     array.push(a_majorCity, "BERLIN"                      ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) BERLIN"          )
+//     array.push(a_majorCity, "ROME"                        ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) ROME"            )
+//     array.push(a_majorCity, "PARIS"                       ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) PARIS"           )
+//     array.push(a_majorCity, "MADRID"                      ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) MADRID"          )
+//     array.push(a_majorCity, "WARSAW"                      ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) WARSAW"          )
+//     array.push(a_majorCity, "LAGOS"                       ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) LAGOS"           )
+//     array.push(a_majorCity, "KINSHASA"                    ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) KINSHASA"        )
+//     array.push(a_majorCity, "ALGIERS"                     ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) ALGIERS"         )
+//     array.push(a_majorCity, "CASABLANCA"                  ), array.push(a_utcTimeOffset,  1   ), array.push(a_utcCity, "(UTC+01:00) CASABLANCA"      )
+//     array.push(a_majorCity, "CAIRO"                       ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) CAIRO"           )
+//     array.push(a_majorCity, "JOHANNESBURG"                ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) JOHANNESBURG"    )
+//     array.push(a_majorCity, "KHARTOUM"                    ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) KHARTOUM"        )
+//     array.push(a_majorCity, "KYIV"                        ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) KYIV"            )
+//     array.push(a_majorCity, "BUCHAREST"                   ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) BUCHAREST"       )
+//     array.push(a_majorCity, "ATHENS"                      ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) ATHENS"          )
+//     array.push(a_majorCity, "JERUSALEM"                   ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) JERUSALEM"       )
+//     array.push(a_majorCity, "SOFIA"                       ), array.push(a_utcTimeOffset,  2   ), array.push(a_utcCity, "(UTC+02:00) SOFIA"           )
+//     array.push(a_majorCity, "MOSCOW"                      ), array.push(a_utcTimeOffset,  3   ), array.push(a_utcCity, "(UTC+03:00) MOSCOW"          )
+//     array.push(a_majorCity, "ISTANBUL"                    ), array.push(a_utcTimeOffset,  3   ), array.push(a_utcCity, "(UTC+03:00) ISTANBUL"        )
+//     array.push(a_majorCity, "RIYADH"                      ), array.push(a_utcTimeOffset,  3   ), array.push(a_utcCity, "(UTC+03:00) RIYADH"          )
+//     array.push(a_majorCity, "BAGHDAD"                     ), array.push(a_utcTimeOffset,  3   ), array.push(a_utcCity, "(UTC+03:00) BAGHDAD"         )
+//     array.push(a_majorCity, "ADDIS ABABA"                 ), array.push(a_utcTimeOffset,  3   ), array.push(a_utcCity, "(UTC+03:00) ADDIS ABABA"     )
+//     array.push(a_majorCity, "DOHA"                        ), array.push(a_utcTimeOffset,  3   ), array.push(a_utcCity, "(UTC+03:00) DOHA"            )
+//     array.push(a_majorCity, "TEHRAN"                      ), array.push(a_utcTimeOffset,  3.5 ), array.push(a_utcCity, "(UTC+03:30) TEHRAN"          )
+//     array.push(a_majorCity, "DUBAI"                       ), array.push(a_utcTimeOffset,  4   ), array.push(a_utcCity, "(UTC+04:00) DUBAI"           )
+//     array.push(a_majorCity, "BAKU"                        ), array.push(a_utcTimeOffset,  4   ), array.push(a_utcCity, "(UTC+04:00) BAKU"            )
+//     array.push(a_majorCity, "TBILISI"                     ), array.push(a_utcTimeOffset,  4   ), array.push(a_utcCity, "(UTC+04:00) TBILISI"         )
+//     array.push(a_majorCity, "YEREVAN"                     ), array.push(a_utcTimeOffset,  4   ), array.push(a_utcCity, "(UTC+04:00) YEREVAN"         )
+//     array.push(a_majorCity, "SAMARA"                      ), array.push(a_utcTimeOffset,  4   ), array.push(a_utcCity, "(UTC+04:00) SAMARA"          )
+//     array.push(a_majorCity, "KABUL"                       ), array.push(a_utcTimeOffset,  4.5 ), array.push(a_utcCity, "(UTC+04:30) KABUL"           )
+//     array.push(a_majorCity, "KARACHI"                     ), array.push(a_utcTimeOffset,  5   ), array.push(a_utcCity, "(UTC+05:00) KARACHI"         )
+//     array.push(a_majorCity, "TASHKENT"                    ), array.push(a_utcTimeOffset,  5   ), array.push(a_utcCity, "(UTC+05:00) TASHKENT"        )
+//     array.push(a_majorCity, "YEKATERINBURG"               ), array.push(a_utcTimeOffset,  5   ), array.push(a_utcCity, "(UTC+05:00) YEKATERINBURG"   )
+//     array.push(a_majorCity, "MUMBAI"                      ), array.push(a_utcTimeOffset,  5.5 ), array.push(a_utcCity, "(UTC+05:30) MUMBAI"          )
+//     array.push(a_majorCity, "COLOMBO"                     ), array.push(a_utcTimeOffset,  5.5 ), array.push(a_utcCity, "(UTC+05:30) COLOMBO"         )
+//     array.push(a_majorCity, "KATHMANDU"                   ), array.push(a_utcTimeOffset,  5.75), array.push(a_utcCity, "(UTC+05:45) KATHMANDU"       )
+//     array.push(a_majorCity, "DHAKA"                       ), array.push(a_utcTimeOffset,  6   ), array.push(a_utcCity, "(UTC+06:00) DHAKA"           )
+//     array.push(a_majorCity, "ALMATY"                      ), array.push(a_utcTimeOffset,  6   ), array.push(a_utcCity, "(UTC+06:00) ALMATY"          )
+//     array.push(a_majorCity, "OMSK"                        ), array.push(a_utcTimeOffset,  6   ), array.push(a_utcCity, "(UTC+06:00) OMSK"            )
+//     array.push(a_majorCity, "YANGON"                      ), array.push(a_utcTimeOffset,  6.5 ), array.push(a_utcCity, "(UTC+06:30) YANGON"          )
+//     array.push(a_majorCity, "JAKARTA"                     ), array.push(a_utcTimeOffset,  7   ), array.push(a_utcCity, "(UTC+07:00) JAKARTA"         )
+//     array.push(a_majorCity, "HO CHI MINH CITY"            ), array.push(a_utcTimeOffset,  7   ), array.push(a_utcCity, "(UTC+07:00) HO CHI MINH CITY")
+//     array.push(a_majorCity, "BANGKOK"                     ), array.push(a_utcTimeOffset,  7   ), array.push(a_utcCity, "(UTC+07:00) BANGKOK"         )
+//     array.push(a_majorCity, "KRASNOYARSK"                 ), array.push(a_utcTimeOffset,  7   ), array.push(a_utcCity, "(UTC+07:00) KRASNOYARSK"     )
+//     array.push(a_majorCity, "SHANGHAI"                    ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) SHANGHAI"        )
+//     array.push(a_majorCity, "TAIPEI"                      ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) TAIPEI"          )
+//     array.push(a_majorCity, "KUALA LUMPUR"                ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) KUALA LUMPUR"    )
+//     array.push(a_majorCity, "SINGAPORE"                   ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) SINGAPORE"       )
+//     array.push(a_majorCity, "PERTH"                       ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) PERTH"           )
+//     array.push(a_majorCity, "MANILA"                      ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) MANILA"          )
+//     array.push(a_majorCity, "MAKASSAR"                    ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) MAKASSAR"        )
+//     array.push(a_majorCity, "IRKUTSK"                     ), array.push(a_utcTimeOffset,  8   ), array.push(a_utcCity, "(UTC+08:00) IRKUTSK"         )
+//     array.push(a_majorCity, "TOKYO"                       ), array.push(a_utcTimeOffset,  9   ), array.push(a_utcCity, "(UTC+09:00) TOKYO"           )
+//     array.push(a_majorCity, "SEOUL"                       ), array.push(a_utcTimeOffset,  9   ), array.push(a_utcCity, "(UTC+09:00) SEOUL"           )
+//     array.push(a_majorCity, "PYONGYANG"                   ), array.push(a_utcTimeOffset,  9   ), array.push(a_utcCity, "(UTC+09:00) PYONGYANG"       )
+//     array.push(a_majorCity, "AMBON"                       ), array.push(a_utcTimeOffset,  9   ), array.push(a_utcCity, "(UTC+09:00) AMBON"           )
+//     array.push(a_majorCity, "YAKUTSK"                     ), array.push(a_utcTimeOffset,  9   ), array.push(a_utcCity, "(UTC+09:00) YAKUTSK"         )
+//     array.push(a_majorCity, "ADELAIDE"                    ), array.push(a_utcTimeOffset,  9.5 ), array.push(a_utcCity, "(UTC+09:30) ADELAIDE"        )
+//     array.push(a_majorCity, "SYDNEY"                      ), array.push(a_utcTimeOffset,  10  ), array.push(a_utcCity, "(UTC+10:00) SYDNEY"          )
+//     array.push(a_majorCity, "PORT MORESBY"                ), array.push(a_utcTimeOffset,  10  ), array.push(a_utcCity, "(UTC+10:00) PORT MORESBY"    )
+//     array.push(a_majorCity, "VLADIVOSTOK"                 ), array.push(a_utcTimeOffset,  10  ), array.push(a_utcCity, "(UTC+10:00) VLADIVOSTOK"     )
+//     array.push(a_majorCity, "NOUMEA"                      ), array.push(a_utcTimeOffset,  11  ), array.push(a_utcCity, "(UTC+11:00) NOUMEA"          )
+//     array.push(a_majorCity, "MAGADAN"                     ), array.push(a_utcTimeOffset,  11  ), array.push(a_utcCity, "(UTC+11:00) MAGADAN"         )
+//     array.push(a_majorCity, "AUCKLAND"                    ), array.push(a_utcTimeOffset,  12  ), array.push(a_utcCity, "(UTC+12:00) AUCKLAND"        )
+//     array.push(a_majorCity, "SUVA"                        ), array.push(a_utcTimeOffset,  12  ), array.push(a_utcCity, "(UTC+12:00) SUVA"            )
+//     array.push(a_majorCity, "PETROPAVLOVSK"               ), array.push(a_utcTimeOffset,  12  ), array.push(a_utcCity, "(UTC+12:00) PETROPAVLOVSK"   )
+//     array.push(a_majorCity, "KIRIBATI (Latest TZ)"        ), array.push(a_utcTimeOffset,  14  ), array.push(a_utcCity, "(UTC+14:00) KIRIBATI"        )
+
+//     // Market Open/Close Hours - Forex
+//     array.push(a_forexMarket, "(UTC+10:00) SYDNEY"  ), array.push(a_forexOpenH, 08), array.push(a_forexCloseH, 17)
+//     array.push(a_forexMarket, "(UTC+09:00) TOKYO"   ), array.push(a_forexOpenH, 09), array.push(a_forexCloseH, 18)
+//     array.push(a_forexMarket, "(UTC+00:00) LONDON"  ), array.push(a_forexOpenH, 08), array.push(a_forexCloseH, 17)
+//     array.push(a_forexMarket, "(UTC-05:00) NEW YORK"), array.push(a_forexOpenH, 08), array.push(a_forexCloseH, 17)
+    
+//     // Minute and Second clock hand position calculations
+//     // Trigonometric function Tangent is used which relate an angle of a right-angled triangle to ratios of two side lengths
+//     angle = 6
+//     for i = 0 to clockDiameter - 1
+//         array.push(a_linePointY2, tan(i * angle * 2.0 * asin(1.0) / 180))
+//     array.push(a_linePointY2, 13)
+    
+//     // Second clock hand position calculations, an alternative approach suggested/developped by @midtownsk8rguy
+//     // Both with static values and the ones calculated with trigonometric function are presented below (secondHand - uses satic values, minuteHands - uses trigonometric function)
+//     array.push(a_linePointY, 0.0 )
+//     array.push(a_linePointY, 0.1 )
+//     array.push(a_linePointY, 0.27)
+//     array.push(a_linePointY, 0.55)
+//     array.push(a_linePointY, 0.85)
+//     array.push(a_linePointY, 1.25)
+//     array.push(a_linePointY, 1.7 )
+//     array.push(a_linePointY, 2.3 )
+//     array.push(a_linePointY, 3.0 )
+//     array.push(a_linePointY, 3.8 )
+//     array.push(a_linePointY, 4.8 )
+//     array.push(a_linePointY, 6.0 )
+//     array.push(a_linePointY, 7.6 )
+// 	array.push(a_linePointY, 9.6 )
+// 	array.push(a_linePointY, 13.0)
+// 	array.push(a_linePointY, 15.1)
+//     array.push(a_linePointY, 0.0 )
+//     array.push(a_linePointY, 0.1 )
+//     array.push(a_linePointY, 0.27)
+//     array.push(a_linePointY, 0.55)
+//     array.push(a_linePointY, 0.85)
+//     array.push(a_linePointY, 1.25)
+//     array.push(a_linePointY, 1.7 )
+//     array.push(a_linePointY, 2.3 )
+//     array.push(a_linePointY, 3.0 )
+//     array.push(a_linePointY, 3.8 )
+//     array.push(a_linePointY, 4.8 )
+//     array.push(a_linePointY, 6.0 )
+//     array.push(a_linePointY, 7.6 )
+// 	array.push(a_linePointY, 9.6 )
+// 	array.push(a_linePointY, 13.0)
+// 	array.push(a_linePointY, 15.1)
+
+
+// f_whatIsTheTime(_utc, _dst) =>
+//     TZ  = "Etc/UTC"
+//     DST = _dst ? 1 : 0
+    
+//     utcTime = (array.get(a_utcTimeOffset, array.indexof(a_utcCity, _utc)) + DST) * 3600000 + timenow
+    
+//     [
+//        floor(utcTime / 3600000) % 24, 
+//        floor(utcTime / 60000  ) % 60, 
+//        floor(utcTime / 1000   ) % 60, 
+//        dayofmonth(int(utcTime), TZ) , 
+//        month     (int(utcTime), TZ) , 
+//        year      (int(utcTime), TZ) , 
+//        dayofweek (int(utcTime), TZ)
+//      ]
+
+// //------------------------------------------------------------------------------
+// // digital clock
+
+// f_digitalDisplay(_utc, _marketDetails, _dst) => 
+
+//     [h, m, s, D, M, Y, A] = f_whatIsTheTime(_utc, _dst)
+    
+//     ht = h < 10 ? '0' + tostring(h) : tostring(h)
+//     mt = m < 10 ? '0' + tostring(m) : tostring(m)
+//     st = s < 10 ? '0' + tostring(s) : tostring(s)
+//     Dt = D < 10 ? '0' + tostring(D) : tostring(D)
+//     Mt = M < 10 ? '0' + tostring(M) : tostring(M)
+//     Yt = tostring(Y)
+//     dateTime = Dt + '/' + Mt + '/' + Yt + '-' + ht + ':' + mt + ':' + st
+    
+//     if _marketDetails
+//         if A != 1 and A != 7
+//             fxO = array.get(a_forexOpenH , array.indexof(a_forexMarket, _utc))
+//             fxC = array.get(a_forexCloseH, array.indexof(a_forexMarket, _utc))
+        
+//             market  = if h >= fxO and h < fxC
+//                 hc  = fxC - h - 1
+//                 mc  = 60 - m - 1
+//                 sc  = 60 - s
+//                 sct = sc < 10 ? '0' + tostring(sc) : tostring(sc)
+//                 mct = mc < 10 ? '0' + tostring(mc) : tostring(mc)
+//                 hct = hc < 10 ? '0' + tostring(hc) : tostring(hc)
+//                 closes = hct + ':' + mct + ':' + sct
+//                 array.get(a_majorCity, array.indexof(a_utcCity, _utc)) + ' ' + dateTime + " 🟢 Closes in " + closes
+//             else
+//                 ho  = if h < fxO
+//                     fxO - h - 1
+//                 else
+//                     24 - h + fxO - 1
+//                 mo  = 60 - m - 1
+//                 so  = 60 - s
+//                 sot = so < 10 ? '0' + tostring(so) : tostring(so)
+//                 mot = mo < 10 ? '0' + tostring(mo) : tostring(mo)
+//                 hot = ho < 10 ? '0' + tostring(ho) : tostring(ho)
+//                 opens = hot + ':' + mot + ':' + sot
+                
+//                 if h >= fxC and A == 6
+//                     array.get(a_majorCity, array.indexof(a_utcCity, _utc)) + ' ' + dateTime + " 🟠 Weekend"
+//                 else
+//                     array.get(a_majorCity, array.indexof(a_utcCity, _utc)) + ' ' + dateTime + " 🔴 Opens in " + opens
+//         else
+//             array.get(a_majorCity, array.indexof(a_utcCity, _utc)) + ' ' + dateTime + " 🟠 Weekend"
+//     else
+//         array.get(a_majorCity, array.indexof(a_utcCity, _utc)) + '\n' + dateTime
+
+
+// f_digitalClock(_x, _y, _style, _textcolor, _utc, _marketDetails, _dst) =>
+// 	var label digitalClock = label.new(0, _y, text='', color=#00000000, xloc=xloc.bar_index, style=_style, textcolor=_textcolor, size=size.small)
+
+//     label.set_text (digitalClock, f_digitalDisplay(_utc, _marketDetails, _dst))
+// 	label.set_xy   (digitalClock, bar_index[_x], _y)
+
+// //------------------------------------------------------------------------------
+// // digital clock presentation
+
+// if syminfo.type == "forex"
+//     f_digitalClock(15, 17, label.style_label_down , color.lime, i_UTC                 , false, i_xSummerTime      )
+//     f_digitalClock(25, 23, label.style_label_right, color.blue, "(UTC+10:00) SYDNEY"  , true , i_sydneySummerTime )
+//     f_digitalClock(25, 18, label.style_label_right, color.blue, "(UTC+09:00) TOKYO"   , true , false              )
+//     f_digitalClock(25, 13, label.style_label_right, color.blue, "(UTC+00:00) LONDON"  , true , i_londonSummerTime )
+//     f_digitalClock(25, 8 , label.style_label_right, color.blue, "(UTC-05:00) NEW YORK", true , i_newyorkSummerTime)
+// else
+//     f_digitalClock(15, 17, label.style_label_down , color.lime, i_UTC                 , false, i_xSummerTime      )
+//     f_digitalClock(13, 15, label.style_label_left , color.blue, "(UTC+10:00) SYDNEY"  , false, i_sydneySummerTime )
+//     f_digitalClock(15,  9, label.style_label_left , color.blue, "(UTC+09:00) TOKYO"   , false, false              )
+//     f_digitalClock(15,  9, label.style_label_right, color.blue, "(UTC+00:00) LONDON"  , false, i_londonSummerTime )
+//     f_digitalClock(17, 15, label.style_label_right, color.blue, "(UTC-05:00) NEW YORK", false, i_newyorkSummerTime)
+
+// //------------------------------------------------------------------------------
+// // analog clock presentation
+
+// // what is the time ?
+// [hourHand, minuteHand, secondHand, _, _, _, _] = f_whatIsTheTime(i_UTC, i_xSummerTime)
+
+// if change(barTime) and array.size(a_analogClock) > 0
+//     for i = 1 to array.size(a_analogClock)
+//         lines = array.shift(a_analogClock)
+//         line.delete(lines)
+
+// // Encircling Clock Ring Lines
+// // calculated using Pythagorean theorem, which is a fundamental relation in Euclidean geometry among the three sides of a right triangle
+
+// if barstate.islast
+//     if syminfo.type == "forex"
+//         for i = 0 to clockDiameter - 14
+//             array.push(a_analogClock, line.new(barTime[clockDiameter + i], clockDiameter + sqrt(pow(clockDiameter, 2) - pow(i, 2)), barTime[clockDiameter + i + 1], clockDiameter + sqrt(pow(clockDiameter, 2) - pow(i + 1, 2))                , xloc.bar_time, extend.both, color.aqua  , line.style_dotted, 1))
+//         for i = 0 to clockDiameter - 14
+//             array.push(a_analogClock, line.new(barTime[clockDiameter + i], clockDiameter - sqrt(pow(clockDiameter, 2) - pow(i, 2)), barTime[clockDiameter + i + 1], clockDiameter - sqrt(pow(clockDiameter, 2) - pow(i + 1, 2))                , xloc.bar_time, extend.both, color.yellow, line.style_dotted, 1))
+//     else
+//         for i = 0 to clockDiameter - 1
+//             array.push(a_analogClock, line.new(barTime[clockDiameter + i], clockDiameter + sqrt(pow(clockDiameter, 2) - pow(i, 2)), barTime[clockDiameter + i + 1], clockDiameter + sqrt(pow(clockDiameter, 2) - pow(i + 1, 2))                , xloc.bar_time, extend.both, color.aqua  , line.style_dotted, 1))
+//         for i = 0 to clockDiameter - 1
+//             array.push(a_analogClock, line.new(barTime[clockDiameter + i], clockDiameter - sqrt(pow(clockDiameter, 2) - pow(i, 2)), barTime[clockDiameter + i + 1], clockDiameter - sqrt(pow(clockDiameter, 2) - pow(i + 1, 2))                , xloc.bar_time, extend.both, color.yellow, line.style_dotted, 1))
+
+//     for i = 1 to clockDiameter - 1
+//         array.push(a_analogClock, line.new(barTime[i + 1], clockDiameter + sqrt(pow(clockDiameter, 2) - pow(clockDiameter - i, 2)), barTime[i]                    , clockDiameter + sqrt(pow(clockDiameter, 2) - pow(clockDiameter - i + 1, 2)), xloc.bar_time, extend.both, color.orange, line.style_dotted, 1))
+//     for i = 1 to clockDiameter - 1
+//         array.push(a_analogClock, line.new(barTime[i + 1], clockDiameter - sqrt(pow(clockDiameter, 2) - pow(clockDiameter - i, 2)), barTime[i]                    , clockDiameter - sqrt(pow(clockDiameter, 2) - pow(clockDiameter - i + 1, 2)), xloc.bar_time, extend.both, color.lime  , line.style_dotted, 1))
+
+// // analog clock - secondHand
+// // secondHand calculations are replaced with @midtownsk8rguy's approach 
+// // previosus version : secondHand and minuteHand was calculated with the same trigonometric function method, now we have two different methods applied ;-) 
+
+// int   x2 = na
+// float y2 = na
+
+// if secondHand < 15
+//     x2 := barTime[clockDiameter - secondHand]
+//     y2 := 2 * clockDiameter - array.get(a_linePointY, secondHand)
+// else if secondHand < 30 and secondHand > 14
+//     x2 := barTime[(secondHand == 15 ? secondHand + 1 : secondHand) - clockDiameter]
+//     y2 := array.get(a_linePointY, 2 * clockDiameter - secondHand)
+// else if secondHand < 45 and secondHand > 29 
+//     x2 := barTime[secondHand - clockDiameter]
+//     y2 := array.get(a_linePointY, secondHand - 2 * clockDiameter)
+// else if secondHand > 44
+//     x2 := barTime[5 * clockDiameter - (secondHand<46 ? secondHand + 1 : secondHand)]
+//     y2 := 2 * clockDiameter - array.get(a_linePointY, 4 * clockDiameter - secondHand)
+// array.push(a_analogClock, line.new(time[clockDiameter], clockDiameter, x2, y2, xloc.bar_time, extend.none, #FF00FF, line.style_solid, 1))
+
+// // analog clock - minuteHand  
+
+// if minuteHand < 16
+//     array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - minuteHand]    , 2 * clockDiameter - array.get(a_linePointY2, minuteHand) - 2                    , xloc.bar_time, extend.none, color.aqua, line.style_solid, 3))
+// else if minuteHand < 31 and minuteHand > 15
+//     array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[minuteHand - clockDiameter]    , array.get(a_linePointY2, 2 * clockDiameter - minuteHand) + 2                    , xloc.bar_time, extend.none, color.aqua, line.style_solid, 3))
+// else if minuteHand < 46 and minuteHand > 30 
+//     array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[minuteHand - clockDiameter]    , array.get(a_linePointY2, minuteHand - 2 * clockDiameter) + 2                    , xloc.bar_time, extend.none, color.aqua, line.style_solid, 3))
+// else if minuteHand > 45
+//     array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[5 * clockDiameter - minuteHand], 2 * clockDiameter - array.get(a_linePointY2, 4 * clockDiameter - minuteHand) - 2, xloc.bar_time, extend.none, color.aqua, line.style_solid, 3))
+
+// // analog clock - hourHand 
+// // attempted to made the clock proportional with price chart, with a small circle but in this case hourHand calculation does not seem programatically nice   
+
+// if hourHand == 0 or hourHand == 12
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 0] , 1.60 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 1] , 1.58 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 2] , 1.56 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 2] , 1.53 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 1 or hourHand == 13
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 3] , 1.50 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 3] , 1.45 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 4] , 1.40 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 4] , 1.35 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 2 or hourHand == 14
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 5] , 1.30 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 5] , 1.25 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 5] , 1.20 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 5] , 1.15 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 3 or hourHand == 15
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 6] , 1.00 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 6] , 0.95 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 6] , 0.90 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 6] , 0.85 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 4 or hourHand == 16
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 7] , 0.80 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 7] , 0.75 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 6] , 0.70 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 6] , 0.65 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 5 or hourHand == 17
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 5] , 0.60 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 4] , 0.50 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 3] , 0.40 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter - 2] , 0.30 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 6 or hourHand == 18
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 0] , 0.30 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 1] , 0.32 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 2] , 0.34 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 3] , 0.37 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 7 or hourHand == 19
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 5] , 0.40 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 5] , 0.45 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 6] , 0.50 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 6] , 0.60 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 8 or hourHand == 20
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 7] , 0.70 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 8] , 0.75 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 9] , 0.80 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 9] , 0.90 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 9 or hourHand == 21
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 10], 1.00 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 10], 1.10 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 9] , 1.20 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 9] , 1.30 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 10 or hourHand == 22
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 8] , 1.35 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 7] , 1.40 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 6] , 1.45 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 5] , 1.50 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+
+// if hourHand == 11 or hourHand == 23
+//     if minuteHand < 16
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 4] , 1.55 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 31 and minuteHand > 15
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 3] , 1.60 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand < 46 and minuteHand > 30 
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 2] , 1.65 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
+//     else if minuteHand > 45
+//         array.push(a_analogClock, line.new(barTime[clockDiameter], clockDiameter, barTime[clockDiameter + 1] , 1.70 * clockDiameter, xloc.bar_time, extend.none, color.aqua, line.style_solid, 5))
