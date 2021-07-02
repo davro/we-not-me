@@ -1,0 +1,30 @@
+// @version = 4
+study("My TDI B/S BTC 1D", shorttitle="BTC_1D", overlay=true)
+
+rsiPeriod = input(30, minval = 1, title = "BTC 1D RSI Period")
+buyLow = input(36, minval = 1, title = "BTC 1D Buy Low trigger")
+sellHigh = input(82, minval = 1, title = "BTC 1D Buy Low trigger")
+
+bandLength = 31
+currentCandleClose = close
+previousCandleClose = close[1]
+
+currentRsi = rsi(currentCandleClose, rsiPeriod)
+previousRsi = rsi(previousCandleClose, rsiPeriod)
+
+previousRsiMA = sma(previousRsi, bandLength)
+
+offset = (1.6185 * stdev(previousRsi, bandLength))
+
+topLine = previousRsiMA + offset
+bottomLine = previousRsiMA - offset
+midLine = (topLine + bottomLine) / 2
+
+fastMA = sma(previousRsi, 1)
+slowMA = sma(previousRsi, 9)
+
+buyEntry = previousRsi <= buyLow and (bottomLine - fastMA > 1) and slowMA < midLine and currentCandleClose > previousCandleClose
+sellEntry = previousRsi >= sellHigh and fastMA > topLine and slowMA > midLine and currentCandleClose < previousCandleClose
+
+plotshape(buyEntry, style=shape.labelup,size=size.small, text="B", color=color.green, textcolor=color.white, location=location.belowbar)
+plotshape(sellEntry, style=shape.labeldown,size=size.small, text="S", color=color.red, textcolor=color.white, location=location.abovebar)
