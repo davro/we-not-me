@@ -116,10 +116,11 @@ midLine         = (topLine + bottomLine) / 2
 fastMA          = sma(previousRsi, 1)
 slowMA          = sma(previousRsi, 9)
 
-var sellInProgress = false
-var buyInProgress = false
-buySignal   = previousRsi <= buyLowAt and (bottomLine - fastMA > 1) and slowMA < midLine and currentCandleClose > previousCandleClose
-sellSignal  = previousRsi >= sellHighAt and (fastMA - topLine > 1) and slowMA > midLine and currentCandleClose < previousCandleClose
+var sellInProgress  = false
+var buyInProgress   = false
+
+buySignal   = buyInProgress == false and previousRsi <= buyLowAt and (bottomLine - fastMA > 1) and slowMA < midLine and currentCandleClose > previousCandleClose
+sellSignal  = sellInProgress == false and previousRsi >= sellHighAt and (fastMA - topLine > 1) and slowMA > midLine and currentCandleClose < previousCandleClose
 
 plotshape(buyInProgress == false and buySignal, style=shape.labelup,size=size.small, text="B", color=color.green, textcolor=color.white, location=location.belowbar)
 plotshape(sellInProgress == false and sellSignal, style=shape.labeldown,size=size.small, text="S", color=color.red, textcolor=color.white, location=location.abovebar)
