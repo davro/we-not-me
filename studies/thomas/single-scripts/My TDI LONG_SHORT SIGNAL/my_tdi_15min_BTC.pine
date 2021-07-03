@@ -1,0 +1,234 @@
+/////////////////////////////////////////////////////////////////////
+// Using a mix of RSI + TDI + TD indicator to define entry / exit
+// on 15min time frame
+// 
+// Based on an RSI 14 Period
+//
+// Long Entry Trigger  : RSI below 21 + below TDI bottom band
+// Short Entry Trigger : RSI above 74 + above TDI top band
+//
+// Long / Short Exit Trigger   : TP Reached or TD 9 reached
+//
+//
+// Backtesting from June 2021 using default TP prices and TAKE PROFIT = << TP 2 OR TD 9 >>
+// ASSUMING BUY AND SELL 1 BITCOIN, WITHOUT SLIPPAGE
+//
+// Position opened at 15min open
+// Position closed at:
+//   - Stop Loss line
+//   - OR Take profit line
+//   - OR TD 9 Candle Close
+//
+// 03 June 15:15 | SHORT | 38362 | CLOSE | 37459 | DIFF | + $ 903   (+903)  > TD 9          ++
+// 08 June 07:45 | LONG  | 33953 | CLOSE | 33204 | DIFF | - $ 749   (+154)  > SL            --
+// 09 June 07:45 | LONG  | 31460 | CLOSE | 32950 | DIFF | + $ 1490  (+1644) > TP 2          ++
+// 09 June 17:15 | SHORT | 34350 | CLOSE | 35100 | DIFF | - $ 750   (+894)  > SL            --
+// 14 June 03:00 | SHORT | 37047 | CLOSE | 38120 | DIFF | - $ 1073  (-179)  > SL            --
+// 14 June 06:15 | SHORT | 39000 | CLOSE | 39750 | DIFF | - $ 750   (-929)  > SL            --
+// 14 June 23:45 | SHORT | 40748 | CLOSE | 39447 | DIFF | + $ 1301  (+372)  > TP 2          ++
+// 16 June 04:15 | SHORT | 41330 | CLOSE | 39820 | DIFF | + $ 1510  (+1882) > TP 2          ++
+// 19 June 05:00 | LONG  | 35275 | CLOSE | 35634 | DIFF | + $ 359   (+2241) > TD 9          ++
+// 20 June 20:30 | LONG  | 34090 | CLOSE | 34620 | DIFF | + $ 530   (+2771) > TD 9          ++
+// 21 June 06:30 | LONG  | 35938 | CLOSE | 34738 | DIFF | + $ 1200  (+3971) > TD 9 + TP2    ++
+// 21 June 14:45 | LONG  | 29403 | CLOSE | 28660 | DIFF | - $ 743   (+4714) > SL            --
+// 24 June 22:15 | SHORT | 34126 | CLOSE | 34870 | DIFF | - $ 744   (+3970) > SL            --
+// 26 June 18:15 | LONG  | 30228 | CLOSE | 31700 | DIFF | + $ 1472  (+5442) > TD 9 + TP2    ++
+// 27 June 11:45 | SHORT | 32950 | CLOSE | 32363 | DIFF | + $ 587   (+6029) > TD 9          ++
+// 28 June 09:00 | SHORT | 34445 | CLOSE | 35210 | DIFF | - $ 765   (+6794) > SL            --
+// 29 June 23:45 | SHORT | 36380 | CLOSE | 34880 | DIFF | + $ 1500  (+8294) > TD 9 + TP2    ++
+//
+// IT SEEMS LIKE THE STOP LOSS IS A BIT TO TIGHT, THIS ASSET IS VERY VOLATILE AND OFTEN GO UP FIRST
+// INCREASING THE STOP LOSS MIGHT GIVE BETTER RESULTS, BUT ALSO EXPOSES AT BIGGER LOSS
+/////////////////////////////////////////////////////////////////////
+
+// @version = 4
+study("WE:TDI-TD L/S BTC 15min", shorttitle="BTC_15min", overlay=true)
+
+takeProfit_1    = input(550, minval = 1, title = "Take Profit 1--Entry Price +/-", group='$ difference from entry price')
+takeProfit_2    = input(1500, minval = 1, title = "Take Profit 2--Entry Price +/-", group='$ difference from entry price')
+takeProfit_3    = input(2300, minval = 1, title = "Take Profit 3--Entry Price +/-", group='$ difference from entry price')
+stopLoss        = input(750, minval = 1, title = "Stop Loss------Entry Price +/-", group='$ difference from entry price')
+takeProfitMode  = input("TP 2 OR TD 9", title="Prefered TP", options=['TP 1', 'TP 2', 'TP 3', 'TD 9', 'ANY', 'TP 2 OR TD 9'])
+keepLastLines   = input(false, title="Keep Last TP/SL lines")
+showPrevious    = input(true, title="(History) Show Previous Take Profit & Stop Loss")
+
+takeProfitMode_TD9 = takeProfitMode == 'ANY' or takeProfitMode == 'TD 9'
+takeProfitMode_TP = takeProfitMode == 'ANY' or takeProfitMode != 'TD 9'
+
+takeProfit(currentClose, entryPrice, td9, isLong) =>
+    if (takeProfitMode == 'ANY' and isLong == true)
+        if (currentClose >= entryPrice + takeProfit_1)
+            true
+        else if (currentClose >= entryPrice + takeProfit_2)
+            true
+        else if (currentClose >= entryPrice + takeProfit_3)
+            true
+    else if (takeProfitMode == 'ANY' and isLong == false)
+        if (currentClose <= entryPrice - takeProfit_1)
+            true
+        else if (currentClose <= entryPrice - takeProfit_2)
+            true
+        else if (currentClose <= entryPrice - takeProfit_3)
+            true
+    else if (takeProfitMode == 'TP 2 OR TD 9' and isLong == true)
+        if (currentClose >= entryPrice + takeProfit_2 or td9)
+            true
+    else if (takeProfitMode == 'TP 2 OR TD 9' and isLong == false)
+        if (currentClose <= entryPrice - takeProfit_2 or td9)
+            true
+    else if (takeProfitMode == 'TD 9' and td9)
+        true
+    else if (takeProfitMode == 'TP 1' and isLong == true)
+        if (currentClose >= entryPrice + takeProfit_1)
+            true
+    else if (takeProfitMode == 'TP 1' and isLong == false)
+        if (currentClose <= entryPrice - takeProfit_1)
+            true
+    else if (takeProfitMode == 'TP 2' and isLong == true)
+        if (currentClose >= entryPrice + takeProfit_2)
+            true
+    else if (takeProfitMode == 'TP 2' and isLong == false)
+        if (currentClose <= entryPrice - takeProfit_2)
+            true
+    else if (takeProfitMode == 'TP 3' and isLong == true)
+        if (currentClose >= entryPrice + takeProfit_3)
+            true
+    else if (takeProfitMode == 'TP 3' and isLong == false)
+        if (currentClose <= entryPrice - takeProfit_3)
+            true
+    else
+        false
+
+rsiPeriod           = 14
+buyLowAt            = 21
+sellHighAt          = 74
+bandLength          = 31
+currentCandleClose  = close
+previousCandleClose = close[1]
+
+currentRsi      = rsi(currentCandleClose, rsiPeriod)
+previousRsi     = rsi(previousCandleClose, rsiPeriod)
+previousRsiMA   = sma(previousRsi, bandLength)
+offset          = (1.6185 * stdev(previousRsi, bandLength))
+topLine         = previousRsiMA + offset
+bottomLine      = previousRsiMA - offset
+midLine         = (topLine + bottomLine) / 2
+fastMA          = sma(previousRsi, 1)
+slowMA          = sma(previousRsi, 9)
+
+var sellInProgress = false
+var buyInProgress = false
+buySignal   = previousRsi <= buyLowAt and (bottomLine - fastMA > 1) and slowMA < midLine and currentCandleClose > previousCandleClose
+sellSignal  = previousRsi >= sellHighAt and (fastMA - topLine > 1) and slowMA > midLine and currentCandleClose < previousCandleClose
+
+plotshape(buyInProgress == false and buySignal, style=shape.labelup,size=size.small, text="B", color=color.green, textcolor=color.white, location=location.belowbar)
+plotshape(sellInProgress == false and sellSignal, style=shape.labeldown,size=size.small, text="S", color=color.red, textcolor=color.white, location=location.abovebar)
+
+//
+// Close Positions Logic
+//
+var entryPrice = float(0)
+
+if (sellSignal)
+    entryPrice := open
+    sellInProgress := true
+
+if (buySignal)
+    entryPrice := open
+    buyInProgress := true
+
+buySignals = 0
+buySignals := (close < close[4]) ? buySignals[1] == 9 ? 1 : buySignals[1] + 1 : 0
+
+sellSignals = 0
+sellSignals := (close > close[4]) ? sellSignals[1] == 9 ? 1 : sellSignals[1] + 1 : 0
+
+BuyOrSell = max(buySignals, sellSignals)
+var tpSell = 0
+if (sellInProgress and takeProfit(low, entryPrice, buySignals and BuyOrSell == 9 and sellSignal == false, false))
+    tpSell := 1
+    entryPrice := 0
+else if (sellInProgress and low >= entryPrice + stopLoss)
+    tpSell := 2
+    entryPrice := 0
+else
+    tpSell := 0
+    
+var tpBuy = 0
+if (buyInProgress and takeProfit(high, entryPrice, sellSignals and BuyOrSell == 9 and buySignal == false, true))
+    tpBuy := 1
+    entryPrice := 0
+else if (buyInProgress and close <= entryPrice - stopLoss)
+    tpBuy := 2
+    entryPrice := 0
+else
+    tpBuy := 0
+
+if (tpSell > 0)
+    sellInProgress := false
+
+if (tpBuy > 0)
+    buyInProgress := false
+
+//
+// Close Position plot
+//
+plotshape(showPrevious and tpSell == 1, text="TP_SELL", style=shape.labelup,   color=color.new(color.green, 0), textcolor=color.black, size=size.tiny, location=location.belowbar, title="TP_SELL")
+plotshape(showPrevious and tpBuy == 1,  text="TP_BUY",  style=shape.labeldown, color=color.new(color.green, 0), textcolor=color.black, size=size.tiny, location=location.abovebar, title="TP_BUY" )
+plotshape(showPrevious and tpSell == 2, text="SL_SELL", style=shape.labeldown, color=color.new(color.red, 0),   textcolor=color.black, size=size.tiny, location=location.abovebar, title="TP_SELL")
+plotshape(showPrevious and tpBuy == 2,  text="SL_BUY",  style=shape.labelup,   color=color.new(color.red, 0),   textcolor=color.black, size=size.tiny, location=location.belowbar, title="TP_BUY" )
+
+//
+// Current Position SL/TP lines
+//
+var line positionOpen = na
+var line positionStop = na
+var line positionTakeEarly = na
+var line positionTake = na
+var line positionTakeGreedy = na
+
+if (sellSignal and sellInProgress)
+    positionOpen := line.new(bar_index[1], open, bar_index, open, color=color.new(color.gray, 20), style=line.style_solid, width=3, extend=extend.right)
+    positionStop := line.new(bar_index[1], open + stopLoss, bar_index, open + stopLoss, color=color.new(color.red, 20), style=line.style_solid, width=5, extend=extend.right)
+    positionTakeEarly := line.new(bar_index[1], open - takeProfit_1, bar_index, open - takeProfit_1, color=color.new(color.blue, 20), style=line.style_solid, width=3, extend=extend.right)
+    positionTake := line.new(bar_index[1], open - takeProfit_2, bar_index, open - takeProfit_2, color=color.new(color.green, 20), style=line.style_solid, width=5, extend=extend.right)
+    positionTakeGreedy := line.new(bar_index[1], open - takeProfit_3, bar_index, open - takeProfit_3, color=color.new(color.purple, 20), style=line.style_solid, width=3, extend=extend.right)
+    line.delete(positionOpen[1])
+    line.delete(positionStop[1])
+    line.delete(positionTake[1])
+    line.delete(positionTakeGreedy[1])
+    line.delete(positionTakeEarly[1])
+
+if (buySignal and buyInProgress)
+    positionOpen := line.new(bar_index[1], open, bar_index, open, color=color.new(color.gray, 20), style=line.style_solid, width=3, extend=extend.right)
+    positionStop := line.new(bar_index[1], open - stopLoss, bar_index, open - stopLoss, color=color.new(color.red, 20), style=line.style_solid, width=5, extend=extend.right)
+    positionTakeEarly := line.new(bar_index[1], open + takeProfit_1, bar_index, open + takeProfit_1, color=color.new(color.blue, 20), style=line.style_solid, width=3, extend=extend.right)
+    positionTake := line.new(bar_index[1], open + takeProfit_2, bar_index, open + takeProfit_2, color=color.new(color.green, 20), style=line.style_solid, width=5, extend=extend.right)
+    positionTakeGreedy := line.new(bar_index[1], open + takeProfit_3, bar_index, open + takeProfit_3, color=color.new(color.purple, 20), style=line.style_solid, width=3, extend=extend.right)
+    line.delete(positionOpen[1])
+    line.delete(positionStop[1])
+    line.delete(positionTake[1])
+    line.delete(positionTakeGreedy[1])
+    line.delete(positionTakeEarly[1])
+    
+if (keepLastLines == false and (tpSell or tpBuy))
+    line.delete(positionOpen[1])
+    line.delete(positionStop[1])
+    line.delete(positionTake[1])
+    line.delete(positionTakeGreedy[1])
+    line.delete(positionTakeEarly[1])
+
+//
+// ALERTS
+//
+openLong        = buySignal
+openShort       = sellSignal
+takeProfitLong  = tpBuy == 1
+takeProfitShort = tpSell == 1
+stopLossLong    = tpBuy == 2
+stopLossShort   = tpSell == 2
+
+// alertcondition(openLong, title="BTC_15_MIN_OPEN_LONG_SIGNAL", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) BTC_15_MIN_OPEN_LONG_SIGNAL"}' )
+// alertcondition(openShort, title="BTC_15_MIN_OPEN_SHORT_SIGNAL", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) BTC_15_MIN_OPEN_SHORT_SIGNAL"}' )
+// alertcondition(closeLong, title="BTC_15_MIN_CLOSE_LONG_SIGNAL", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) BTC_15_MIN_CLOSE_LONG_SIGNAL"}' )
+// alertcondition(closeShort, title="BTC_15_MIN_CLOSE_SHORT_SIGNAL", message='{"text": "{{ticker}} ({{exchange}} {{interval}}) BTC_15_MIN_CLOSE_SHORT_SIGNAL"}' )
