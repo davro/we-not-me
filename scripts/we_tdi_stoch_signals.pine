@@ -1,8 +1,7 @@
 //@version=4
 study(title='WE:TDI/STOCH/SIGNALS', shorttitle='TSS', format=format.price, precision=2, resolution='', overlay=true)
 
-mode = input('BTCUSD/4H', title='Configuration mode :', options=['DEFAULT', 'BTCUSD/4H', 'XAUUSD/15MIN'])
-
+mode = input('BTCUSD/4H', title='Configuration mode :', options=['DEFAULT', 'BTCUSD/4H', 'BTCUSD/1D', 'BTCUSD/1W', 'BTCUSD/1M', 'XAUUSD/15MIN'])
 
 ///////////////////////////////
 // Stoch
@@ -60,9 +59,9 @@ lengthtradesl = input(9, minval = 1, title = 'Slow MA on RSI', group='TDI DEFAUL
 oversold = input(30, minval = 1, title = 'RSI Oversold', group='TDI DEFAULT Config')
 overbought = input(70, minval = 1, title = 'RSI Overbought', group='TDI DEFAULT Config')
 
-rsiPeriod = if (mode == 'BTCUSD/4H')
+rsiPeriod = if (mode == 'BTCUSD/4H' or mode == 'BTCUSD/1W' or mode == 'BTCUSD/1D')
     30
-else if (mode == 'XAUUSD/15MIN')
+else if (mode == 'XAUUSD/15MIN' or mode == 'BTCUSD/1M')
     14
 else
     rsiPeriodValue
@@ -71,6 +70,12 @@ rsiOversold = if (mode == 'BTCUSD/4H')
     42
 else if (mode == 'XAUUSD/15MIN')
     30
+else if (mode == 'BTCUSD/1W')
+    42
+else if (mode == 'BTCUSD/1D')
+    28
+else if (mode == 'BTCUSD/1M')
+    48
 else
     oversold
 
@@ -78,6 +83,12 @@ rsiOverbought = if (mode == 'BTCUSD/4H')
     65
 else if (mode == 'XAUUSD/15MIN')
     70
+else if (mode == 'BTCUSD/1W')
+    84
+else if (mode == 'BTCUSD/1D')
+    78
+else if (mode == 'BTCUSD/1M')
+    90
 else
     overbought
 
