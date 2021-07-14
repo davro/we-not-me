@@ -1,0 +1,104 @@
+//@version=4
+study(title='WE:TDI/STOCH/SIGNALS', shorttitle='TSS', format=format.price, precision=2, resolution='', overlay=true)
+
+mode = input('BTCUSD/4H', title='Configuration mode :', options=['DEFAULT', 'BTCUSD/4H', 'XAUUSD/15MIN'])
+
+
+///////////////////////////////
+// Stoch
+///////////////////////////////
+highValue = 82
+lowValue = 18
+smoothingK = 5
+smoothingD = 3
+
+getStoch(stochPeriod) =>
+    values = array.new_float()
+    k = sma(stoch(close, high, low, stochPeriod), smoothingD)
+    array.push(values, k)
+    array.push(values, sma(k, smoothingD))
+    values
+
+getColor(value, lowV, highV, defaultColor) =>
+    if (value >= highV)
+        color.red
+    else if (value <= lowV)
+        color.green
+    else
+        defaultColor
+
+//
+// Stoch Period 1
+//
+sotch1 = getStoch(15)
+stoch1k = array.get(sotch1, 0)
+stoch1d = array.get(sotch1, 1)
+//
+// Stoch Period 2
+//
+sotch2 = getStoch(32)
+stoch2k = array.get(sotch2, 0)
+stoch2d = array.get(sotch2, 1)
+//
+// Stoch Period 3
+//
+sotch3 = getStoch(50)
+stoch3k = array.get(sotch3, 0)
+stoch3d = array.get(sotch3, 1)
+
+stochBuySignal = stoch1k <= lowValue and stoch1d <= lowValue and stoch2k <= lowValue and stoch2d <= lowValue and stoch3k <= lowValue and stoch3d <= lowValue
+stochSellSignal = stoch1k >= highValue and stoch1d >= highValue and stoch2k >= highValue and stoch2d >= highValue and stoch3k >= highValue and stoch3d >= highValue
+
+
+//
+// TDI
+//
+rsiPeriodValue = input(14, minval = 1, title = 'RSI Period', group='TDI DEFAULT Config')
+bandLength = input(31, minval = 1, title = 'Band Length', group='TDI DEFAULT Config')
+lengthrsipl = input(1, minval = 0, title = 'Fast MA on RSI', group='TDI DEFAULT Config')
+lengthtradesl = input(9, minval = 1, title = 'Slow MA on RSI', group='TDI DEFAULT Config')
+oversold = input(30, minval = 1, title = 'RSI Oversold', group='TDI DEFAULT Config')
+overbought = input(70, minval = 1, title = 'RSI Overbought', group='TDI DEFAULT Config')
+
+rsiPeriod = if (mode == 'BTCUSD/4H')
+    30
+else if (mode == 'XAUUSD/15MIN')
+    14
+else
+    rsiPeriodValue
+
+rsiOversold = if (mode == 'BTCUSD/4H')
+    42
+else if (mode == 'XAUUSD/15MIN')
+    30
+else
+    oversold
+
+rsiOverbought = if (mode == 'BTCUSD/4H')
+    65
+else if (mode == 'XAUUSD/15MIN')
+    70
+else
+    overbought
+
+src = close
+r = rsi(src, rsiPeriod)
+ma = sma(r, bandLength)
+offs = (1.6185 * stdev(r, bandLength))
+up = ma + offs
+dn = ma - offs
+mid = (up + dn) / 2
+fastMA = sma(r, lengthrsipl)
+slowMA = sma(r, lengthtradesl)
+
+tdiBuySignal = fastMA <= dn and fastMA <= rsiOversold
+tdiSellSignal = fastMA >= up and fastMA >= rsiOverbought
+
+buySignal = tdiBuySignal and stochBuySignal
+sellSignal = tdiSellSignal and stochSellSignal
+
+plotshape(buySignal, style=shape.labelup,size=size.small, text='B', color=color.green, textcolor=color.white, location=location.belowbar)
+plotshape(sellSignal, style=shape.labeldown,size=size.small, text='S', color=color.red, textcolor=color.white, location=location.abovebar)
+
+alertcondition(condition=(buySignal), title='{{ticker}} - {{interval}} - BUY', message='{{ticker}} - {{interval}} - BUY - Wait candle close for confirmation of reversal')
+alertcondition(condition=(sellSignal), title='{{ticker}} - {{interval}} - SELL', message='{{ticker}} - {{interval}} - SELL - Wait candle close for confirmation of reversal')
